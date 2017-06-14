@@ -1,0 +1,13 @@
+# File managed by Ansible, do not edit manually
+[Unit]
+Description=SMS Wrapper
+After=default.target
+[Service]
+User=suma
+Type=simple
+Environment="SUMA_INTEGRATION_PATH=/data/suma"
+ExecStart=/usr/bin/java -jar /opt/application/suma/PA-PDK-SUMA.jar
+WorkingDirectory=/opt/application/suma/
+Restart=always
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<parent>
+		<groupId>com.francetelecom.maven</groupId>
+		<artifactId>pom-corporate</artifactId>
+		<version>3.0</version>
+	</parent>
+
+	<modelVersion>4.0.0</modelVersion>
+	<name>SUMA parent Maven module</name>
+	<groupId>com.orange.paddock</groupId>
+	<artifactId>suma</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<modules>
+		<module>suma-dao-mongodb</module>
+		<module>suma-business</module>
+		<module>suma-provider</module>
+		<module>suma-jar</module>
+		<module>suma-tar</module>
+	</modules>
+
+	<properties>	
+		<jdk.version>1.8</jdk.version>
+		<application.name>PA-PDK-SUMA</application.name>
+		<application.version>${sumaVersion}</application.version>
+		<package.name>${application.name}-${application.version}</package.name>
+	</properties>
+
+	<dependencyManagement>
+	<dependencies>
+			<!-- Spring dependencies -->
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-dependencies</artifactId>
+				 <version>1.5.4.RELEASE</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+</project>

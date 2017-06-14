@@ -1,0 +1,69 @@
+variables:
+  PACKAGE: PA-PDK-SUMA
+  COMPONENT: suma
+  VERSION: $CI_COMMIT_REF_NAME
+
+stages:
+  - maven
+  - rpm
+  - release
+
+.job_template: &job_definition  # Hidden job that defines an anchor named 'job_definition'
+  tags:
+    - rsc
+    - shared
+    - docker
+  before_script:
+    - env | grep ^CI_
+
+
+job-build-maven:
+  image: dockerproxy-iva.si.francetelecom.fr/maven:3.3-jdk-8
+  stage: maven
+  <<: *job_definition
+  script:
+    - mvn package --settings settings.xml -DsumaVersion=$VERSION
+    - ls -l $COMPONENT-tar/target/    
+  artifacts:
+    expire_in: 1h
+    paths:
+      - $COMPONENT-tar/target/$PACKAGE-$VERSION.tar 
+
+
+job-build-rpm:
+  image: dockerproxy-iva.si.francetelecom.fr/themalkolm/docker-fpm:1.6.0
+  stage: rpm 
+  <<: *job_definition  
+  script:
+    - ls -l $COMPONENT-tar/target/
+    - >
+      fpm 
+      -s tar 
+      -t rpm 
+      --name "$PACKAGE" 
+      --version $VERSION 
+      --iteration 1
+      --prefix /opt/application/$COMPONENT  
+      --after-install after-install.sh 
+      --after-remove after-remove.sh 
+      $COMPONENT-tar/target/$PACKAGE-$VERSION.tar
+    - ls -lh *.rpm
+  artifacts:
+    expire_in: 1h
+    paths:
+      - $PACKAGE-$VERSION-1.x86_64.rpm
+  only:
+    - tags  
+
+
+job-release:
+  image: dockerproxy-iva.si.francetelecom.fr/centos:7
+  stage: release 
+  <<: *job_definition  
+  script:
+    - >
+      curl -u $ARTIFACTORY_USERNAME:$ARTIFACTORY_PASSWORD 
+      -T $PACKAGE-$VERSION-1.x86_64.rpm 
+      -XPUT https://artifactory-iva.si.francetelecom.fr/artifactory/yum-virt-orange-project-paddock-el/$PACKAGE-$VERSION-1.x86_64.rpm
+  only:
+    - tags
