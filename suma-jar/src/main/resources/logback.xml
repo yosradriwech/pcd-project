@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration scan="true" scanPeriod="30 seconds">
+<include optional="false" file="config/logback-settings.xml" />	 
+</configuration>
