@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="https://ccgw.orange.pl/api/2.1" xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+    targetNamespace="https://ccgw.orange.pl/api/2.1" elementFormDefault="qualified" jxb:version="1.0">
+
+    <xsd:include schemaLocation="Common.xsd" />
+
+    <xsd:complexType name="UnsubscribeRequest" >
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">
+                Żądanie wypisania z subskrypcji.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexContent>
+            <xsd:extension base="BaseType">
+                <xsd:sequence>
+                    <xsd:element name="provider-pass" type="xsd:string">
+                        <xsd:annotation>
+                            <xsd:documentation xml:lang="en">Provider's password</xsd:documentation>
+                            <xsd:documentation xml:lang="pl">Hasło dostawcy.</xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="subscription-id" type="xsd:integer">
+                        <xsd:annotation>
+                            <xsd:documentation xml:lang="en">Identifier of the subscription.</xsd:documentation>
+                            <xsd:documentation xml:lang="pl">Identyfikator subskrypcji.</xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="subscriber" type="Msisdn">
+                        <xsd:annotation>
+                            <xsd:documentation xml:lang="en">Msisdn of the subscriber.</xsd:documentation>
+                            <xsd:documentation xml:lang="pl">Msisdn jako identyfikator subskrybenta.</xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="vas-signature" type="Signature">
+                        <xsd:annotation>
+                            <xsd:documentation xml:lang="en">Request signature.</xsd:documentation>
+                            <xsd:documentation xml:lang="pl">Podpis żądania.</xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:element>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+    
+    <xsd:complexType name="UnsubscribeResponse">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">
+                Odpowiedź na żądanie wypisania z subskrypcji
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="status" type="Status">
+                <xsd:annotation>
+                    <xsd:documentation xml:lang="PL">Pole określa status
+                        odpowiedzi.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:schema>

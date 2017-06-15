@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="https://ccgw.orange.pl/api/2.1" xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+    targetNamespace="https://ccgw.orange.pl/api/2.1" elementFormDefault="qualified" jxb:version="1.0">
+    
+    <xsd:include schemaLocation="Common.xsd" />
+
+    <xsd:complexType name="RefundStateByDatesRequest">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">
+                Struktura opisująca
+                zapytanie o status
+                reklamacji. Daty w formacie
+                2013-05-30T09:00:00
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexContent>
+            <xsd:extension base="BaseType">
+                <xsd:sequence>
+            <xsd:element name="sale-provider-id" type="string150">
+                <xsd:annotation>
+                    <xsd:documentation xml:lang="PL">Pole identyfikujące
+                        usługodawcę.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+                    <xsd:element name="msisdn" type="Msisdn" />
+                    <xsd:element name="date-from" type="xsd:dateTime" />
+                    <xsd:element name="date-to" type="xsd:dateTime" />
+                    <xsd:element name="vas-signature" type="Signature" />
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:complexType name="RefundStateByTxIdRequest">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">
+                Struktura opisująca zapytanie o status reklamacji.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexContent>
+            <xsd:extension base="BaseType">
+                <xsd:sequence>
+            <xsd:element name="sale-provider-id" type="string150">
+                <xsd:annotation>
+                    <xsd:documentation xml:lang="PL">Pole identyfikujące
+                        usługodawcę.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+                    <xsd:element name="transaction-id">
+                        <xsd:annotation>
+                            <xsd:documentation xml:lang="PL"> Identyfikator
+                                transakcji przydzielony danemu żądaniu przez CCGW
+                            </xsd:documentation>
+                        </xsd:annotation>
+                        <xsd:simpleType>
+                            <xsd:restriction base="xsd:string"/>
+                        </xsd:simpleType>
+                    </xsd:element>
+                    <xsd:element name="vas-signature" type="Signature" />
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:complexType name="RefundStateResponse">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">
+                Struktura opisująca zapytanie o status reklamacji.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexContent>
+            <xsd:extension base="BaseType">
+                <xsd:sequence>
+            <xsd:element name="sale-provider-id" type="string150">
+                <xsd:annotation>
+                    <xsd:documentation xml:lang="PL">Pole identyfikujące usługodawcę.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+                    <xsd:element name="refund-state" type="RefundStateType" minOccurs="0" maxOccurs="unbounded" />
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:complexType name="RefundStateType">
+        <xsd:sequence>
+            <xsd:element name="transaction-id" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation xml:lang="PL"> Identyfikator
+                        transakcji przydzielony danemu żądaniu przez CCGW
+                    </xsd:documentation>
+                </xsd:annotation>
+                <xsd:simpleType>
+                    <xsd:restriction base="xsd:string"/>
+                </xsd:simpleType>
+            </xsd:element>
+            <xsd:element name="caseStatus" type="xsd:string" />
+            <xsd:element name="caseId" type="xsd:string" minOccurs="0" />
+        </xsd:sequence>
+    </xsd:complexType>
+    
+</xsd:schema>

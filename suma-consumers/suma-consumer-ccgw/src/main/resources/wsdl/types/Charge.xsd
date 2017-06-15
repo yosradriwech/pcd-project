@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="https://ccgw.orange.pl/api/2.1" xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+    targetNamespace="https://ccgw.orange.pl/api/2.1" elementFormDefault="qualified" jxb:version="1.0">
+    
+    <xsd:include schemaLocation="Common.xsd" />
+    <xsd:include schemaLocation="ChargingBaseType.xsd" />
+
+    <xsd:complexType name="ChargeRequest">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">
+                Żądanie przypadku
+                użycia "charge".
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexContent>
+            <xsd:extension base="AuthorizationRequestType" />
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:complexType name="ChargeResponse">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">
+                Odpowiedź dla przypadku
+                użycia "Charge".
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexContent>
+            <xsd:extension base="AuthorizationResponseType">
+                <xsd:sequence>
+                    <xsd:element name="activation-date" minOccurs="0">
+                        <xsd:annotation>
+                            <xsd:documentation xml:lang="PL">Data, po której Dostawca może rozpocząć świadczenie usług, tj. obciążyć klienta za usługę i ją dostarczyć.
+                                Pole oznacza 64-bitową liczbę sekund jakie upłynęły od 1 stycznia 1970 roku od godziny 00:00:00.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                        <xsd:simpleType>
+                            <xsd:restriction base="xsd:long" />
+                        </xsd:simpleType>
+                    </xsd:element>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+</xsd:schema>

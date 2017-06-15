@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="https://ccgw.orange.pl/api/2.1" xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+    targetNamespace="https://ccgw.orange.pl/api/2.1" elementFormDefault="qualified" jxb:version="1.0">
+    
+    <xsd:include schemaLocation="Common.xsd" />
+    
+    <xsd:simpleType name="TransactionState">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">
+                Określa status autoryzacji transakcji
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="authorisation" />
+            <xsd:enumeration value="active" />
+            <xsd:enumeration value="done" />
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:complexType name="GetTransactionStateRequest">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">Żądanie pozwalające
+                pobrać stan transakcji.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexContent>
+            <xsd:extension base="BaseType">
+                <xsd:sequence>
+            <xsd:element name="sale-provider-id" type="string150">
+                <xsd:annotation>
+                    <xsd:documentation xml:lang="PL">Pole identyfikujące
+                        usługodawcę.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+                    <xsd:element name="transaction-id" type="xsd:string">
+                        <xsd:annotation>
+                            <xsd:documentation>ID transakcji</xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="provider-pass" type="xsd:string">
+                        <xsd:annotation>
+                            <xsd:documentation>hasło dostawcy (VAS)</xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="vas-signature" type="Signature">
+                        <xsd:annotation>
+                            <xsd:documentation>Podpis składany przez VAS pod wiadomoscia.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:element>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:complexType name="GetTransactionStateResponse">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">Odpowiedź na żądanie
+                pobrania stanu transakcji.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexContent>
+            <xsd:extension base="BaseType">
+                <xsd:sequence>
+            <xsd:element name="sale-provider-id" type="string150">
+                <xsd:annotation>
+                    <xsd:documentation xml:lang="PL">Pole identyfikujące
+                        usługodawcę.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+                    <xsd:element name="transaction-id" type="xsd:string">
+                        <xsd:annotation>
+                            <xsd:documentation xml:lang="PL">ID transakcji
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="transaction-state" type="TransactionState">
+                        <xsd:annotation>
+                            <xsd:documentation xml:lang="PL">Status transakcji
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:element>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+</xsd:schema>

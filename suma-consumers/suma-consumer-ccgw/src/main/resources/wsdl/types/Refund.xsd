@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="https://ccgw.orange.pl/api/2.1" xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+    targetNamespace="https://ccgw.orange.pl/api/2.1" elementFormDefault="qualified" jxb:version="1.0">
+    
+    <xsd:include schemaLocation="Common.xsd" />
+    <xsd:include schemaLocation="ChargingBaseType.xsd" />
+
+    <xsd:complexType name="RefundRequest">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">
+                Żądanie zwrotu środków.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexContent>
+            <xsd:extension base="RequestType">
+                <xsd:sequence>
+                    <xsd:element name="amount" maxOccurs="1" minOccurs="0">
+                        <xsd:annotation>
+                            <xsd:documentation xml:lang="pl">
+                                Kwota zwrotu brutto. Brana pod uwagę tylko przy reklamacjach typu odstąpienie.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                        <xsd:simpleType>
+                            <xsd:restriction base="xsd:decimal">
+                                <xsd:minInclusive value="0" />
+                                <xsd:fractionDigits value="2" />
+                            </xsd:restriction>
+                        </xsd:simpleType>
+                    </xsd:element>
+                    <xsd:element name="type" type="RefundType" maxOccurs="1" minOccurs="0">
+                        <xsd:annotation>
+                            <xsd:documentation xml:lang="pl">
+                                Typ zwrotu: odstąpienie lub reklamacja.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:element>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:complexType name="RefundResponse">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">
+                Odpowiedź dla zwrotu środków.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexContent>
+            <xsd:extension base="ResponseType">
+                <xsd:sequence>
+                    <xsd:element name="subscription-id" minOccurs="0" type="xsd:integer">
+                        <xsd:annotation>
+                            <xsd:documentation>
+                                Identyfikator subskrypcji zwracany w przypadku, gdy żądanie dotyczy zakupu cyklicznego.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="amount" maxOccurs="1" minOccurs="0">
+                        <xsd:annotation>
+                            <xsd:documentation xml:lang="pl">
+                                Kwota zwrotu brutto.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                        <xsd:simpleType>
+                            <xsd:restriction base="xsd:decimal">
+                                <xsd:minInclusive value="0" />
+                                <xsd:fractionDigits value="2" />
+                            </xsd:restriction>
+                        </xsd:simpleType>
+                    </xsd:element>
+                    <xsd:element name="type" type="RefundType" maxOccurs="1" minOccurs="0">
+                        <xsd:annotation>
+                            <xsd:documentation xml:lang="pl">
+                                Typ zwrotu.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:element>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:simpleType name="RefundType">
+        <xsd:annotation>
+            <xsd:documentation>
+                Typ definiujący rodzaje zwrotów: 
+         - complaint – reklamacyjny
+         - renouncement – odstąpienie
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="complaint" />
+            <xsd:enumeration value="renouncement" />
+        </xsd:restriction>
+    </xsd:simpleType>
+</xsd:schema>

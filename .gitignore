@@ -1,0 +1,8 @@
+.project
+.settings
+/suma-business/.classpath
+/suma-consumer-ccgw/.classpath
+/suma-jar/.classpath
+/suma-provider/.classpath
+/suma-consumers/suma-consumer-ccgw/.classpath
+/suma-dao-mongodb/.classpath

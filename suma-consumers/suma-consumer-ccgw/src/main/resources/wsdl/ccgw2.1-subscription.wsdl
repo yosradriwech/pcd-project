@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+                  xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="ccgw2.1" xmlns:tns="https://ccgw.orange.pl/api/2.1"
+                  targetNamespace="https://ccgw.orange.pl/api/2.1">
+
+    <wsdl:types>
+        <xsd:schema targetNamespace="https://ccgw.orange.pl/api/2.1">
+            <xsd:include schemaLocation="ccgw2.1-subscription.xsd"/>
+        </xsd:schema>
+    </wsdl:types>
+
+    <wsdl:message name="SubscriptionSubscribeRequestMessage">
+        <wsdl:part element="tns:subscription-subscribe-request" name="parameters"/>
+    </wsdl:message>
+    <wsdl:message name="SubscriptionSubscribeResponseMessage">
+        <wsdl:part element="tns:subscription-subscribe-response" name="parameters"/>
+    </wsdl:message>
+    <wsdl:message name="SubscriptionChargeRequestMessage">
+        <wsdl:part element="tns:subscription-charge-request" name="parameters"/>
+    </wsdl:message>
+    <wsdl:message name="SubscriptionChargeResponseMessage">
+        <wsdl:part element="tns:subscription-charge-response" name="parameters"/>
+    </wsdl:message>
+    <wsdl:message name="SubscriptionReservationRequestMessage">
+        <wsdl:part element="tns:subscription-reservation-request" name="parameters"/>
+    </wsdl:message>
+    <wsdl:message name="SubscriptionReservationResponseMessage">
+        <wsdl:part element="tns:subscription-reservation-response" name="parameters"/>
+    </wsdl:message>
+    <wsdl:message name="SubscriptionConfirmationRequestMessage">
+        <wsdl:part element="tns:subscription-confirmation-request" name="parameters"/>
+    </wsdl:message>
+    <wsdl:message name="SubscriptionConfirmationResponseMessage">
+        <wsdl:part element="tns:subscription-confirmation-response" name="parameters"/>
+    </wsdl:message>
+    <wsdl:message name="SubscriptionCancellationRequestMessage">
+        <wsdl:part element="tns:subscription-cancellation-request" name="parameters"/>
+    </wsdl:message>
+    <wsdl:message name="SubscriptionCancellationResponseMessage">
+        <wsdl:part element="tns:subscription-cancellation-response" name="parameters"/>
+    </wsdl:message>
+    <wsdl:message name="SubscriptionRefundRequestMessage">
+        <wsdl:part element="tns:subscription-refund-request" name="parameters"/>
+    </wsdl:message>
+    <wsdl:message name="SubscriptionRefundResponseMessage">
+        <wsdl:part element="tns:subscription-refund-response" name="parameters"/>
+    </wsdl:message>
+    <wsdl:message name="SubscriptionUnsubscribeRequestMessage">
+        <wsdl:part element="tns:subscription-unsubscribe-request" name="parameters"/>
+    </wsdl:message>
+    <wsdl:message name="SubscriptionUnsubscribeResponseMessage">
+        <wsdl:part element="tns:subscription-unsubscribe-response" name="parameters"/>
+    </wsdl:message>
+   	<wsdl:message name="Fault">
+		<wsdl:part element="tns:subscription-error" name="parameters" />
+	</wsdl:message>
+
+    <wsdl:portType name="CcgwSubscriptionPortType">
+        <wsdl:operation name="Subscribe">
+            <wsdl:input message="tns:SubscriptionSubscribeRequestMessage"/>
+            <wsdl:output message="tns:SubscriptionSubscribeResponseMessage"/>
+            <wsdl:fault name="SubscribeFault" message="tns:Fault"/>
+        </wsdl:operation>
+        <wsdl:operation name="Charge">
+            <wsdl:input message="tns:SubscriptionChargeRequestMessage"/>
+            <wsdl:output message="tns:SubscriptionChargeResponseMessage"/>
+            <wsdl:fault name="ChargeFault" message="tns:Fault"/>
+        </wsdl:operation>
+        <wsdl:operation name="Reservation">
+            <wsdl:input message="tns:SubscriptionReservationRequestMessage"/>
+            <wsdl:output message="tns:SubscriptionReservationResponseMessage"/>
+            <wsdl:fault name="ReservationFault" message="tns:Fault"/>
+        </wsdl:operation>
+        <wsdl:operation name="Confirmation">
+            <wsdl:input message="tns:SubscriptionConfirmationRequestMessage"/>
+            <wsdl:output message="tns:SubscriptionConfirmationResponseMessage"/>
+            <wsdl:fault name="ConfirmationFault" message="tns:Fault"/>
+        </wsdl:operation>
+        <wsdl:operation name="Cancellation">
+            <wsdl:input message="tns:SubscriptionCancellationRequestMessage"/>
+            <wsdl:output message="tns:SubscriptionCancellationResponseMessage"/>
+            <wsdl:fault name="CancellationFault" message="tns:Fault"/>
+        </wsdl:operation>
+        <wsdl:operation name="Refund">
+            <wsdl:input message="tns:SubscriptionRefundRequestMessage"/>
+            <wsdl:output message="tns:SubscriptionRefundResponseMessage"/>
+            <wsdl:fault name="RefundFault" message="tns:Fault"/>
+        </wsdl:operation>
+        <wsdl:operation name="Unsubscribe">
+            <wsdl:input message="tns:SubscriptionUnsubscribeRequestMessage"/>
+            <wsdl:output message="tns:SubscriptionUnsubscribeResponseMessage"/>
+            <wsdl:fault name="UnsubscribeFault" message="tns:Fault"/>
+        </wsdl:operation>
+    </wsdl:portType>
+
+    <wsdl:binding name="CcgwSubscriptionSoap" type="tns:CcgwSubscriptionPortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="Subscribe">
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="SubscribeFault">
+                <soap:fault name="SubscribeFault" use="literal"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="Charge">
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="ChargeFault">
+                <soap:fault name="ChargeFault" use="literal"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="Reservation">
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="ReservationFault">
+                <soap:fault name="ReservationFault" use="literal"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="Confirmation">
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="ConfirmationFault">
+                <soap:fault name="ConfirmationFault" use="literal"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="Cancellation">
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="CancellationFault">
+                <soap:fault name="CancellationFault" use="literal"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="Refund">
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="RefundFault">
+                <soap:fault name="RefundFault" use="literal"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="Unsubscribe">
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="UnsubscribeFault">
+                <soap:fault name="UnsubscribeFault" use="literal"/>
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <wsdl:service name="CcgwSubscriptionService">
+        <wsdl:port binding="tns:CcgwSubscriptionSoap" name="CcgwSubscriptionPort"/>
+    </wsdl:service>
+
+</wsdl:definitions>

@@ -1,0 +1,421 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="https://ccgw.orange.pl/api/2.1" xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+    targetNamespace="https://ccgw.orange.pl/api/2.1" elementFormDefault="qualified" jxb:version="1.0">
+    
+    <xsd:include schemaLocation="Common.xsd" />
+    
+    <xsd:complexType name="AuthorizationRequestType" abstract="true">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">
+                Bazowy typ dla żądań
+                wykonujących rezerwację środków "Reservation" albo
+                "Charge".
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexContent>
+            <xsd:extension base="RequestType">
+                <xsd:sequence>
+                    <xsd:element name="optional-charge-params" type="OptionalChargeParamsType" minOccurs="0">
+                        <xsd:annotation>
+                            <xsd:documentation xml:lang="PL">Grupuje elementy
+                                opcjonalne wykorzystywane przy obciążaniu
+                                użytkownika.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="ns-content" type="xsd:string" minOccurs="0">
+                        <xsd:annotation>
+                            <xsd:documentation xml:lang="PL">Odpowiedź NS -
+                                jednokrotnie opakowana w CDATA.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="assent-for-activation" type="xsd:boolean" minOccurs="0">
+                        <xsd:annotation>
+                            <xsd:documentation>Pole pozwala na przekazanie informacji o decyzji klienta dotyczącej zgody na wcześniejsze rozpoczęcie świadczenia usług.
+                            Pole jest wymagane w przypadku, gdy decyzja klienta została zebrana poza systemami OPL (tj. AoC nie było wykonywane przez system OPL).
+                            Wspomniana wymagalność dotyczy wszystkich transakcji jednorazowych oraz, w przypadku obciążeń cyklicznych, tylko żądań realizujących zapisanie (subscribe) do subskrypcji).
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:element>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+        <xsd:complexType name="AuthorizationResponseType" abstract="true">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">
+                Bazowy typ dla
+                odpowiedzi na rezerwację środków "Reservation" albo
+                "Charge".
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexContent>
+            <xsd:extension base="ResponseType">
+                <xsd:sequence>
+                    <xsd:element name="token-required" type="xsd:boolean" minOccurs="1">
+                        <xsd:annotation>
+                            <xsd:documentation xml:lang="PL">Flaga określa czy
+                                wymagany jest token w kolejnym requescie.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="ns-url" type="xsd:string" minOccurs="0">
+                        <xsd:annotation>
+                            <xsd:documentation xml:lang="PL">Opcjonalny URL do
+                                NS, który może przeprowadzic AoC.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="assent-for-activation" type="xsd:boolean" minOccurs="0">
+                        <xsd:annotation>
+                            <xsd:documentation>Informacja o zgodzie klienta na wcześniejsze rozpoczęcie świadczenia usług.
+                                Pole zwracane każdorazowo dla transakcji jednorazowych oraz dla żądań typu "susbcribe" w przypadku żądania cyklicznego.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:element>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+    
+    
+    <xsd:complexType name="PostReservationRequestType" abstract="true">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">
+                Bazowy typ dla żądań
+                modyfikujących stan powstały podczas żądań
+                rezerwujących (również
+                obciążających).
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexContent>
+            <xsd:extension base="RequestType">
+                <xsd:sequence>
+                    <xsd:element name="price" type="Price" nillable="true" minOccurs="0">
+                        <xsd:annotation>
+                            <xsd:documentation xml:lang="PL">To pole jest
+                                używane dla usług których cena została obliczona
+                                przez dostawcę. Struktura zawiera kwotę i walutę.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:element>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+    
+    <xsd:complexType name="RequestType" abstract="true">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">
+                Bazowy typ dla
+                wszystkich żądań.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexContent>
+            <xsd:extension base="ChargingBaseType">
+                <xsd:sequence>
+                    <xsd:element name="cycle-flag" minOccurs="0">
+                        <xsd:annotation>
+                            <xsd:documentation>Pole pokazuje czy żądanie jest cykliczne.
+                                Jeśli flaga ma wartość true - żądanie
+                                jest cykliczne, w przeciwnym wypadku transakcja będzie traktowana jako obciążenie jednorazowe.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                        <xsd:simpleType>
+                            <xsd:restriction base="xsd:boolean" />
+                        </xsd:simpleType>
+                    </xsd:element>
+                    <xsd:element name="provider-pass" type="xsd:string">
+                        <xsd:annotation>
+                            <xsd:documentation>hasło dostawcy (VAS)</xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="vas-signature" type="Signature">
+                        <xsd:annotation>
+                            <xsd:documentation>Podpis składany przez VAS pod wiadomoscia.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="token" type="xsd:string" minOccurs="0">
+                        <xsd:annotation>
+                            <xsd:documentation>Token przepisany z telefonu komórkowego.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:element>
+                    
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+    
+    <xsd:complexType name="ResponseType" abstract="true">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">
+                Bazowy typ dla
+                wszystkich odpowiedzi.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexContent>
+            <xsd:extension base="ChargingBaseType">
+                <xsd:sequence>
+                    <xsd:element name="price" type="Price" minOccurs="0">
+                        <xsd:annotation>
+                            <xsd:documentation xml:lang="PL">Pole to przedstawia
+                                listę należności za pobierany kontent. Kwoty
+                                zawierają podatek VAT.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="ccgw-signature" type="Signature">
+                        <xsd:annotation>
+                            <xsd:documentation xml:lang="PL">Podpisuje
+                                informacje zwracane przez CCGW,
+                                oraz weryfikuje podpisy
+                                własne CCGW.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="status" type="Status">
+                        <xsd:annotation>
+                            <xsd:documentation xml:lang="PL">Pole określa status
+                                odpowiedzi.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:element>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:complexType name="ChargingBaseType" abstract="true">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">Bazowy typ dla
+                wszystkich komunikatów dotyczących obciążania konta,
+                zarówno
+                response'ów jak i request'ów. Zawiera
+                pola wspólne dla wszystkich
+                komunikatów dotyczących pobierania kasy.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexContent>
+            <xsd:extension base="BaseType">
+                <xsd:sequence>
+            <xsd:element name="sale-provider-id" type="string150">
+                <xsd:annotation>
+                    <xsd:documentation xml:lang="PL">Pole identyfikujące
+                        usługodawcę.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+                    <xsd:element name="authentication-method" type="AuthenticationMethodType">
+                        <xsd:annotation>
+                            <xsd:documentation xml:lang="PL">Element określający kanał dostępowy jakim
+                                realizowana jest transakcja.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="authorization-type" type="AuthorizationType">
+                        <xsd:annotation>
+                            <xsd:documentation xml:lang="PL">Metoda autoryzacji transakcji.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="transaction-id">
+                        <xsd:annotation>
+                            <xsd:documentation xml:lang="PL">Identyfikator transakcji przydzielony danemu
+                                żądaniu przez VAS. Musi być unikatowy w ramach sale-providera, jezeli nie
+                                wystepuje sale provider to w ramach providera. Odpowiedź na to żądanie
+                                będzie posiadała identyczny identyfikator.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                        <xsd:simpleType>
+                            <xsd:restriction base="xsd:string"/>
+                        </xsd:simpleType>
+                    </xsd:element>
+                    <xsd:element name="msisdn" type="Msisdn" minOccurs="0">
+                        <xsd:annotation>
+                            <xsd:documentation xml:lang="PL"> 11-sto lub 9
+                                elementowy ciąg znaków identyfikujących klienta w
+                                imieniu którego VAS zgłasza żądanie. Odpowiedź będzie zawierała to samo
+                                pole. Format pola powininen być w formacie międzynarodowym.
+                                Akceptowalne są następujące numery:
+                                48500123456
+                                501123456
+                                DSL123456 ( Houston)
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="content-info" type="ContentInfoType">
+                        <xsd:annotation>
+                            <xsd:documentation xml:lang="PL">Każda płatność
+                                dotyczy pewnego kontentu - produktu.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="sale-model" type="SaleModelType">
+                        <xsd:annotation>
+                            <xsd:documentation xml:lang="PL">Model sprzedażowy. Dopuszczalne wartości: kiosk, brand
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:element>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:complexType name="ContentInfoType">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">
+                Struktura zawierająca
+                podstawowe obowiązkowe informacje o pobieranym
+                contencie.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="content-name" type="string150">
+                <xsd:annotation>
+                    <xsd:documentation xml:lang="PL">Nazwa treści.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="content-type" type="string50">
+                <xsd:annotation>
+                    <xsd:documentation xml:lang="PL">Typ treści.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="rating-level" type="string10">
+                <xsd:annotation>
+                    <xsd:documentation xml:lang="PL">Pole wskazuje na
+                        poziom ratingu treści. Jest istotne dla ratingu
+                        contentu w
+                        Infranecie.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="adult-flag" type="xsd:boolean">
+                <xsd:annotation>
+                    <xsd:documentation xml:lang="PL">Flaga informująca
+                        o dostępie do produkty jedynie przez osoby
+                        pełnoletnie
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="Price">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">
+                Struktura opisująca cenę. Kwota i waluta.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="amount">
+                <xsd:simpleType>
+                    <xsd:restriction base="xsd:decimal">
+                        <xsd:minInclusive value="0" />
+                        <xsd:fractionDigits value="2" />
+                    </xsd:restriction>
+                </xsd:simpleType>
+            </xsd:element>
+            <xsd:element name="taxed-amount">
+                <xsd:simpleType>
+                    <xsd:restriction base="xsd:decimal">
+                        <xsd:minInclusive value="0" />
+                        <xsd:fractionDigits value="2" />
+                    </xsd:restriction>
+                </xsd:simpleType>
+            </xsd:element>
+            <xsd:element name="currency" type="xsd:string" />
+        </xsd:sequence>
+    </xsd:complexType>
+    
+    <xsd:complexType name="OptionalChargeParamsType">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">Grupuje elementy
+                opcjonalne wykorzystywane przy obciążaniu użytkownika.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="imsi" type="Imsi" nillable="true" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation xml:lang="PL">"IMSI" klienta.
+                        Stosowane w zależności od potrzeb.
+                        Bliźniacze "imsi"
+                        stosowane w wypadku isnienia "twin cards".
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="price" type="Price" nillable="true" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation xml:lang="PL">To pole jest używane
+                        dla usług których cena została obliczona
+                        przez dostawcę. Struktura
+                        zawiera kwotę i walutę.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="sub-content-category" type="text" nillable="true" minOccurs="0" maxOccurs="unbounded">
+                <xsd:annotation>
+                    <xsd:documentation xml:lang="PL">Pole to pozwala na
+                        identyfikacje pod kategorii.
+                        Np. logo-bacground,logo-picture ...
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:simpleType name="SaleModelType">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">
+                Określa model sprzedaży
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="kiosk" />
+            <xsd:enumeration value="brand" />
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="AuthenticationMethodType">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">
+                Określa sposob w jaki zostal zautentykowany numer MSISDN
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="WAP-Gateway" />
+            <xsd:enumeration value="Internet" />
+        </xsd:restriction>
+    </xsd:simpleType>
+    <xsd:simpleType name="AuthorizationType">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">
+                Dostępne metody autoryzacji
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="none" />
+            <xsd:enumeration value="aoc" />
+            <xsd:enumeration value="token" />
+            <xsd:enumeration value="aoc_token" />
+            <xsd:enumeration value="sms" />
+            <xsd:enumeration value="aoc_sms" />
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="CycleOperationType">
+        <xsd:annotation>
+            <xsd:documentation>Typ definiujący dopuszczalne operacje na obciążeniach cyklicznych. „subscribe” - pierwsze obciążenie
+                cykliczne; „debit” kolejne obciążenie cykliczne.</xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="subscribe" />
+            <xsd:enumeration value="debit" />
+        </xsd:restriction>
+    </xsd:simpleType>
+
+</xsd:schema>

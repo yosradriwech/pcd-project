@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="https://ccgw.orange.pl/api/2.1" xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+    targetNamespace="https://ccgw.orange.pl/api/2.1" elementFormDefault="qualified" jxb:version="1.0">
+
+    <xsd:include schemaLocation="Common.xsd" />
+
+    <xsd:complexType name="SubscriptionBaseRequest" abstract="true">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="pl">
+                Typ bazowy dla żądań obsługi subskrypcji.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexContent>
+            <xsd:extension base="BaseType">
+                <xsd:sequence>
+                    <xsd:element name="provider-pass" type="xsd:string">
+                        <xsd:annotation>
+                            <xsd:documentation xml:lang="pl">Hasło dostawcy.</xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="transaction-id" type="xsd:string">
+						<xsd:annotation>
+							<xsd:documentation xml:lang="pl"> Identyfikator
+								transakcji przydzielony danemu żądaniu przez VAS.
+							</xsd:documentation>
+						</xsd:annotation>
+					</xsd:element>
+                    <xsd:element name="subscriber" type="Msisdn">
+                        <xsd:annotation>
+                            <xsd:documentation xml:lang="pl">Msisdn jako identyfikator subskrybenta.</xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="assent-for-activation" type="xsd:boolean" minOccurs="0">
+                    	<xsd:annotation>
+                    		<xsd:documentation xml:lang="pl">Pole pozwala na przekazanie informacji o decyzji klienta dotyczącej zgody na wcześniejsze rozpoczęcie świadczenia usług.
+                            	Pole jest wymagane w przypadku, gdy decyzja klienta została zebrana poza systemami OPL (tj. AoC nie było wykonywane przez system OPL).
+                            </xsd:documentation>
+                    	</xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="subscription-info" type="SubscriptionInfoType">
+                    	<xsd:annotation>
+                    		<xsd:documentation xml:lang="pl">Informacje dotyczące subskrypcji</xsd:documentation>
+                    	</xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="vas-signature" type="Signature">
+                        <xsd:annotation>
+                            <xsd:documentation xml:lang="pl">Podpis żądania.</xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:element>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+    
+    <xsd:complexType name="SubscribeRequest">
+    	<xsd:annotation>
+            <xsd:documentation xml:lang="PL">
+                Żądanie zapisania abonenta do subskrypcji.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexContent>
+            <xsd:extension base="SubscriptionBaseRequest">
+            	<xsd:sequence>
+            		<xsd:element name="ns-content" type="xsd:string" minOccurs="0">
+                        <xsd:annotation>
+                            <xsd:documentation xml:lang="PL">Odpowiedź NS -
+                                jednokrotnie opakowana w CDATA.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="token" type="xsd:string" minOccurs="0">
+                        <xsd:annotation>
+                            <xsd:documentation>Token przepisany z telefonu komórkowego.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:element>
+            	</xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+    
+    <xsd:complexType name="SubscriptionChargeRequest">
+    	<xsd:annotation>
+            <xsd:documentation xml:lang="PL">
+                Żądanie obciążenia abonenta w ramach subskrypcji.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexContent>
+            <xsd:extension base="SubscriptionBaseRequest" />
+        </xsd:complexContent>
+    </xsd:complexType>
+    
+    <xsd:complexType name="SubscriptionInfoType">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="pl">
+				Struktura zawierająca
+				podstawowe obowiązkowe informacje o zakładanej subskypcji.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="sale-provider-id" type="xsd:string">
+                <xsd:annotation>
+                    <xsd:documentation xml:lang="pl">Pole identyfikujące
+                        usługodawcę.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="sale-model" type="SaleModelType">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="pl">Enum określający
+						typ sprzedaży, Dopuszczalne wartości: kiosk, brand
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="subscription-model" type="SubscriptionModelType">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="pl">Enum określający
+						typ subskrypcji. Dopuszczalne wartości: BUY, TRY_BUY
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="content-type" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="pl">Typ treści.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="content-name" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="pl">Nazwa treści.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="adult-flag" type="xsd:boolean">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="pl">Flaga informująca
+						o dostępie do produktów jedynie przez osoby
+						pełnoletnie
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="price" type="Price">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="pl">To pole jest używane
+                        dla usług których cena została obliczona
+                        przez dostawcę. Struktura
+                        zawiera kwotę i walutę.
+                    </xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:simpleType name="SaleModelType">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="PL">
+				Określa model sprzedaży
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="kiosk" />
+			<xsd:enumeration value="brand" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<xsd:simpleType name="SubscriptionModelType">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="PL">
+				Określa typ subskrypcji
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="BUY" />
+			<xsd:enumeration value="TRY_BUY" />
+		</xsd:restriction>
+	</xsd:simpleType>
+    
+    <xsd:complexType name="Price">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">
+                Struktura opisująca cenę. Kwota i waluta.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="amount">
+                <xsd:simpleType>
+                    <xsd:restriction base="xsd:decimal">
+                        <xsd:minInclusive value="0" />
+                        <xsd:fractionDigits value="2" />
+                    </xsd:restriction>
+                </xsd:simpleType>
+            </xsd:element>
+            <xsd:element name="taxed-amount">
+                <xsd:simpleType>
+                    <xsd:restriction base="xsd:decimal">
+                        <xsd:minInclusive value="0" />
+                        <xsd:fractionDigits value="2" />
+                    </xsd:restriction>
+                </xsd:simpleType>
+            </xsd:element>
+            <xsd:element name="currency" type="xsd:string" />
+        </xsd:sequence>
+    </xsd:complexType>
+    
+    <xsd:complexType name="SubscriptionBaseResponse" abstract="true">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="pl">
+                Odpowiedź na żądanie zapisania abonenta do subskrypcji
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+        	<xsd:element name="subscription-id" type="xsd:integer" minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="pl">Identyfikator subskrypcji.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+            <xsd:element name="status" type="Status">
+                <xsd:annotation>
+                    <xsd:documentation xml:lang="pl">Pole określa status
+                        odpowiedzi.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+    
+    <xsd:complexType name="SubscribeResponse">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="pl">
+                Odpowiedź na żądanie zapisania abonenta do subskrypcji
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexContent>
+        	<xsd:extension base="SubscriptionBaseResponse">
+        		<xsd:sequence>
+        			<xsd:element name="token-required" type="xsd:boolean" minOccurs="1">
+		                <xsd:annotation>
+		                    <xsd:documentation xml:lang="PL">Flaga określa czy
+		                        wymagany jest token w kolejnym requescie.
+		                    </xsd:documentation>
+		                </xsd:annotation>
+		            </xsd:element>
+		            <xsd:element name="ns-url" type="xsd:string" minOccurs="0">
+		                <xsd:annotation>
+		                    <xsd:documentation xml:lang="PL">Opcjonalny URL do
+		                        NS, który może przeprowadzic AoC.
+		                    </xsd:documentation>
+		                </xsd:annotation>
+		            </xsd:element>
+        		</xsd:sequence>
+        	</xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+    
+    <xsd:complexType name="SubscriptionChargeResponse">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="pl">
+                Odpowiedź na żądanie zapisania abonenta do subskrypcji
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexContent>
+        	<xsd:extension base="SubscriptionBaseResponse" />
+        </xsd:complexContent>
+    </xsd:complexType>
+    
+</xsd:schema>

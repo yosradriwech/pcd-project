@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="https://ccgw.orange.pl/api/2.1"
+            xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+            targetNamespace="https://ccgw.orange.pl/api/2.1" elementFormDefault="qualified" jxb:version="1.0">
+
+    <xsd:include schemaLocation="types/subscription/SubscribeRequest.xsd"/>
+    <xsd:include schemaLocation="types/subscription/SubscribeResponse.xsd"/>
+    <xsd:include schemaLocation="types/subscription/PostSubscribeChargeRequest.xsd"/>
+    <xsd:include schemaLocation="types/subscription/PostSubscribeChargeResponse.xsd"/>
+    <xsd:include schemaLocation="types/subscription/PostSubscribeRequest.xsd"/>
+    <xsd:include schemaLocation="types/subscription/PostSubscribeResponse.xsd"/>
+    <xsd:include schemaLocation="types/subscription/RefundRequest.xsd"/>
+    <xsd:include schemaLocation="types/subscription/UnsubscribeRequest.xsd"/>
+    <xsd:include schemaLocation="types/subscription/Error.xsd"/>
+
+    <xsd:element name="subscription-subscribe-request" type="SubscribeRequestType"/>
+    <xsd:element name="subscription-subscribe-response" type="SubscribeResponseType"/>
+    <xsd:element name="subscription-charge-request" type="PostSubscribeChargeRequestType"/>
+    <xsd:element name="subscription-charge-response" type="PostSubscribeChargeResponseType"/>
+    <xsd:element name="subscription-reservation-request" type="PostSubscribeChargeRequestType"/>
+    <xsd:element name="subscription-reservation-response" type="PostSubscribeResponseType"/>
+    <xsd:element name="subscription-confirmation-request" type="PostSubscribeRequestType"/>
+    <xsd:element name="subscription-confirmation-response" type="PostSubscribeChargeResponseType"/>
+    <xsd:element name="subscription-cancellation-request" type="PostSubscribeRequestType"/>
+    <xsd:element name="subscription-cancellation-response" type="PostSubscribeResponseType"/>
+    <xsd:element name="subscription-refund-request" type="RefundRequestType"/>
+    <xsd:element name="subscription-refund-response" type="PostSubscribeResponseType"/>
+    <xsd:element name="subscription-unsubscribe-request" type="UnubscribeRequestType"/>
+    <xsd:element name="subscription-unsubscribe-response" type="PostSubscribeResponseType"/>
+    
+    <xsd:element name="subscription-error" type="SubscriptionErrorType"/>
+
+</xsd:schema>

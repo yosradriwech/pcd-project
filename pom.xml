@@ -17,6 +17,7 @@
 
 	<modules>
 		<module>suma-dao-mongodb</module>
+		<module>suma-consumers</module>
 		<module>suma-business</module>
 		<module>suma-provider</module>
 		<module>suma-jar</module>
