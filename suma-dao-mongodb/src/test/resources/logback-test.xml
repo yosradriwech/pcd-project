@@ -10,10 +10,10 @@
 	
 	<appender name="technical-log-appender"
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${logs.directory}/PA-PDK-SUMA-technical.log
+		<file>${logs.directory}/PA-PDK-SUMA-technical-test.log
 		</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>${logs.directory}/archive/PA-PDK-SUMA-technical.log.%d{yyyyMMdd}.gz
+			<fileNamePattern>${logs.directory}/archive/PA-PDK-SUMA-technical-test.log.%d{yyyyMMdd}.gz
 			</fileNamePattern>
 			<maxHistory>30</maxHistory>
 		</rollingPolicy>
