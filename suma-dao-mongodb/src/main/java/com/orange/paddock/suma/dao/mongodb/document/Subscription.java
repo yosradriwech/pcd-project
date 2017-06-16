@@ -10,8 +10,10 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document
 public class Subscription {
 
-	@Indexed
 	@Id
+	private String id;
+
+	@Indexed
 	private String subscriptionId;
 
 	@CreatedDate
@@ -31,12 +33,13 @@ public class Subscription {
 	private boolean isAdult;
 	private String status;
 
-	public Subscription() {
-	}
+	public Subscription() {}
 
-	public Subscription(String subscriptionId, Date creationDate, Date activationDate, Date deActivationDate, String transactionId, String serviceId,
-			String onBehalfOf, String endUserId, String description, String categoryCode, Double amount, Double taxedAmount, String currency, boolean isAdult) {
+	public Subscription(String id, String subscriptionId, Date creationDate, Date activationDate, Date deActivationDate, String transactionId,
+			String serviceId, String onBehalfOf, String endUserId, String description, String categoryCode, Double amount, Double taxedAmount,
+			String currency, boolean isAdult, String status) {
 		super();
+		this.id = id;
 		this.subscriptionId = subscriptionId;
 		this.creationDate = creationDate;
 		this.activationDate = activationDate;
@@ -51,6 +54,15 @@ public class Subscription {
 		this.taxedAmount = taxedAmount;
 		this.currency = currency;
 		this.isAdult = isAdult;
+		this.status = status;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
 	}
 
 	public String getStatus() {
@@ -175,10 +187,13 @@ public class Subscription {
 
 	@Override
 	public String toString() {
-		return "Subscription [subscriptionId=" + subscriptionId + ", creationDate=" + creationDate + ", activationDate=" + activationDate
-				+ ", deActivationDate=" + deActivationDate + ", transactionId=" + transactionId + ", serviceId=" + serviceId + ", onBehalfOf=" + onBehalfOf
-				+ ", endUserId=" + endUserId + ", description=" + description + ", categoryCode=" + categoryCode + ", amount=" + amount + ", taxedAmount="
-				+ taxedAmount + ", currency=" + currency + ", isAdult=" + isAdult + "]";
-	};
+		return "Subscription [id=" + id + ", subscriptionId=" + subscriptionId + ", creationDate=" + creationDate + ", activationDate="
+				+ activationDate + ", deActivationDate=" + deActivationDate + ", transactionId=" + transactionId + ", serviceId=" + serviceId
+				+ ", onBehalfOf=" + onBehalfOf + ", endUserId=" + endUserId + ", description=" + description + ", categoryCode=" + categoryCode
+				+ ", amount=" + amount + ", taxedAmount=" + taxedAmount + ", currency=" + currency + ", isAdult=" + isAdult + ", status=" + status
+				+ "]";
+	}
+
+	
 
 }

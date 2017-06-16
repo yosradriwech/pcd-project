@@ -8,7 +8,20 @@
 
 	<jaxws:client id="sumaClient"
 		serviceClass="com.orange.paddock.suma.consumer.ccgw.model.CcgwSubscriptionPortType"
-		address="${ccgw.endpoint}">	
+		address="${ccgw.endpoint}">
 	</jaxws:client>
+
+	<!-- http-conf:conduit name={WSDL_endpoint_target_namespace}PortName.http-conduit -->
+	<http-conf:conduit
+		name="{https://ccgw.orange.pl/api/2.1}CcgwSubscriptionPortType.http-conduit">
+		<http-conf:client CacheControl="no-cache"
+			ReceiveTimeout="40000" ConnectionTimeout="40000" AllowChunking="false"
+			AutoRedirect="false" ProxyServer="${ccgw.proxy.host:}"
+			ProxyServerPort="${ccgw.proxy.port:3128}" ProxyServerType="HTTP" />
+
+		<!-- Uncomment if proxy needed <http-conf:proxyAuthorization> <sec:UserName>${orange.xmshub.proxy.username:}</sec:UserName> 
+			<sec:Password>${orange.xmshub.proxy.password:}</sec:Password> <sec:AuthorizationType>Basic</sec:AuthorizationType> 
+			</http-conf:proxyAuthorization> -->
+	</http-conf:conduit>
 
 </beans>

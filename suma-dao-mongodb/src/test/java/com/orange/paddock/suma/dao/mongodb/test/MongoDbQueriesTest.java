@@ -59,7 +59,7 @@ public class MongoDbQueriesTest {
 		subscription1.setServiceId(SERVICE_ID);
 		subscription1.setTransactionId(TRANSACTION_ID);
 		subscription1.setCurrency("currency1");
-		String id1 = subscriptionRepo.save(subscription1).getSubscriptionId();
+		String id1 = subscriptionRepo.save(subscription1).getId();
 		Assert.assertNotNull(id1);
 		subscription2.setEndUserId(END_USER_ID);
 		subscription2.setAmount(AMOUNT_1);
@@ -67,7 +67,7 @@ public class MongoDbQueriesTest {
 		subscription2.setServiceId(SERVICE_ID);
 		subscription2.setTransactionId(TRANSACTION_ID);
 		subscription2.setCurrency("currency2");
-		String id2 = subscriptionRepo.save(subscription2).getSubscriptionId();
+		String id2 = subscriptionRepo.save(subscription2).getId();
 		Assert.assertNotNull(id2);
 		List<Subscription> subscriptions = subscriptionRepo.findAll();
 		TECHNICAL_LOGGER.info("Size of list of subscriptions for mongodb tests: {}", subscriptions.size());
