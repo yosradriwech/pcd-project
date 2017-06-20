@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="https://ccgw.orange.pl/api/2.1"
+            xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+            targetNamespace="https://ccgw.orange.pl/api/2.1" elementFormDefault="qualified" jxb:version="1.0">
+    
+    <xsd:include schemaLocation="types/Common.xsd" />
+    <xsd:include schemaLocation="types/ChargingBaseType.xsd" />
+    <xsd:include schemaLocation="types/Reservation.xsd" />
+    <xsd:include schemaLocation="types/Cancellation.xsd" />
+    <xsd:include schemaLocation="types/Confirmation.xsd" />
+    <xsd:include schemaLocation="types/Charge.xsd" />
+    <xsd:include schemaLocation="types/Refund.xsd" />
+    <xsd:include schemaLocation="types/GetRefundState.xsd" />
+    <xsd:include schemaLocation="types/GetMsisdn.xsd" />
+    <xsd:include schemaLocation="types/GetTransactionState.xsd" />
+    <xsd:include schemaLocation="types/Unsubscribe.xsd" />
+
+    <xsd:element name="refund-state-by-dates-request" type="RefundStateByDatesRequest">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">Żądanie realizujące
+                funkcjonalność odpytywania przez dostawcę o status
+                reklamacji dla rachunków typu Post. Pasująca odpowiedź to
+                get-refund-state-response.
+            </xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+    <xsd:element name="refund-state-by-tx-id-request" type="RefundStateByTxIdRequest">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">Żądanie realizujące
+                funkcjonalność odpytywania przez dostawcę o status
+                reklamacji dla rachunków typu Post. Pasująca odpowiedź to
+                get-refund-state-response.
+            </xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+    <xsd:element name="refund-state-response" type="RefundStateResponse">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">Odpowiedź na zapytanie
+                o status reklamacji w przypadku rachunków typu
+                post. Pasujące żądania
+                to get-refund-state-by-dates-request oraz
+                get-refund-state-by-tx-id-request.
+            </xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+    <xsd:element name="refund-request" type="RefundRequest">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">Żądanie realizujące
+                zwrot kosztów (np w wyniku reklamacji). Pasująca
+                odpowiedź to
+                refund-response.
+            </xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+    <xsd:element name="refund-response" type="RefundResponse">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">Odpowiedź na
+                żądanie
+                zwrotu kosztów. Pasujące żądanie to refund-request.
+            </xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+    <xsd:element name="charge-request" type="ChargeRequest">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">Żądanie realizujące
+                przypadek użycia Charge. Pasująca odpowiedź to
+                charge-response.
+            </xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+    <xsd:element name="charge-response" type="ChargeResponse">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">Odpowiedź na
+                przypadek
+                użycia Charge. Pasujące żądanie to charge-request.
+            </xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+    <xsd:element name="reservation-request" type="ReservationRequest">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">Żądanie realizujące
+                przypadek użycia Reservation. Pasująca odpowiedź to
+                reservation-response.
+            </xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+    <xsd:element name="reservation-response" type="ReservationResponse">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">Odpowiedź na
+                przypadek
+                użycia Reservation. Pasujące żądanie to
+                reservation-request.
+            </xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+    <xsd:element name="confirmation-request" type="ConfirmationRequest">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">Żądanie realizujące
+                przypadek użycia Confirmation. Pasująca odpowiedź to
+                confirmation-response.
+            </xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+    <xsd:element name="confirmation-response" type="ConfirmationResponse">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">Odpowiedź na
+                przypadek
+                użycia Confirmation. Pasujące żądanie to
+                confirmation-request.
+            </xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+    <xsd:element name="cancellation-request" type="CancellationRequest">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">Żądanie realizujące
+                przypadek użycia Cancellation. Pasująca odpowiedź to
+                cancellation-response.
+            </xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+    <xsd:element name="cancellation-response" type="CancellationResponse">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">Odpowiedź na
+                przypadek
+                użycia Cancellation. Pasujące żądanie to
+                cancellation-request.
+            </xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+    <xsd:element name="error" type="Error">
+        <xsd:annotation>
+            <xsd:documentation>Komunikat zgłaszany gdy wystapi błąd w CCGW.
+            </xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+    <xsd:element name="get-msisdn-request" type="GetMsisdnRequest">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">Żądanie realizujące
+                logikę pobierania numeru MSISDN. Pasująca odpowiedź to
+                get-msisdn-response.
+            </xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+    <xsd:element name="get-msisdn-response" type="GetMsisdnResponse">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">Odpowiedź na
+                żądanie pobrania numeru MSISDN. Pasujące żądanie to get-msisdn-request.
+            </xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+    <xsd:element name="get-transaction-state-request" type="GetTransactionStateRequest">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">Żądanie realizujące
+                logikę pobierania stanu transakcji. Pasująca odpowiedź to
+                get-transaction-state-response.
+            </xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+    <xsd:element name="get-transaction-state-response" type="GetTransactionStateResponse">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">Odpowiedź na
+                żądanie pobrania stanu transakcji. Pasujące żądanie to get-transaction-state-request.
+            </xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+    <xsd:element name="unsubscribe-request" type="UnsubscribeRequest">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">Żądanie realizujące
+                logikę pobierania stanu transakcji. Pasująca odpowiedź to
+                get-transaction-state-response.
+            </xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+    <xsd:element name="unsubscribe-response" type="UnsubscribeResponse">
+        <xsd:annotation>
+            <xsd:documentation xml:lang="PL">Odpowiedź na
+                żądanie pobrania stanu transakcji. Pasujące żądanie to get-transaction-state-request.
+            </xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+
+</xsd:schema>
