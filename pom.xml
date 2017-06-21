@@ -24,22 +24,65 @@
 		<module>suma-tar</module>
 	</modules>
 
-	<properties>	
+	<properties>
 		<jdk.version>1.8</jdk.version>
+		<cxf.version>3.1.10</cxf.version>
+		<jaxws-api.version>2.0</jaxws-api.version>
+
+		<pdk.commons.version>1.3.4</pdk.commons.version>
+
 		<application.name>PA-PDK-SUMA</application.name>
 		<application.version>${sumaVersion}</application.version>
 		<package.name>${application.name}-${application.version}</package.name>
 	</properties>
 
 	<dependencyManagement>
-	<dependencies>
+		<dependencies>
 			<!-- Spring dependencies -->
 			<dependency>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-dependencies</artifactId>
-				 <version>1.5.4.RELEASE</version>
+				<version>1.5.4.RELEASE</version>
 				<type>pom</type>
 				<scope>import</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>com.orange.paddock.module</groupId>
+				<artifactId>paddock-commons</artifactId>
+				<version>${pdk.commons.version}</version>
+			</dependency>
+
+			<!-- CXF dependencies -->
+			<dependency>
+				<groupId>javax.xml</groupId>
+				<artifactId>jaxws-api</artifactId>
+				<version>${jaxws-api.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.cxf</groupId>
+				<artifactId>cxf-rt-core</artifactId>
+				<version>${cxf.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.cxf</groupId>
+				<artifactId>cxf-rt-frontend-jaxws</artifactId>
+				<version>${cxf.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.cxf</groupId>
+				<artifactId>cxf-rt-transports-http</artifactId>
+				<version>${cxf.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.cxf</groupId>
+				<artifactId>cxf-rt-transports-http-jetty</artifactId>
+				<version>${cxf.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.cxf</groupId>
+				<artifactId>cxf-rt-bindings-soap</artifactId>
+				<version>${cxf.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

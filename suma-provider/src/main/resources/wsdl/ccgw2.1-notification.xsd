@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://ccgw.vas.gtp.pl/service/NotificationService/v10"
+            xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+            targetNamespace="http://ccgw.vas.gtp.pl/service/NotificationService/v10" elementFormDefault="qualified" jxb:version="1.0">
+
+    <xsd:include schemaLocation="notification/NotificationRequest.xsd"/>
+    <xsd:include schemaLocation="notification/NotificationResponse.xsd"/>
+
+
+    <xsd:element name="activate-subscription-request" type="SubscriptionNotificationRequestType"/>
+    <xsd:element name="activate-subscription-response" type="SubscriptionNotificationResponseType"/>
+	<xsd:element name="deactivate-subscription-request" type="UnsubscriptionNotificationRequestType"/>
+    <xsd:element name="deactivate-subscription-response" type="UnsubscriptionNotificationResponseType"/>
+
+</xsd:schema>

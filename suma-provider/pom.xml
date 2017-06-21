@@ -10,9 +10,44 @@
 	<name>|- SUMA subscription manager provider</name>
 
 	<properties>
+		<!-- <cxf.version>3.1.10</cxf.version> -->
 		<maven.compiler.source>${jdk.version}</maven.compiler.source>
 		<maven.compiler.target>${jdk.version}</maven.compiler.target>
 	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.cxf</groupId>
+				<artifactId>cxf-codegen-plugin</artifactId>
+				<version>${cxf.version}</version>
+				<executions>
+					<execution>
+						<id>generate CCGW resources</id>
+						<phase>generate-sources</phase>
+						<configuration>
+							<wsdlOptions>
+								<wsdlOption>
+									<wsdl>${basedir}/src/main/resources/wsdl/ccgw2.1-notification.wsdl</wsdl>
+									<extraargs>
+										<extraarg>-p</extraarg>
+										<extraarg>com.orange.paddock.suma.provider.soap.model</extraarg>
+										<extraarg>-compile</extraarg>
+										<extraarg>-validate</extraarg>
+										<extraarg>-verbose</extraarg>
+									</extraargs>
+								</wsdlOption>
+							</wsdlOptions>
+						</configuration>
+						<goals>
+							<goal>wsdl2java</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -27,6 +62,10 @@
 			<artifactId>suma-business</artifactId>
 			<version>${project.parent.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.orange.paddock.module</groupId>
+			<artifactId>paddock-commons</artifactId>
+		</dependency>
 		<!-- mockserver -->
 		<dependency>
 			<groupId>org.mock-server</groupId>
@@ -38,6 +77,14 @@
 					<artifactId>xerces</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-transports-http</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-frontend-jaxws</artifactId>
 		</dependency>
 		<!-- TESTS -->
 		<dependency>

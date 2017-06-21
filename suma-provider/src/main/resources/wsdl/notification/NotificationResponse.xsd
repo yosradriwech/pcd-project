@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://ccgw.vas.gtp.pl/service/NotificationService/v10"
+            xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+            targetNamespace="http://ccgw.vas.gtp.pl/service/NotificationService/v10" elementFormDefault="qualified" jxb:version="1.0">
+		
+
+	<xsd:complexType name="SubscriptionNotificationResponseType">
+        <xsd:sequence>
+            <xsd:element name="status" type="status"/>
+        </xsd:sequence>
+    </xsd:complexType>
+	
+	<xsd:complexType name="UnsubscriptionNotificationResponseType">
+        <xsd:sequence>
+            <xsd:element name="status" type="status"/>
+        </xsd:sequence>
+    </xsd:complexType>
+	
+	<xsd:complexType name="status">
+        <xsd:sequence>
+			<xsd:element name="success" type="xsd:boolean"/>
+			<xsd:element name="errorCode" type="xsd:string" minOccurs="0"/>
+			<xsd:element name="errorParam" type="xsd:string" minOccurs="0"/>
+        </xsd:sequence>
+    </xsd:complexType>
+			
+</xsd:schema>
