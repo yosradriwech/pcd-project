@@ -1,5 +1,6 @@
 package com.orange.paddock.suma.dao.mongodb.test;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import junit.framework.Assert;
@@ -25,9 +26,9 @@ public class MongoDbQueriesTest {
 	private static final String END_USER_ID = "+99900000027501";
 	private static final String SERVICE_ID = "suma-service";
 	private static final String TRANSACTION_ID = "suma-transaction-id";
-	private static final Double AMOUNT = 1.0;
-	private static final Double AMOUNT_1 = 1.5;
-	private static final Double TAXED_AMOUNT = 0.5;
+	private static final BigDecimal AMOUNT = new BigDecimal(1.0);
+	private static final BigDecimal AMOUNT_1 = new BigDecimal(1.5);
+	private static final BigDecimal TAXED_AMOUNT = new BigDecimal(0.5);
 
 	@Autowired
 	private SubscriptionRepository subscriptionRepo;
@@ -75,7 +76,7 @@ public class MongoDbQueriesTest {
 				.findOne(id2).getCurrency());
 
 		Assert.assertEquals("currency1", subscriptionRepo.findOne(id1).getCurrency());
-		Assert.assertEquals(subscriptionRepo.findOne(id2).getAmount(), 1.5);
+		Assert.assertEquals(subscriptionRepo.findOne(id2).getAmount(), new BigDecimal(1.5));
 
 	}
 

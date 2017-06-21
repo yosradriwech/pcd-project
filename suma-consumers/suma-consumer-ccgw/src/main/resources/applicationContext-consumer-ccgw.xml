@@ -7,10 +7,19 @@
     http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
 
 	<jaxws:client id="sumaClient"
-		serviceClass="com.orange.paddock.suma.consumer.ccgw.model.CcgwSubscriptionPortType"
+		serviceClass="com.orange.paddock.suma.consumer.ccgw.susbcription.model.CcgwSubscriptionPortType"
 		address="${ccgw.endpoint}">
+		<jaxws:handlers>
+			<bean class="com.orange.paddock.suma.consumer.ccgw.handlers.CcgwResponseHandler" />
+		</jaxws:handlers>
+<!-- 		<jaxws:inInterceptors> -->
+<!-- 			<ref bean="ccgwResponseInterceptor" /> -->
+<!-- 		</jaxws:inInterceptors> -->
+<!-- 		<jaxws:outInterceptors> -->
+<!-- 			<ref bean="ccgwResponseInterceptor" /> -->
+<!-- 		</jaxws:outInterceptors> -->
 	</jaxws:client>
-
+	
 	<!-- http-conf:conduit name={WSDL_endpoint_target_namespace}PortName.http-conduit -->
 	<http-conf:conduit
 		name="{https://ccgw.orange.pl/api/2.1}CcgwSubscriptionPortType.http-conduit">

@@ -1,5 +1,6 @@
 package com.orange.paddock.suma.dao.mongodb.document;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 import org.springframework.data.annotation.CreatedDate;
@@ -27,8 +28,8 @@ public class Subscription {
 	private String endUserId;
 	private String description;
 	private String categoryCode;
-	private Double amount;
-	private Double taxedAmount;
+	private BigDecimal amount;
+	private BigDecimal taxedAmount;
 	private String currency;
 	private boolean isAdult;
 	private String status;
@@ -36,7 +37,7 @@ public class Subscription {
 	public Subscription() {}
 
 	public Subscription(String id, String subscriptionId, Date creationDate, Date activationDate, Date deActivationDate, String transactionId,
-			String serviceId, String onBehalfOf, String endUserId, String description, String categoryCode, Double amount, Double taxedAmount,
+			String serviceId, String onBehalfOf, String endUserId, String description, String categoryCode, BigDecimal amount, BigDecimal taxedAmount,
 			String currency, boolean isAdult, String status) {
 		super();
 		this.id = id;
@@ -153,19 +154,19 @@ public class Subscription {
 		this.categoryCode = categoryCode;
 	}
 
-	public Double getAmount() {
+	public BigDecimal getAmount() {
 		return amount;
 	}
 
-	public void setAmount(Double amount) {
+	public void setAmount(BigDecimal amount) {
 		this.amount = amount;
 	}
 
-	public Double getTaxedAmount() {
+	public BigDecimal getTaxedAmount() {
 		return taxedAmount;
 	}
 
-	public void setTaxedAmount(Double taxedAmount) {
+	public void setTaxedAmount(BigDecimal taxedAmount) {
 		this.taxedAmount = taxedAmount;
 	}
 

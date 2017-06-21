@@ -31,7 +31,17 @@
 									<wsdl>${basedir}/src/main/resources/wsdl/ccgw2.1-subscription.wsdl</wsdl>
 									<extraargs>
 										<extraarg>-p</extraarg>
-										<extraarg>com.orange.paddock.suma.consumer.ccgw.model</extraarg>
+										<extraarg>com.orange.paddock.suma.consumer.ccgw.susbcription.model</extraarg>
+										<extraarg>-compile</extraarg>
+										<extraarg>-validate</extraarg>
+										<extraarg>-verbose</extraarg>
+									</extraargs>
+								</wsdlOption>
+								<wsdlOption>
+									<wsdl>${basedir}/src/main/resources/wsdl/ccgw2.1.wsdl</wsdl>
+									<extraargs>
+										<extraarg>-p</extraarg>
+										<extraarg>com.orange.paddock.suma.consumer.ccgw.client.model</extraarg>
 										<extraarg>-compile</extraarg>
 										<extraarg>-validate</extraarg>
 										<extraarg>-verbose</extraarg>
@@ -64,6 +74,11 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
+		</dependency>
+			<dependency>
+			<groupId>com.orange.paddock.module</groupId>
+			<artifactId>paddock-commons</artifactId>
+			<version>1.3.4</version>
 		</dependency>
 		<!-- mockserver -->
 		<dependency>
