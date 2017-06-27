@@ -42,7 +42,10 @@ public class SumaUnsubscriptionRequest {
 
 	@Override
 	public String toString() {
-		return "SumaUnsubscriptionRequest [providerId=" + providerId + ", subscriptionId=" + subscriptionId + ", subscriber=" + subscriber + "]";
+		StringBuilder sb = new StringBuilder();
+		sb.append("SumaUnsubscriptionRequest [providerId=").append(providerId).append(", subscriptionId=").append(subscriptionId)
+				.append(", subscriber=").append(subscriber).append("]");
+		return sb.toString();
 	}
 
 }

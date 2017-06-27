@@ -3,6 +3,7 @@ package com.orange.paddock.suma.consumer.ccgw.client;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -15,11 +16,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.orange.paddock.commons.date.PdkDateUtils;
+import com.orange.paddock.suma.commons.RequestIdentifierLogger;
 import com.orange.paddock.suma.consumer.ccgw.exceptions.CcgwClientException;
 import com.orange.paddock.suma.consumer.ccgw.interceptors.CcgwSoapFaultInInterceptor;
 import com.orange.paddock.suma.consumer.ccgw.interceptors.CcgwSoapInInterceptor;
 import com.orange.paddock.suma.consumer.ccgw.log.CcgwSubscriptionLogger;
 import com.orange.paddock.suma.consumer.ccgw.log.CcgwSubscriptionLogger.CcgwSubscriptionFields;
+import com.orange.paddock.suma.consumer.ccgw.log.CcgwUnsubscriptionLogger.CcgwUnsubscriptionFields;
 import com.orange.paddock.suma.consumer.ccgw.model.SumaSubscriptionRequest;
 import com.orange.paddock.suma.consumer.ccgw.model.SumaUnsubscriptionRequest;
 import com.orange.paddock.suma.consumer.ccgw.susbcription.model.AuthenticationMethodType;
@@ -94,21 +97,29 @@ public class CcgwClient {
 	@Autowired
 	private CcgwSoapFaultInInterceptor ccgwSoapFaultInInterceptor;
 
+	@Autowired(required = false)
+	private RequestIdentifierLogger requestLogger;
+
 	/**
 	 * 
 	 * @param sumaSubscriptionRequest
-	 * @param internalId
 	 * @return
 	 * @throws CcgwClientException
 	 */
-	//TODO internalId
-	public String subscribe(SumaSubscriptionRequest sumaSubscriptionRequest, String internalId) throws CcgwClientException {
+	public String subscribe(SumaSubscriptionRequest sumaSubscriptionRequest) throws CcgwClientException {
 
-		TECHNICAL_LOGGER.debug("Starting subscription method using sumaSubscriptionRequest with fields {}", sumaSubscriptionRequest.toString());
+		TECHNICAL_LOGGER.debug("Starting subscription method using sumaSubscriptionRequest with fields {}",
+				sumaSubscriptionRequest.toString());
 		String subscriptionId = null;
-
+		String pdkInternalId = null;
 		Map<CcgwSubscriptionFields, String> logs = new HashMap<CcgwSubscriptionFields, String>();
-		logs.put(CcgwSubscriptionFields.INTERNAL_ID, internalId);
+
+		if (null != requestLogger) {
+			pdkInternalId = requestLogger.getPdkInternalId();
+		} else {
+			pdkInternalId = UUID.randomUUID().toString();
+		}
+		logs.put(CcgwSubscriptionFields.INTERNAL_ID, pdkInternalId);
 		logs.put(CcgwSubscriptionFields.REQUEST_TIMESTAMP, PdkDateUtils.getCurrentDateTimestamp());
 
 		ExtendedContentInfoType contentInfo = subscriptionObjectFactory.createExtendedContentInfoType();
@@ -170,20 +181,23 @@ public class CcgwClient {
 				subscriptionId = String.valueOf(subscribeResponseType.getSubscriptionId());
 			} else {
 				// CCGW response with failure throw CcgwClientException
-				TECHNICAL_LOGGER.debug("Error occured in CcgwClient - SUBSCRIBE error response - Code: {}", subscribeResponseType.getStatus()
-						.getErrorCode().getValue());
+				TECHNICAL_LOGGER.debug("Error occured in CcgwClient - SUBSCRIBE error response - Code: {}", subscribeResponseType
+						.getStatus().getErrorCode().getValue());
 
-				logs.put(CcgwSubscriptionFields.CCGW_HTTP_RESPONSE_CODE, String.valueOf(ccgwSoapInInterceptor.getHttpResponseCode()));
-				logs.put(CcgwSubscriptionFields.CCGW_RESPONSE_STATUS, String.valueOf(subscribeResponseType.getStatus().isSuccess()));
+				logs.put(CcgwSubscriptionFields.CCGW_HTTP_RESPONSE_CODE,
+						String.valueOf(ccgwSoapInInterceptor.getHttpResponseCode()));
+				logs.put(CcgwSubscriptionFields.CCGW_RESPONSE_STATUS,
+						String.valueOf(subscribeResponseType.getStatus().isSuccess()));
 				logs.put(CcgwSubscriptionFields.CCGW_ERROR_CODE, subscribeResponseType.getStatus().getErrorCode().getValue());
 
 				if (null != subscribeResponseType.getStatus().getErrorParam()) {
-					logs.put(CcgwSubscriptionFields.CCGW_ERROR_PARAMS, String.join(",", subscribeResponseType.getStatus().getErrorParam()));
+					logs.put(CcgwSubscriptionFields.CCGW_ERROR_PARAMS,
+							String.join(",", subscribeResponseType.getStatus().getErrorParam()));
 				}
 
 				CcgwSubscriptionLogger.write(logs);
-				throw new CcgwClientException(ccgwSoapInInterceptor.getHttpResponseCode(), subscribeResponseType.getStatus().getErrorCode()
-						.getValue(), subscribeResponseType.getStatus().getErrorParam());
+				throw new CcgwClientException(ccgwSoapInInterceptor.getHttpResponseCode(), subscribeResponseType.getStatus()
+						.getErrorCode().getValue(), subscribeResponseType.getStatus().getErrorParam());
 			}
 
 		} catch (Fault fault) {
@@ -194,17 +208,19 @@ public class CcgwClient {
 			logs.put(CcgwSubscriptionFields.CCGW_ERROR_CODE, fault.getFaultInfo().getStatus().getErrorCode().getValue());
 
 			if (null != fault.getFaultInfo().getStatus().getErrorParam()) {
-				logs.put(CcgwSubscriptionFields.CCGW_ERROR_PARAMS, String.join(",", fault.getFaultInfo().getStatus().getErrorParam()));
+				logs.put(CcgwSubscriptionFields.CCGW_ERROR_PARAMS,
+						String.join(",", fault.getFaultInfo().getStatus().getErrorParam()));
 			}
 			CcgwSubscriptionLogger.write(logs);
-			throw new CcgwClientException(ccgwSoapInInterceptor.getHttpResponseCode(), fault.getFaultInfo().getStatus().getErrorCode().getValue(),
-					fault.getFaultInfo().getStatus().getErrorParam());
+			throw new CcgwClientException(ccgwSoapInInterceptor.getHttpResponseCode(), fault.getFaultInfo().getStatus()
+					.getErrorCode().getValue(), fault.getFaultInfo().getStatus().getErrorParam());
 
 		} catch (SOAPFaultException soapFaultException) {
 			TECHNICAL_LOGGER.debug("Error occured in CcgwClient - SOAPFaultException");
 
 			logs.put(CcgwSubscriptionFields.RESPONSE_TIMESTAMP, PdkDateUtils.getCurrentDateTimestamp());
-			logs.put(CcgwSubscriptionFields.CCGW_HTTP_RESPONSE_CODE, String.valueOf(ccgwSoapFaultInInterceptor.getHttpResponseCode()));
+			logs.put(CcgwSubscriptionFields.CCGW_HTTP_RESPONSE_CODE,
+					String.valueOf(ccgwSoapFaultInInterceptor.getHttpResponseCode()));
 
 			CcgwClientException ccgwClientException = new CcgwClientException("Error occured in CcgwClient - SOAPFaultException");
 			ccgwClientException.setSoapFaultHttpStatusCode(ccgwSoapFaultInInterceptor.getHttpResponseCode());
@@ -223,7 +239,8 @@ public class CcgwClient {
 				ccgwClientException.setCcgwFaultHttpStatusCode(e.getResponseCode());
 			}
 
-			logs.put(CcgwSubscriptionFields.CCGW_HTTP_RESPONSE_CODE, String.valueOf(ccgwClientException.getCcgwFaultHttpStatusCode()));
+			logs.put(CcgwSubscriptionFields.CCGW_HTTP_RESPONSE_CODE,
+					String.valueOf(ccgwClientException.getCcgwFaultHttpStatusCode()));
 			logs.put(CcgwSubscriptionFields.RESPONSE_TIMESTAMP, PdkDateUtils.getCurrentDateTimestamp());
 
 			CcgwSubscriptionLogger.write(logs);
@@ -244,15 +261,24 @@ public class CcgwClient {
 	/**
 	 * 
 	 * @param sumaUnsubscriptionRequest
-	 * @param internalId
 	 * @return
 	 * @throws CcgwClientException
 	 */
-	public boolean unsubscribe(SumaUnsubscriptionRequest sumaUnsubscriptionRequest, String internalId) throws CcgwClientException {
+	public boolean unsubscribe(SumaUnsubscriptionRequest sumaUnsubscriptionRequest) throws CcgwClientException {
 		boolean success = false;
-		TECHNICAL_LOGGER.debug("Starting unsubscription method using sumaUnsubscriptionRequest with fields {}", sumaUnsubscriptionRequest.toString());
-
+		TECHNICAL_LOGGER.debug("Starting unsubscription method using sumaUnsubscriptionRequest with fields {}",
+				sumaUnsubscriptionRequest.toString());
+		
 		// TODO applicative logs
+		String pdkInternalId = null;
+		Map<CcgwUnsubscriptionFields, String> logs = new HashMap<CcgwUnsubscriptionFields, String>();
+		if (null != requestLogger) {
+			pdkInternalId = requestLogger.getPdkInternalId();
+		} else {
+			pdkInternalId = UUID.randomUUID().toString();
+		}
+		logs.put(CcgwUnsubscriptionFields.INTERNAL_ID, pdkInternalId);
+		
 		UnubscribeRequestType unubscribeRequestType = subscriptionObjectFactory.createUnubscribeRequestType();
 		unubscribeRequestType.setProviderId(sumaUnsubscriptionRequest.getProviderId());
 		unubscribeRequestType.setProviderPass(providerPass);
@@ -267,8 +293,9 @@ public class CcgwClient {
 			success = unsubscribeResponse.getStatus().isSuccess();
 
 			if (!success) {
-				TECHNICAL_LOGGER.debug("Error occured in CcgwClient - UNSUBSCRIBE error response - Code: {} errorParams: {}", unsubscribeResponse
-						.getStatus().getErrorCode().getValue(), String.join(", ", unsubscribeResponse.getStatus().getErrorParam()));
+				TECHNICAL_LOGGER.debug("Error occured in CcgwClient - UNSUBSCRIBE error response - Code: {} errorParams: {}",
+						unsubscribeResponse.getStatus().getErrorCode().getValue(),
+						String.join(", ", unsubscribeResponse.getStatus().getErrorParam()));
 				// throw new
 				// CcgwClientException(unsubscribeResponse.getStatus().getErrorCode().getValue(),
 				// unsubscribeResponse.getStatus()
@@ -314,8 +341,9 @@ public class CcgwClient {
 	 * @return
 	 */
 	private String buildUnsubscriptionRequestString(UnubscribeRequestType unubscribeRequestType) {
-		return String.format("timestamp=%s&provider-id=%s&provider-pass=%s&subscription-id=%s&subscriber=%s", unubscribeRequestType.getTimestamp(),
-				unubscribeRequestType.getProviderId(), unubscribeRequestType.getProviderPass(), unubscribeRequestType.getSubscriptionId(),
+		return String.format("timestamp=%s&provider-id=%s&provider-pass=%s&subscription-id=%s&subscriber=%s",
+				unubscribeRequestType.getTimestamp(), unubscribeRequestType.getProviderId(),
+				unubscribeRequestType.getProviderPass(), unubscribeRequestType.getSubscriptionId(),
 				unubscribeRequestType.getSubscriber());
 	}
 
@@ -337,11 +365,14 @@ public class CcgwClient {
 		sb.append(KEY_CONTENT_NAME).append(subscribeRequestType.getContentInfo().getContentName()).append(VAS_SEPARATOR);
 		sb.append(KEY_CONTENT_TYPE).append(subscribeRequestType.getContentInfo().getContentType()).append(VAS_SEPARATOR);
 		sb.append(KEY_RATING_LEVEL).append(ratingLevel).append(VAS_SEPARATOR);
-		sb.append(KEY_ADULT_FLAG).append(String.valueOf(subscribeRequestType.getContentInfo().isAdultFlag())).append(VAS_SEPARATOR);
+		sb.append(KEY_ADULT_FLAG).append(String.valueOf(subscribeRequestType.getContentInfo().isAdultFlag()))
+				.append(VAS_SEPARATOR);
 		sb.append(KEY_SUBSCRIPTION_MODEL).append(subscriptionModel).append(VAS_SEPARATOR);
 		sb.append(KEY_SALE_MODEL).append(saleModel).append(VAS_SEPARATOR);
-		sb.append(KEY_AMOUNT).append(String.valueOf(subscribeRequestType.getContentInfo().getPrice().getAmount())).append(VAS_SEPARATOR);
-		sb.append(KEY_TAXED_AMOUNT).append(String.valueOf(subscribeRequestType.getContentInfo().getPrice().getTaxedAmount())).append(VAS_SEPARATOR);
+		sb.append(KEY_AMOUNT).append(String.valueOf(subscribeRequestType.getContentInfo().getPrice().getAmount()))
+				.append(VAS_SEPARATOR);
+		sb.append(KEY_TAXED_AMOUNT).append(String.valueOf(subscribeRequestType.getContentInfo().getPrice().getTaxedAmount()))
+				.append(VAS_SEPARATOR);
 		sb.append(KEY_CURRENCY).append(subscribeRequestType.getContentInfo().getPrice().getCurrency());
 		TECHNICAL_LOGGER.debug("String to sign {}", sb.toString());
 

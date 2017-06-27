@@ -59,7 +59,12 @@
 	</build>
 
 	<dependencies>
-	<dependency>
+		<dependency>
+			<groupId>${project.parent.groupId}</groupId>
+			<artifactId>suma-commons</artifactId>
+			<version>${project.parent.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-beans</artifactId>
 		</dependency>

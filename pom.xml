@@ -16,6 +16,7 @@
 	<packaging>pom</packaging>
 
 	<modules>
+		<module>suma-commons</module>
 		<module>suma-dao-mongodb</module>
 		<module>suma-consumers</module>
 		<module>suma-business</module>

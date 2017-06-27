@@ -18,8 +18,10 @@ public class SumaSubscriptionRequest {
 	public SumaSubscriptionRequest() {
 	}
 
-	public SumaSubscriptionRequest(String transactionId, String providerId, String saleProviderId, String subscriber, String contentName,
-			String contentType, Boolean adultFlag, BigDecimal amount, BigDecimal taxedAmount, String currency) {
+	public SumaSubscriptionRequest(String transactionId, String providerId,
+			String saleProviderId, String subscriber, String contentName,
+			String contentType, Boolean adultFlag, BigDecimal amount,
+			BigDecimal taxedAmount, String currency) {
 		super();
 		this.transactionId = transactionId;
 		this.providerId = providerId;
@@ -115,9 +117,18 @@ public class SumaSubscriptionRequest {
 
 	@Override
 	public String toString() {
-		return "SumaSubscriptionRequest [transactionId=" + transactionId + ", providerId=" + providerId + ", saleProviderId=" + saleProviderId
-				+ ", subscriber=" + subscriber + ", contentName=" + contentName + ", contentType=" + contentType + ", adultFlag=" + adultFlag
-				+ ", amount=" + amount + ", taxedAmount=" + taxedAmount + ", currency=" + currency + "]";
-	}
+		StringBuilder sb = new StringBuilder();
+		sb.append("SumaSubscriptionRequest [transactionId=")
+				.append(transactionId).append(", providerId=")
+				.append(providerId).append(", saleProviderId=")
+				.append(saleProviderId).append(", subscriber=")
+				.append(subscriber).append(", contentName=")
+				.append(contentName).append(", contentType=")
+				.append(contentType).append(", adultFlag=").append(adultFlag)
+				.append(", amount=").append(amount).append(", taxedAmount=")
+				.append(taxedAmount).append(", currency=").append(currency)
+				.append("]");
+		return sb.toString();
 
+	}
 }

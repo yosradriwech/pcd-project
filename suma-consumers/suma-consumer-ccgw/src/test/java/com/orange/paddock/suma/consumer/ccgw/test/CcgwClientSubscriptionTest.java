@@ -53,7 +53,7 @@ public class CcgwClientSubscriptionTest extends AbstractCcgwClientSubscriptionTe
 		subReq.setSaleProviderId(SALE_PROVIDER_ID);
 		subReq.setProviderId(SALE_PROVIDER_ID);
 
-		String subId = ccgwClient.subscribe(subReq, "CcgwTransactionId");
+		String subId = ccgwClient.subscribe(subReq);
 		TECHNICAL_LOGGER.debug("Subscription test result in : {}", subId);
 		Assert.assertNotNull(subId);
 		
@@ -79,7 +79,7 @@ public class CcgwClientSubscriptionTest extends AbstractCcgwClientSubscriptionTe
 		subReq.setCurrency("EUR");
 		subReq.setSaleProviderId(SALE_PROVIDER_ID);
 		subReq.setProviderId(SALE_PROVIDER_ID);
-		String subId = ccgwClient.subscribe(subReq, "CcgwTransactionId");
+		String subId = ccgwClient.subscribe(subReq);
 		TECHNICAL_LOGGER.debug("Subscription test result in : {}", subId);
 	}
 
@@ -103,7 +103,7 @@ public class CcgwClientSubscriptionTest extends AbstractCcgwClientSubscriptionTe
 		subReq.setCurrency("EUR");
 		subReq.setSaleProviderId(SALE_PROVIDER_ID);
 		subReq.setProviderId(SALE_PROVIDER_ID);
-		String subId = ccgwClient.subscribe(subReq, "CcgwTransactionId");
+		String subId = ccgwClient.subscribe(subReq);
 		TECHNICAL_LOGGER.debug("Subscription test result in : {}", subId);
 
 	}
@@ -122,7 +122,7 @@ public class CcgwClientSubscriptionTest extends AbstractCcgwClientSubscriptionTe
 		subReq.setCurrency("EUR");
 		subReq.setSaleProviderId(SALE_PROVIDER_ID);
 		subReq.setProviderId(SALE_PROVIDER_ID);
-		String subId = ccgwClient.subscribe(subReq, "CcgwTransactionId");
+		String subId = ccgwClient.subscribe(subReq);
 		TECHNICAL_LOGGER.debug("Subscription test result in : {}", subId);
 	}
 
@@ -149,7 +149,7 @@ public class CcgwClientSubscriptionTest extends AbstractCcgwClientSubscriptionTe
 		subReq.setCurrency("EUR");
 		subReq.setSaleProviderId(SALE_PROVIDER_ID);
 		subReq.setProviderId(SALE_PROVIDER_ID);
-		String subId = ccgwClient.subscribe(subReq, "CcgwTransactionId");
+		String subId = ccgwClient.subscribe(subReq);
 		TECHNICAL_LOGGER.debug("Subscription test result in : {}", subId);
 	}
 
