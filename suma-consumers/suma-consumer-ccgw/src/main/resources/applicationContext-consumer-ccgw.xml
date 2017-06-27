@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jaxws="http://cxf.apache.org/jaxws"
 	xmlns:http-conf="http://cxf.apache.org/transports/http/configuration"
@@ -6,20 +7,26 @@
     http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd 
     http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
 
-	<jaxws:client id="sumaClient"
+	<jaxws:client id="ccgwSubscriptionPort"
 		serviceClass="com.orange.paddock.suma.consumer.ccgw.susbcription.model.CcgwSubscriptionPortType"
 		address="${ccgw.endpoint}">
-		<jaxws:handlers>
-			<bean class="com.orange.paddock.suma.consumer.ccgw.handlers.CcgwResponseHandler" />
-		</jaxws:handlers>
-<!-- 		<jaxws:inInterceptors> -->
-<!-- 			<ref bean="ccgwResponseInterceptor" /> -->
-<!-- 		</jaxws:inInterceptors> -->
-<!-- 		<jaxws:outInterceptors> -->
-<!-- 			<ref bean="ccgwResponseInterceptor" /> -->
-<!-- 		</jaxws:outInterceptors> -->
+
+		<jaxws:inInterceptors>
+			<ref bean="ccgwSoapInInterceptor" />
+		</jaxws:inInterceptors>
+
+		<jaxws:inFaultInterceptors>
+			<ref bean="ccgwSoapFaultInInterceptor" />
+		</jaxws:inFaultInterceptors>
+
 	</jaxws:client>
-	
+
+	<bean id="ccgwSoapInInterceptor"
+		class="com.orange.paddock.suma.consumer.ccgw.interceptors.CcgwSoapInInterceptor" />
+
+	<bean id="ccgwSoapFaultInInterceptor"
+		class="com.orange.paddock.suma.consumer.ccgw.interceptors.CcgwSoapFaultInInterceptor" />
+
 	<!-- http-conf:conduit name={WSDL_endpoint_target_namespace}PortName.http-conduit -->
 	<http-conf:conduit
 		name="{https://ccgw.orange.pl/api/2.1}CcgwSubscriptionPortType.http-conduit">

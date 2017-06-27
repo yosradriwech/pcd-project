@@ -8,7 +8,6 @@ import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.annotation.PropertySource;
 
 import com.orange.paddock.suma.consumer.ccgw.client.CcgwClient;
-import com.orange.paddock.suma.consumer.ccgw.handlers.CcgwResponseHandler;
 import com.orange.paddock.suma.consumer.ccgw.susbcription.model.ObjectFactory;
 
 @Configuration
@@ -21,15 +20,13 @@ public class CcgwClientTestApplication {
 	public CcgwClient ccgwClient () {
 		return new CcgwClient();
 	}
-	@Bean
-	public CcgwResponseHandler ccgwResponseInterceptor() {
-		return new CcgwResponseHandler();
-	}
 	
 	@Bean
 	public ObjectFactory subscriptionObjectFactory() {
 		return new ObjectFactory();
 	}
+	
+
 	public static void main(String[] args) {
 		SpringApplication.run(CcgwClientTestApplication.class);
 	}

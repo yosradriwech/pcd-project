@@ -6,7 +6,9 @@ import java.util.Map;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import javax.xml.ws.soap.SOAPFaultException;
 
+import org.apache.cxf.transport.http.HTTPException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +16,8 @@ import org.springframework.beans.factory.annotation.Value;
 
 import com.orange.paddock.commons.date.PdkDateUtils;
 import com.orange.paddock.suma.consumer.ccgw.exceptions.CcgwClientException;
-import com.orange.paddock.suma.consumer.ccgw.handlers.CcgwResponseHandler;
+import com.orange.paddock.suma.consumer.ccgw.interceptors.CcgwSoapFaultInInterceptor;
+import com.orange.paddock.suma.consumer.ccgw.interceptors.CcgwSoapInInterceptor;
 import com.orange.paddock.suma.consumer.ccgw.log.CcgwSubscriptionLogger;
 import com.orange.paddock.suma.consumer.ccgw.log.CcgwSubscriptionLogger.CcgwSubscriptionFields;
 import com.orange.paddock.suma.consumer.ccgw.model.SumaSubscriptionRequest;
@@ -80,13 +83,16 @@ public class CcgwClient {
 	private String providerSecret;
 
 	@Autowired
-	private CcgwSubscriptionPortType sumaClient;
+	private CcgwSubscriptionPortType ccgwSubscriptionPort;
 
 	@Autowired
 	private ObjectFactory subscriptionObjectFactory;
 
 	@Autowired
-	private CcgwResponseHandler ccgwResponseInterceptors;
+	private CcgwSoapInInterceptor ccgwSoapInInterceptor;
+
+	@Autowired
+	private CcgwSoapFaultInInterceptor ccgwSoapFaultInInterceptor;
 
 	/**
 	 * 
@@ -95,10 +101,12 @@ public class CcgwClient {
 	 * @return
 	 * @throws CcgwClientException
 	 */
+	//TODO internalId
 	public String subscribe(SumaSubscriptionRequest sumaSubscriptionRequest, String internalId) throws CcgwClientException {
 
 		TECHNICAL_LOGGER.debug("Starting subscription method using sumaSubscriptionRequest with fields {}", sumaSubscriptionRequest.toString());
 		String subscriptionId = null;
+
 		Map<CcgwSubscriptionFields, String> logs = new HashMap<CcgwSubscriptionFields, String>();
 		logs.put(CcgwSubscriptionFields.INTERNAL_ID, internalId);
 		logs.put(CcgwSubscriptionFields.REQUEST_TIMESTAMP, PdkDateUtils.getCurrentDateTimestamp());
@@ -149,43 +157,83 @@ public class CcgwClient {
 		logs.put(CcgwSubscriptionFields.VAS_SIGNATURE, String.valueOf(subscribeRequestType.getVasSignature()));
 
 		try {
-			SubscribeResponseType subscribeResponseType = sumaClient.subscribe(subscribeRequestType);
+			// Call CCGW remote service
+			SubscribeResponseType subscribeResponseType = ccgwSubscriptionPort.subscribe(subscribeRequestType);
+
+			// CCGW is responsive
 			logs.put(CcgwSubscriptionFields.RESPONSE_TIMESTAMP, PdkDateUtils.getCurrentDateTimestamp());
-			// TODO CcgwSubscriptionFields.CCGW_HTTP_RESPONSE_CODE
+			logs.put(CcgwSubscriptionFields.CCGW_HTTP_RESPONSE_CODE, String.valueOf(ccgwSoapInInterceptor.getHttpResponseCode()));
 			logs.put(CcgwSubscriptionFields.SUBSCRIPTION_ID, String.valueOf(subscribeResponseType.getSubscriptionId()));
 
 			if (subscribeResponseType.getStatus().isSuccess()) {
+				// CCGW response is successful
 				subscriptionId = String.valueOf(subscribeResponseType.getSubscriptionId());
 			} else {
-				TECHNICAL_LOGGER.debug("Error occured in CcgwClient - SUBSCRIBE error response - Code: {} ", subscribeResponseType.getStatus()
+				// CCGW response with failure throw CcgwClientException
+				TECHNICAL_LOGGER.debug("Error occured in CcgwClient - SUBSCRIBE error response - Code: {}", subscribeResponseType.getStatus()
 						.getErrorCode().getValue());
-				// TODO CcgwSubscriptionFields.CCGW_HTTP_RESPONSE_CODE
+
+				logs.put(CcgwSubscriptionFields.CCGW_HTTP_RESPONSE_CODE, String.valueOf(ccgwSoapInInterceptor.getHttpResponseCode()));
 				logs.put(CcgwSubscriptionFields.CCGW_RESPONSE_STATUS, String.valueOf(subscribeResponseType.getStatus().isSuccess()));
 				logs.put(CcgwSubscriptionFields.CCGW_ERROR_CODE, subscribeResponseType.getStatus().getErrorCode().getValue());
+
 				if (null != subscribeResponseType.getStatus().getErrorParam()) {
 					logs.put(CcgwSubscriptionFields.CCGW_ERROR_PARAMS, String.join(",", subscribeResponseType.getStatus().getErrorParam()));
 				}
+
 				CcgwSubscriptionLogger.write(logs);
-				throw new CcgwClientException(subscribeResponseType.getStatus().getErrorCode().getValue(), subscribeResponseType.getStatus()
-						.getErrorParam());
+				throw new CcgwClientException(ccgwSoapInInterceptor.getHttpResponseCode(), subscribeResponseType.getStatus().getErrorCode()
+						.getValue(), subscribeResponseType.getStatus().getErrorParam());
 			}
 
 		} catch (Fault fault) {
 			TECHNICAL_LOGGER.debug("Error occured in CcgwClient - SUBSCRIBE soap fault: {}", fault.toString());
-			// TODO CcgwSubscriptionFields.CCGW_HTTP_RESPONSE_CODE
+			logs.put(CcgwSubscriptionFields.CCGW_HTTP_RESPONSE_CODE, String.valueOf(ccgwSoapInInterceptor.getHttpResponseCode()));
 			logs.put(CcgwSubscriptionFields.RESPONSE_TIMESTAMP, PdkDateUtils.getCurrentDateTimestamp());
 			logs.put(CcgwSubscriptionFields.CCGW_RESPONSE_STATUS, String.valueOf(fault.getFaultInfo().getStatus().isSuccess()));
 			logs.put(CcgwSubscriptionFields.CCGW_ERROR_CODE, fault.getFaultInfo().getStatus().getErrorCode().getValue());
+
 			if (null != fault.getFaultInfo().getStatus().getErrorParam()) {
 				logs.put(CcgwSubscriptionFields.CCGW_ERROR_PARAMS, String.join(",", fault.getFaultInfo().getStatus().getErrorParam()));
 			}
+			CcgwSubscriptionLogger.write(logs);
+			throw new CcgwClientException(ccgwSoapInInterceptor.getHttpResponseCode(), fault.getFaultInfo().getStatus().getErrorCode().getValue(),
+					fault.getFaultInfo().getStatus().getErrorParam());
 
-			throw new CcgwClientException(fault.getFaultInfo().getStatus().getErrorCode().getValue(), fault.getFaultInfo().getStatus()
-					.getErrorParam());
+		} catch (SOAPFaultException soapFaultException) {
+			TECHNICAL_LOGGER.debug("Error occured in CcgwClient - SOAPFaultException");
 
+			logs.put(CcgwSubscriptionFields.RESPONSE_TIMESTAMP, PdkDateUtils.getCurrentDateTimestamp());
+			logs.put(CcgwSubscriptionFields.CCGW_HTTP_RESPONSE_CODE, String.valueOf(ccgwSoapFaultInInterceptor.getHttpResponseCode()));
+
+			CcgwClientException ccgwClientException = new CcgwClientException("Error occured in CcgwClient - SOAPFaultException");
+			ccgwClientException.setSoapFaultHttpStatusCode(ccgwSoapFaultInInterceptor.getHttpResponseCode());
+			ccgwClientException.setSoapFaultCode(soapFaultException.getFault().getFaultCode());
+			ccgwClientException.setSoapFaultMessage(soapFaultException.getFault().getFaultString());
+
+			CcgwSubscriptionLogger.write(logs);
+			throw ccgwClientException;
+		} catch (javax.xml.ws.WebServiceException webServiceException) {
+			TECHNICAL_LOGGER.debug("Error occured in CcgwClient - WebServiceException" + webServiceException);
+			CcgwClientException ccgwClientException = new CcgwClientException("Error occured in CcgwClient - WebServiceException");
+
+			if ((null != webServiceException.getCause()) && (webServiceException.getCause() instanceof HTTPException)) {
+				TECHNICAL_LOGGER.debug("Error due to http conduit exception");
+				HTTPException e = (HTTPException) webServiceException.getCause();
+				ccgwClientException.setCcgwFaultHttpStatusCode(e.getResponseCode());
+			}
+
+			logs.put(CcgwSubscriptionFields.CCGW_HTTP_RESPONSE_CODE, String.valueOf(ccgwClientException.getCcgwFaultHttpStatusCode()));
+			logs.put(CcgwSubscriptionFields.RESPONSE_TIMESTAMP, PdkDateUtils.getCurrentDateTimestamp());
+
+			CcgwSubscriptionLogger.write(logs);
+			throw ccgwClientException;
+		} catch (CcgwClientException ccgwClientException) {
+			throw ccgwClientException;
 		} catch (Exception e) {
-			//TODO
-			TECHNICAL_LOGGER.debug("An exception has occred while requesting ccgw {}", e);
+			TECHNICAL_LOGGER.debug("An unexpected exception has occred while requesting ccgw ");
+			CcgwSubscriptionLogger.write(logs);
+			throw new CcgwClientException();
 		}
 
 		CcgwSubscriptionLogger.write(logs);
@@ -204,7 +252,7 @@ public class CcgwClient {
 		boolean success = false;
 		TECHNICAL_LOGGER.debug("Starting unsubscription method using sumaUnsubscriptionRequest with fields {}", sumaUnsubscriptionRequest.toString());
 
-		//TODO applicative logs
+		// TODO applicative logs
 		UnubscribeRequestType unubscribeRequestType = subscriptionObjectFactory.createUnubscribeRequestType();
 		unubscribeRequestType.setProviderId(sumaUnsubscriptionRequest.getProviderId());
 		unubscribeRequestType.setProviderPass(providerPass);
@@ -215,20 +263,24 @@ public class CcgwClient {
 		unubscribeRequestType.setVasSignature(calculateVasSignature(providerSecret, stringToSign));
 
 		try {
-			PostSubscribeResponseType unsubscribeResponse = sumaClient.unsubscribe(unubscribeRequestType);
+			PostSubscribeResponseType unsubscribeResponse = ccgwSubscriptionPort.unsubscribe(unubscribeRequestType);
 			success = unsubscribeResponse.getStatus().isSuccess();
 
 			if (!success) {
 				TECHNICAL_LOGGER.debug("Error occured in CcgwClient - UNSUBSCRIBE error response - Code: {} errorParams: {}", unsubscribeResponse
 						.getStatus().getErrorCode().getValue(), String.join(", ", unsubscribeResponse.getStatus().getErrorParam()));
-				throw new CcgwClientException(unsubscribeResponse.getStatus().getErrorCode().getValue(), unsubscribeResponse.getStatus()
-						.getErrorParam());
+				// throw new
+				// CcgwClientException(unsubscribeResponse.getStatus().getErrorCode().getValue(),
+				// unsubscribeResponse.getStatus()
+				// .getErrorParam());
 			}
 
 		} catch (Fault fault) {
 			TECHNICAL_LOGGER.debug("Error occured in CcgwClient - UNSUBSCRIBE soap fault: {}", fault.toString());
-			throw new CcgwClientException(fault.getFaultInfo().getStatus().getErrorCode().getValue(), fault.getFaultInfo().getStatus()
-					.getErrorParam());
+			// throw new
+			// CcgwClientException(fault.getFaultInfo().getStatus().getErrorCode().getValue(),
+			// fault.getFaultInfo().getStatus()
+			// .getErrorParam());
 		}
 
 		return success;
