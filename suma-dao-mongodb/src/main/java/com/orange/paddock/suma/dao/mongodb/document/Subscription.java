@@ -34,11 +34,12 @@ public class Subscription {
 	private boolean isAdult;
 	private String status;
 
-	public Subscription() {}
+	public Subscription() {
+	}
 
-	public Subscription(String id, String subscriptionId, Date creationDate, Date activationDate, Date deActivationDate, String transactionId,
-			String serviceId, String onBehalfOf, String endUserId, String description, String categoryCode, BigDecimal amount, BigDecimal taxedAmount,
-			String currency, boolean isAdult, String status) {
+	public Subscription(String id, String subscriptionId, Date creationDate, Date activationDate, Date deActivationDate,
+			String transactionId, String serviceId, String onBehalfOf, String endUserId, String description, String categoryCode,
+			BigDecimal amount, BigDecimal taxedAmount, String currency, boolean isAdult, String status) {
 		super();
 		this.id = id;
 		this.subscriptionId = subscriptionId;
@@ -188,13 +189,15 @@ public class Subscription {
 
 	@Override
 	public String toString() {
-		return "Subscription [id=" + id + ", subscriptionId=" + subscriptionId + ", creationDate=" + creationDate + ", activationDate="
-				+ activationDate + ", deActivationDate=" + deActivationDate + ", transactionId=" + transactionId + ", serviceId=" + serviceId
-				+ ", onBehalfOf=" + onBehalfOf + ", endUserId=" + endUserId + ", description=" + description + ", categoryCode=" + categoryCode
-				+ ", amount=" + amount + ", taxedAmount=" + taxedAmount + ", currency=" + currency + ", isAdult=" + isAdult + ", status=" + status
-				+ "]";
+		StringBuilder sb = new StringBuilder();
+		sb.append("Subscription [id=").append(id).append(", subscriptionId=").append(subscriptionId).append(", creationDate=")
+				.append(creationDate).append(", activationDate=").append(activationDate).append(", deActivationDate=")
+				.append(deActivationDate).append(", transactionId=").append(transactionId).append(", serviceId=" + serviceId)
+				.append(", onBehalfOf=").append(onBehalfOf).append(", endUserId=").append(endUserId).append(", description=")
+				.append(description + ", categoryCode=").append(categoryCode).append(", amount=").append(amount)
+				.append(", taxedAmount=").append(taxedAmount).append(", currency=").append(currency).append(", isAdult=")
+				.append(isAdult).append(", status=").append(status).append("]");
+		return sb.toString();
 	}
-
-	
 
 }
