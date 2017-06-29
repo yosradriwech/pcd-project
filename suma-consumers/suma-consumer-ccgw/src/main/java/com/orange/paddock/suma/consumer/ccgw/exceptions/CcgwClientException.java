@@ -8,39 +8,39 @@ public class CcgwClientException extends Exception {
 	private static final long serialVersionUID = 1L;
 
 	// Information below retrieved from CCGW client response
-	private int ccgwFaultHttpStatusCode;
+	private Integer ccgwFaultHttpStatusCode;
 	private String ccgwFaultStatusCode;
 	private List<String> ccgwFaultStatusErrorParams;
 
 	// Information below retrieved from SOAP fault
 	private String soapFaultMessage;
 	private String soapFaultCode;
-	private int soapFaultHttpStatusCode;
+	private Integer soapFaultHttpStatusCode;
 
 	public CcgwClientException(String message) {
 		super(message);
-		this.ccgwFaultStatusCode = "0";
+		this.ccgwFaultStatusCode = "ERROR";
 		this.ccgwFaultStatusErrorParams = new ArrayList<String>();
 	}
 
 	public CcgwClientException() {
 		super("An unexpected error occured while calling CCGW client");
-		this.ccgwFaultStatusCode = "0";
+		this.ccgwFaultStatusCode = "ERROR";
 		this.ccgwFaultStatusErrorParams = new ArrayList<String>();
 	}
 
-	public CcgwClientException(int ccgwFaultHttpStatusCode, String ccgwFaultStatusCode, List<String> ccgwFaultStatusErrorParams) {
+	public CcgwClientException(Integer ccgwFaultHttpStatusCode, String ccgwFaultStatusCode, List<String> ccgwFaultStatusErrorParams) {
 		super();
 		this.ccgwFaultHttpStatusCode = ccgwFaultHttpStatusCode;
 		this.ccgwFaultStatusCode = ccgwFaultStatusCode;
 		this.ccgwFaultStatusErrorParams = ccgwFaultStatusErrorParams;
 	}
 
-	public int getCcgwFaultHttpStatusCode() {
+	public Integer getCcgwFaultHttpStatusCode() {
 		return ccgwFaultHttpStatusCode;
 	}
 
-	public void setCcgwFaultHttpStatusCode(int ccgwFaultHttpStatusCode) {
+	public void setCcgwFaultHttpStatusCode(Integer ccgwFaultHttpStatusCode) {
 		this.ccgwFaultHttpStatusCode = ccgwFaultHttpStatusCode;
 	}
 
@@ -76,11 +76,11 @@ public class CcgwClientException extends Exception {
 		this.soapFaultCode = soapFaultCode;
 	}
 
-	public int getSoapFaultHttpStatusCode() {
+	public Integer getSoapFaultHttpStatusCode() {
 		return soapFaultHttpStatusCode;
 	}
 
-	public void setSoapFaultHttpStatusCode(int soapFaultHttpStatusCode) {
+	public void setSoapFaultHttpStatusCode(Integer soapFaultHttpStatusCode) {
 		this.soapFaultHttpStatusCode = soapFaultHttpStatusCode;
 	}
 

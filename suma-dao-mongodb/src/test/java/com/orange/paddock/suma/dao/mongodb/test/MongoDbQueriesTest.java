@@ -1,7 +1,9 @@
 package com.orange.paddock.suma.dao.mongodb.test;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
 
 import junit.framework.Assert;
 
@@ -70,14 +72,22 @@ public class MongoDbQueriesTest {
 		subscription2.setCurrency("currency2");
 		String id2 = subscriptionRepo.save(subscription2).getId();
 		Assert.assertNotNull(id2);
-		List<Subscription> subscriptions = subscriptionRepo.findAll();
-		TECHNICAL_LOGGER.info("Size of list of subscriptions for mongodb tests: {}", subscriptions.size());
+
+		List<Subscription> initialSubscriptionList = new ArrayList<Subscription>() {
+			private static final long serialVersionUID = 1L;
+
+			{
+				add(subscription1);
+				add(subscription2);
+			}
+		};
+		List<Subscription> savedSubscriptionList = subscriptionRepo.findAll();
+
+		TECHNICAL_LOGGER.info("Size of list of subscriptions for mongodb tests: {}", savedSubscriptionList.size());
 		TECHNICAL_LOGGER.info("Currency of Sub 1 : {}, currency of Sub 2 : {}", subscriptionRepo.findOne(id1).getCurrency(), subscriptionRepo
 				.findOne(id2).getCurrency());
-
-		Assert.assertEquals("currency1", subscriptionRepo.findOne(id1).getCurrency());
-		Assert.assertEquals(subscriptionRepo.findOne(id2).getAmount(), new BigDecimal(1.5));
-
+		Assert.assertEquals(savedSubscriptionList, initialSubscriptionList);
+		Assert.assertEquals(subscriptionRepo.findOne(id1), subscription1);
 	}
 
 }

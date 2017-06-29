@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.orange.paddock.suma.consumer.ccgw.client.CcgwClient;
 import com.orange.paddock.suma.consumer.ccgw.exceptions.CcgwClientException;
+import com.orange.paddock.suma.consumer.ccgw.exceptions.CcgwNotRespondingException;
 import com.orange.paddock.suma.consumer.ccgw.model.SumaSubscriptionRequest;
 import com.orange.paddock.suma.consumer.ccgw.susbcription.model.Fault;
 
@@ -33,7 +34,7 @@ public class CcgwClientSubscriptionTest extends AbstractCcgwClientSubscriptionTe
 	private CcgwClient ccgwClient;
 
 	@Test
-	public void subscriptionSuccessTest() throws CcgwClientException, MalformedURLException, Fault {
+	public void subscriptionSuccessTest() throws CcgwClientException, MalformedURLException, Fault, CcgwNotRespondingException {
 
 		TECHNICAL_LOGGER.debug("Sending subscription request expected success");
 		mockServerClient.when(request().withPath("/subscribe")).respond(
@@ -60,7 +61,7 @@ public class CcgwClientSubscriptionTest extends AbstractCcgwClientSubscriptionTe
 	}
 
 	@Test(expected = CcgwClientException.class)
-	public void subscriptionFailureTest() throws CcgwClientException, Fault {
+	public void subscriptionFailureTest() throws CcgwClientException, Fault, CcgwNotRespondingException {
 
 		TECHNICAL_LOGGER.debug("Sending subscription request expected success set to false");
 		mockServerClient.when(request().withPath("/subscribe")).respond(
@@ -84,7 +85,7 @@ public class CcgwClientSubscriptionTest extends AbstractCcgwClientSubscriptionTe
 	}
 
 	@Test(expected = CcgwClientException.class)
-	public void subscriptionInternalErrorTest() throws CcgwClientException, Fault {
+	public void subscriptionInternalErrorTest() throws CcgwClientException, Fault, CcgwNotRespondingException {
 
 		TECHNICAL_LOGGER.debug("Sending subscription request expected 500");
 		mockServerClient.when(request().withPath("/subscribe")).respond(
@@ -109,7 +110,7 @@ public class CcgwClientSubscriptionTest extends AbstractCcgwClientSubscriptionTe
 	}
 
 	@Test(expected = CcgwClientException.class)
-	public void subscriptionBadRequestTest() throws CcgwClientException, Fault {
+	public void subscriptionBadRequestTest() throws CcgwClientException, Fault, CcgwNotRespondingException {
 
 		TECHNICAL_LOGGER.debug("Sending subscription request expected 400");
 		mockServerClient.when(request().withPath("/subscribe")).respond(response().withStatusCode(400));
@@ -127,7 +128,7 @@ public class CcgwClientSubscriptionTest extends AbstractCcgwClientSubscriptionTe
 	}
 
 	@Test(expected = CcgwClientException.class)
-	public void subscriptionSoapFaultTest() throws CcgwClientException, Fault {
+	public void subscriptionSoapFaultTest() throws CcgwClientException, Fault, CcgwNotRespondingException {
 
 		TECHNICAL_LOGGER.debug("Sending subscription request expected SOAP fault");
 		mockServerClient
