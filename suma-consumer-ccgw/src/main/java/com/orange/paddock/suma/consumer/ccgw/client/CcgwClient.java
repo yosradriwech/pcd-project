@@ -42,7 +42,6 @@ import com.orange.paddock.suma.consumer.ccgw.susbcription.model.SubscribeRequest
 import com.orange.paddock.suma.consumer.ccgw.susbcription.model.SubscribeResponseType;
 import com.orange.paddock.suma.consumer.ccgw.susbcription.model.SubscriptionModelType;
 import com.orange.paddock.suma.consumer.ccgw.susbcription.model.UnubscribeRequestType;
-import com.orange.paddock.suma.consumer.ccgw.utils.SoapWebServiceUtils;
 
 public class CcgwClient {
 
@@ -173,25 +172,25 @@ public class CcgwClient {
 			logs.put(CcgwSubscriptionFields.RESPONSE_TIMESTAMP, PdkDateUtils.getCurrentDateTimestamp());
 
 			// Check if subscribe response in not null
-			if (!SoapWebServiceUtils.objectIsNull(subscribeResponseType)) {
+			if (!Objects.isNull(subscribeResponseType)) {
 				// Retrieve subscription Id
-				if (!SoapWebServiceUtils.objectIsNull(subscribeResponseType.getSubscriptionId())) {
+				if (!Objects.isNull(subscribeResponseType.getSubscriptionId())) {
 					subscriptionId = String.valueOf(subscribeResponseType.getSubscriptionId());
 				}
 
 				httpResponseCode = HttpStatus.OK.value();
 
 				// Check if status object is not NULL
-				if (!SoapWebServiceUtils.objectIsNull(subscribeResponseType.getStatus())) {
+				if (!Objects.isNull(subscribeResponseType.getStatus())) {
 					logs.put(CcgwSubscriptionFields.CCGW_RESPONSE_STATUS, String.valueOf(subscribeResponseType.getStatus().isSuccess()));
 					if (!subscribeResponseType.getStatus().isSuccess()) {
 						// CCGW response with failure throw CcgwClientException
 						TECHNICAL_LOGGER.debug("Error occured in CcgwClient - SUBSCRIBE error response");
 
-						if (!SoapWebServiceUtils.objectIsNull(subscribeResponseType.getStatus().getErrorParam())) {
+						if (!Objects.isNull(subscribeResponseType.getStatus().getErrorParam())) {
 							ccgwErrorParams = subscribeResponseType.getStatus().getErrorParam();
 						}
-						if (!SoapWebServiceUtils.objectIsNull(subscribeResponseType.getStatus().getErrorCode())) {
+						if (!Objects.isNull(subscribeResponseType.getStatus().getErrorCode())) {
 							ccgwErrorCode = subscribeResponseType.getStatus().getErrorCode().getValue();
 						}
 
@@ -214,12 +213,12 @@ public class CcgwClient {
 
 			logs.put(CcgwSubscriptionFields.RESPONSE_TIMESTAMP, PdkDateUtils.getCurrentDateTimestamp());
 			httpResponseCode = HttpStatus.OK.value();
-			if (!SoapWebServiceUtils.objectIsNull(fault.getFaultInfo().getStatus())) {
+			if (!Objects.isNull(fault.getFaultInfo().getStatus())) {
 				logs.put(CcgwSubscriptionFields.CCGW_RESPONSE_STATUS, String.valueOf(fault.getFaultInfo().getStatus().isSuccess()));
-				if (!SoapWebServiceUtils.objectIsNull(fault.getFaultInfo().getStatus().getErrorParam())) {
+				if (!Objects.isNull(fault.getFaultInfo().getStatus().getErrorParam())) {
 					ccgwErrorParams = fault.getFaultInfo().getStatus().getErrorParam();
 				}
-				if (!SoapWebServiceUtils.objectIsNull(fault.getFaultInfo().getStatus().getErrorCode())) {
+				if (!Objects.isNull(fault.getFaultInfo().getStatus().getErrorCode())) {
 					ccgwErrorCode = fault.getFaultInfo().getStatus().getErrorCode().getValue();
 				}
 			}
@@ -326,11 +325,11 @@ public class CcgwClient {
 			logs.put(CcgwUnsubscriptionFields.RESPONSE_TIMESTAMP, PdkDateUtils.getCurrentDateTimestamp());
 
 			// Check if un-subscribe response in not null
-			if (!SoapWebServiceUtils.objectIsNull(unsubscribeResponse)) {
+			if (!Objects.isNull(unsubscribeResponse)) {
 				// Retrieve Http response code
 				httpResponseCode = HttpStatus.OK.value();
 				// Check if status object is not NULL
-				if (!SoapWebServiceUtils.objectIsNull(unsubscribeResponse.getStatus())) {
+				if (!Objects.isNull(unsubscribeResponse.getStatus())) {
 					success = unsubscribeResponse.getStatus().isSuccess();
 					logs.put(CcgwUnsubscriptionFields.CCGW_RESPONSE_STATUS, String.valueOf(success));
 
@@ -338,10 +337,10 @@ public class CcgwClient {
 						// CCGW response with failure throw CcgwClientException
 						TECHNICAL_LOGGER.debug("Error occured in CcgwClient - UNSUBSCRIBE error response");
 
-						if (!SoapWebServiceUtils.objectIsNull(unsubscribeResponse.getStatus().getErrorParam())) {
+						if (!Objects.isNull(unsubscribeResponse.getStatus().getErrorParam())) {
 							ccgwErrorParams = unsubscribeResponse.getStatus().getErrorParam();
 						}
-						if (!SoapWebServiceUtils.objectIsNull(unsubscribeResponse.getStatus().getErrorCode())) {
+						if (!Objects.isNull(unsubscribeResponse.getStatus().getErrorCode())) {
 							ccgwErrorCode = unsubscribeResponse.getStatus().getErrorCode().getValue();
 						}
 
@@ -363,12 +362,12 @@ public class CcgwClient {
 
 			logs.put(CcgwUnsubscriptionFields.RESPONSE_TIMESTAMP, PdkDateUtils.getCurrentDateTimestamp());
 			httpResponseCode = HttpStatus.OK.value();
-			if (!SoapWebServiceUtils.objectIsNull(fault.getFaultInfo().getStatus())) {
+			if (!Objects.isNull(fault.getFaultInfo().getStatus())) {
 				logs.put(CcgwUnsubscriptionFields.CCGW_RESPONSE_STATUS, String.valueOf(fault.getFaultInfo().getStatus().isSuccess()));
-				if (!SoapWebServiceUtils.objectIsNull(fault.getFaultInfo().getStatus().getErrorParam())) {
+				if (!Objects.isNull(fault.getFaultInfo().getStatus().getErrorParam())) {
 					ccgwErrorParams = fault.getFaultInfo().getStatus().getErrorParam();
 				}
-				if (!SoapWebServiceUtils.objectIsNull(fault.getFaultInfo().getStatus().getErrorCode())) {
+				if (!Objects.isNull(fault.getFaultInfo().getStatus().getErrorCode())) {
 					ccgwErrorCode = fault.getFaultInfo().getStatus().getErrorCode().getValue();
 				}
 			}
