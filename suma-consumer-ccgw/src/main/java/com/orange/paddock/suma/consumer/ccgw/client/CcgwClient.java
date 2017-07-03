@@ -18,12 +18,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 
 import com.orange.paddock.commons.date.PdkDateUtils;
 import com.orange.paddock.suma.consumer.ccgw.exceptions.CcgwClientException;
 import com.orange.paddock.suma.consumer.ccgw.exceptions.CcgwNotRespondingException;
-import com.orange.paddock.suma.consumer.ccgw.interceptors.CcgwSoapFaultInInterceptor;
-import com.orange.paddock.suma.consumer.ccgw.interceptors.CcgwSoapInInterceptor;
 import com.orange.paddock.suma.consumer.ccgw.log.CcgwSubscriptionLogger;
 import com.orange.paddock.suma.consumer.ccgw.log.CcgwSubscriptionLogger.CcgwSubscriptionFields;
 import com.orange.paddock.suma.consumer.ccgw.log.CcgwUnsubscriptionLogger;
@@ -98,12 +97,6 @@ public class CcgwClient {
 
 	@Autowired
 	private ObjectFactory subscriptionObjectFactory;
-
-	@Autowired
-	private CcgwSoapInInterceptor ccgwSoapInInterceptor;
-
-	@Autowired
-	private CcgwSoapFaultInInterceptor ccgwSoapFaultInInterceptor;
 
 	/**
 	 * 
@@ -185,10 +178,9 @@ public class CcgwClient {
 				if (!SoapWebServiceUtils.objectIsNull(subscribeResponseType.getSubscriptionId())) {
 					subscriptionId = String.valueOf(subscribeResponseType.getSubscriptionId());
 				}
-				// Retrieve Http response code
-				if (!SoapWebServiceUtils.objectIsNull(ccgwSoapInInterceptor)) {
-					httpResponseCode = ccgwSoapInInterceptor.getHttpResponseCode();
-				}
+
+				httpResponseCode = HttpStatus.OK.value();
+
 				// Check if status object is not NULL
 				if (!SoapWebServiceUtils.objectIsNull(subscribeResponseType.getStatus())) {
 					logs.put(CcgwSubscriptionFields.CCGW_RESPONSE_STATUS, String.valueOf(subscribeResponseType.getStatus().isSuccess()));
@@ -221,9 +213,7 @@ public class CcgwClient {
 			TECHNICAL_LOGGER.debug("Error occured in CcgwClient - SUBSCRIBE service fault");
 
 			logs.put(CcgwSubscriptionFields.RESPONSE_TIMESTAMP, PdkDateUtils.getCurrentDateTimestamp());
-			if (!SoapWebServiceUtils.objectIsNull(ccgwSoapInInterceptor)) {
-				httpResponseCode = ccgwSoapInInterceptor.getHttpResponseCode();
-			}
+			httpResponseCode = HttpStatus.OK.value();
 			if (!SoapWebServiceUtils.objectIsNull(fault.getFaultInfo().getStatus())) {
 				logs.put(CcgwSubscriptionFields.CCGW_RESPONSE_STATUS, String.valueOf(fault.getFaultInfo().getStatus().isSuccess()));
 				if (!SoapWebServiceUtils.objectIsNull(fault.getFaultInfo().getStatus().getErrorParam())) {
@@ -244,9 +234,7 @@ public class CcgwClient {
 			TECHNICAL_LOGGER.debug("Error occured in CcgwClient subscribe - SOAPFaultException");
 
 			logs.put(CcgwSubscriptionFields.RESPONSE_TIMESTAMP, PdkDateUtils.getCurrentDateTimestamp());
-			if (!SoapWebServiceUtils.objectIsNull(ccgwSoapFaultInInterceptor)) {
-				httpResponseCode = ccgwSoapFaultInInterceptor.getHttpResponseCode();
-			}
+			httpResponseCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
 			logs.put(CcgwSubscriptionFields.CCGW_HTTP_RESPONSE_CODE, String.valueOf((Object) httpResponseCode));
 			logs.put(CcgwSubscriptionFields.CCGW_RESPONSE_STATUS, CCGW_RESPONSE_STATUS_ERROR);
 
@@ -340,9 +328,7 @@ public class CcgwClient {
 			// Check if un-subscribe response in not null
 			if (!SoapWebServiceUtils.objectIsNull(unsubscribeResponse)) {
 				// Retrieve Http response code
-				if (!SoapWebServiceUtils.objectIsNull(ccgwSoapInInterceptor)) {
-					httpResponseCode = ccgwSoapInInterceptor.getHttpResponseCode();
-				}
+				httpResponseCode = HttpStatus.OK.value();
 				// Check if status object is not NULL
 				if (!SoapWebServiceUtils.objectIsNull(unsubscribeResponse.getStatus())) {
 					success = unsubscribeResponse.getStatus().isSuccess();
@@ -376,9 +362,7 @@ public class CcgwClient {
 			TECHNICAL_LOGGER.debug("Error occured in CcgwClient - UNSUBSCRIBE service fault");
 
 			logs.put(CcgwUnsubscriptionFields.RESPONSE_TIMESTAMP, PdkDateUtils.getCurrentDateTimestamp());
-			if (!SoapWebServiceUtils.objectIsNull(ccgwSoapInInterceptor)) {
-				httpResponseCode = ccgwSoapInInterceptor.getHttpResponseCode();
-			}
+			httpResponseCode = HttpStatus.OK.value();
 			if (!SoapWebServiceUtils.objectIsNull(fault.getFaultInfo().getStatus())) {
 				logs.put(CcgwUnsubscriptionFields.CCGW_RESPONSE_STATUS, String.valueOf(fault.getFaultInfo().getStatus().isSuccess()));
 				if (!SoapWebServiceUtils.objectIsNull(fault.getFaultInfo().getStatus().getErrorParam())) {
@@ -400,10 +384,8 @@ public class CcgwClient {
 			TECHNICAL_LOGGER.debug("Error occured in CcgwClient unsubscribe - SOAPFaultException");
 
 			logs.put(CcgwUnsubscriptionFields.RESPONSE_TIMESTAMP, PdkDateUtils.getCurrentDateTimestamp());
-			if (!SoapWebServiceUtils.objectIsNull(ccgwSoapFaultInInterceptor)) {
-				httpResponseCode = ccgwSoapFaultInInterceptor.getHttpResponseCode();
-			}
 
+			httpResponseCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
 			CcgwClientException ccgwClientException = new CcgwClientException("Error occured in CcgwClient unsubscribe - SOAPFaultException");
 			ccgwClientException.setSoapFaultHttpStatusCode(httpResponseCode);
 			ccgwClientException.setSoapFaultCode(soapFaultException.getFault().getFaultCode());
