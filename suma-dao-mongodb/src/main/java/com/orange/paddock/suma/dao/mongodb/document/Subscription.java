@@ -188,42 +188,6 @@ public class Subscription {
 		this.isAdult = isAdult;
 	}
 
-	// @Override
-	// public boolean equals(Object subscriptionObjToCompareTo) {
-	//
-	// if (Objects.isNull(subscriptionObjToCompareTo)) {
-	// return false;
-	// }
-	// if (!(subscriptionObjToCompareTo instanceof Subscription)) {
-	// return false;
-	// }
-	// Subscription subscriptionToCompareTo = (Subscription) subscriptionObjToCompareTo;
-	// return Objects.equals(id, subscriptionToCompareTo.getId()) && Objects.equals(subscriptionId,
-	// subscriptionToCompareTo.getSubscriptionId())
-	// && Objects.equals(creationDate, subscriptionToCompareTo.getCreationDate())
-	// && Objects.equals(activationDate, subscriptionToCompareTo.getActivationDate())
-	// && Objects.equals(deActivationDate, subscriptionToCompareTo.getDeActivationDate())
-	// && Objects.equals(transactionId, subscriptionToCompareTo.getTransactionId())
-	// && Objects.equals(serviceId, subscriptionToCompareTo.getServiceId())
-	// && Objects.equals(onBehalfOf, subscriptionToCompareTo.getOnBehalfOf())
-	// && Objects.equals(endUserId, subscriptionToCompareTo.getEndUserId())
-	// && Objects.equals(description, subscriptionToCompareTo.getDescription())
-	// && Objects.equals(categoryCode, subscriptionToCompareTo.getCategoryCode())
-	// && Objects.equals(amount, subscriptionToCompareTo.getAmount())
-	// && Objects.equals(taxedAmount, subscriptionToCompareTo.getTaxedAmount())
-	// && Objects.equals(currency, subscriptionToCompareTo.getCurrency()) && isAdult ==
-	// subscriptionToCompareTo.isAdult
-	// && Objects.equals(status, subscriptionToCompareTo.getStatus());
-	// };
-	//
-	// @Override
-	// public int hashCode() {
-	//
-	// return Objects.hash(id, subscriptionId, creationDate, activationDate, deActivationDate,
-	// transactionId, serviceId, onBehalfOf, endUserId,
-	// description, categoryCode, amount, taxedAmount, currency, isAdult, status);
-	// }
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;

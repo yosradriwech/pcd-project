@@ -25,6 +25,11 @@
 			<version>${project.parent.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>${project.parent.groupId}</groupId>
+			<artifactId>suma-consumer-ccgw</artifactId>
+			<version>${project.parent.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 		</dependency>
@@ -32,11 +37,17 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
 		</dependency>
+		<!-- Orika for mappers -->
+		<dependency>
+			<groupId>ma.glasnost.orika</groupId>
+			<artifactId>orika-core</artifactId>
+			 <version>${orika.version}</version>
+		</dependency>
 		<!-- mockserver -->
 		<dependency>
 			<groupId>org.mock-server</groupId>
 			<artifactId>mockserver-netty</artifactId>
-			<version>3.10.7</version>
+			<version>${mockserver.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>xerces</groupId>
