@@ -1,5 +1,6 @@
 package com.orange.paddock.suma.business.exception;
 
+
 public abstract class AbstractSumaException extends Exception {
 
 	private static final long serialVersionUID = 1L;
@@ -29,6 +30,8 @@ public abstract class AbstractSumaException extends Exception {
 	public static final String SUMA_ERROR_CODE_00003 = "00003";
 	public static final String SUMA_ERROR_CODE_00004 = "00004";
 
+	protected static final int HTTP_CODE_BAD_REQUEST = 400;
+	
 	protected String internalErrorCode;
 	protected String errorCode;
 	protected String errorDescription;
