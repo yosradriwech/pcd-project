@@ -75,7 +75,7 @@ public class SubscriptionRestController {
 		}
 
 		LOGGER.debug("Subscription with EndUserIdType: '{}'", endUserIdValue);
-		subscriptionId = manager.subscribe(body, endUserIdValue);
+		subscriptionId = manager.subscribe(body, endUserIdValue,"mco");
 
 		URI location = null;
 		try {
@@ -94,7 +94,12 @@ public class SubscriptionRestController {
 
 		LOGGER.debug("Unsubscription request receive for subscriptionId '{}'", subscriptionId);
 
-		manager.unsubscribe(subscriptionId);
+		try {
+			manager.unsubscribe(subscriptionId);
+		} catch (AbstractSumaException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
@@ -105,7 +110,13 @@ public class SubscriptionRestController {
 
 		LOGGER.debug("Get subscription status for subscriptionId '{}'", subscriptionId);
 
-		SubscriptionDto subscription = manager.getSubscriptionStatus(subscriptionId);
+		SubscriptionDto subscription = null;
+		try {
+			subscription = manager.getSubscriptionStatus(subscriptionId);
+		} catch (AbstractSumaException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		return new ResponseEntity<SubscriptionDto>(subscription, HttpStatus.OK);
 	}

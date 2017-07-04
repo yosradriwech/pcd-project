@@ -14,7 +14,13 @@
 		<maven.compiler.target>${jdk.version}</maven.compiler.target>
 	</properties>
 
+
 	<dependencies>
+		<dependency>
+			<groupId>com.orange.paddock.module</groupId>
+			<artifactId>paddock-consumer-wt</artifactId>
+			<version>${wt.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web-services</artifactId>
@@ -41,7 +47,7 @@
 		<dependency>
 			<groupId>ma.glasnost.orika</groupId>
 			<artifactId>orika-core</artifactId>
-			 <version>${orika.version}</version>
+			<version>${orika.version}</version>
 		</dependency>
 		<!-- mockserver -->
 		<dependency>

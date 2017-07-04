@@ -128,7 +128,7 @@ public class SubscriptionDto {
 		this.currency = currency;
 	}
 
-	public boolean isAdult() {
+	public boolean getIsAdult() {
 		return isAdult;
 	}
 
