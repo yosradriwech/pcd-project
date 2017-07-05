@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true">
+
+	<logger name="org.springframework" level="WARN" />
+
+	<appender name="console-appender" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d{yyyy/MM/dd HH:mm:ss,Europe/Paris} [%thread] %-5level %logger{36} - %m %throwable{full}%n</pattern>
+		</encoder>
+	</appender>
+
+	<root level="DEBUG">
+		<appender-ref ref="console-appender" />
+	</root>
+
+</configuration>

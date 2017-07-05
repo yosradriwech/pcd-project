@@ -1,0 +1,10 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:v10="http://ccgw.vas.gtp.pl/service/NotificationService/v10">
+   <soapenv:Header />
+   <soapenv:Body>
+      <v10:activate-subscription-response>
+         <v10:status>
+            <v10:success>true</v10:success>
+         </v10:status>
+      </v10:activate-subscription-response>
+   </soapenv:Body>
+</soapenv:Envelope>

@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class SubscriptionDto {
 
 	private Date creationDate;
@@ -18,7 +20,10 @@ public class SubscriptionDto {
 	private BigDecimal amount;
 	private BigDecimal taxedAmount;
 	private String currency;
-	private boolean isAdult;
+	
+	@JsonProperty(required =true)
+	private Boolean isAdult;
+	
 	private String status;
 
 	public SubscriptionDto() {
@@ -128,11 +133,11 @@ public class SubscriptionDto {
 		this.currency = currency;
 	}
 
-	public boolean getIsAdult() {
+	public Boolean getIsAdult() {
 		return isAdult;
 	}
 
-	public void setAdult(boolean isAdult) {
+	public void setAdult(Boolean isAdult) {
 		this.isAdult = isAdult;
 	}
 

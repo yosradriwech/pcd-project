@@ -18,16 +18,6 @@ import com.orange.paddock.suma.provider.soap.model.NotificationPortType;
 @EnableWs
 public class NotificationSoapConfiguration {
 	
-//	public DefaultWsdl11Definition defaultWsdl11Definition(XsdSchema notificationSchema){
-//		DefaultWsdl11Definition wsdl11Definition = new DefaultWsdl11Definition();
-//		wsdl11Definition.setPortTypeName("NotificationPortType");
-//		wsdl11Definition.setLocationUri("/notification");
-//		wsdl11Definition.setTargetNamespace("https://ccgw.orange.pl/api/2.1");
-//		wsdl11Definition.setSchema(notificationSchema);
-//		return wsdl11Definition;
-//		
-//	}
-	
 	@Bean
 	public ServletRegistrationBean legacyServletRegistrationBean() {
 		return new ServletRegistrationBean(new CXFServlet(), "/notification/*");
@@ -45,11 +35,9 @@ public class NotificationSoapConfiguration {
 	
 	@Bean
 	public Endpoint endpointLegacy() {
+
 		EndpointImpl endpoint = new EndpointImpl(springBus(), legacyService());
 
-		//Map<String, Object> properties = new HashMap<String, Object>();
-		// properties.put(SCHEMA_VALIDATION_ENABLED, new Boolean(schemaValidation));
-		// endpoint.setProperties(properties);
 		endpoint.publish("/");
 
 		return endpoint;
