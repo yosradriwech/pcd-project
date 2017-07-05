@@ -1,9 +1,11 @@
-package com.orange.paddock.suma.business.manager.test;
+package com.orange.paddock.suma.business.manager.test.integration;
 
 import com.orange.paddock.suma.business.exception.AbstractSumaException;
 import com.orange.paddock.suma.business.exception.ccgw.SumaCcgwInternalErrorException;
 import com.orange.paddock.suma.business.manager.SubscriptionManager;
+import com.orange.paddock.suma.business.manager.test.AbstractSubscriptionManagerTest;
 import com.orange.paddock.suma.business.model.SubscriptionDto;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -15,9 +17,9 @@ import java.math.BigInteger;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
-public class SubscriptionManagerTest extends AbstractSubscriptionManagerTest {
+public class SubscriptionManagerSubscribeIntegrationTest extends AbstractSubscriptionManagerTest {
 
-	private static final Logger TECHNICAL_LOGGER = LoggerFactory.getLogger(SubscriptionManagerTest.class);
+	private static final Logger TECHNICAL_LOGGER = LoggerFactory.getLogger(SubscriptionManagerSubscribeIntegrationTest.class);
 
 	@Autowired
 	private SubscriptionManager subscriptionManager;
