@@ -2,11 +2,11 @@ package com.orange.paddock.suma.business.exception;
 
 import org.springframework.http.HttpStatus;
 
-public class SUMABadRequestException extends AbstractSumaException {
+public class SumaBadRequestException extends AbstractSumaException {
 
 	private static final long serialVersionUID = 1L;
 
-	public SUMABadRequestException() {
+	public SumaBadRequestException() {
 		super("Bad request received");
 		internalErrorCode = INTERNAL_SUMA_0001_CODE;
 		errorCode = SUMA_ERROR_CODE_00003;
@@ -15,7 +15,7 @@ public class SUMABadRequestException extends AbstractSumaException {
 
 	}
 
-	public SUMABadRequestException(String invalidParameter) {
+	public SumaBadRequestException(String invalidParameter) {
 		super("Bad request received");
 		internalErrorCode = INTERNAL_SUMA_0001_CODE;
 		errorCode = SUMA_ERROR_CODE_00003;

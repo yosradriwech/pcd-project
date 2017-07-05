@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.orange.paddock.commons.http.PdkHeader;
 import com.orange.paddock.suma.business.exception.AbstractSumaException;
-import com.orange.paddock.suma.business.exception.SUMABadRequestException;
+import com.orange.paddock.suma.business.exception.SumaBadRequestException;
 import com.orange.paddock.suma.business.manager.SubscriptionManager;
 import com.orange.paddock.suma.business.model.SubscriptionDto;
 
@@ -53,7 +53,7 @@ public class SubscriptionRestController {
 				.getHeader(PdkHeader.ORANGE_API_TOKEN) == null	|| "".equals(request.getHeader(PdkHeader.ORANGE_API_TOKEN)))) {
 
 			LOGGER.error("Missing header OrangeAPIToken");
-			throw new SUMABadRequestException("Missing header Orange API Token.");
+			throw new SumaBadRequestException("Missing header Orange API Token.");
 		}
 
 		if (body.getEndUserId().equals(PdkHeader.ORANGE_ISE2) && request.getHeader(PdkHeader.ORANGE_ISE2) != null
@@ -66,12 +66,12 @@ public class SubscriptionRestController {
 				endUserIdValue = request.getHeader(PdkHeader.ORANGE_ISE2);
 			} else {
 				LOGGER.error("Missing required header MCO");
-				throw new SUMABadRequestException("Missing required header MCO.");
+				throw new SumaBadRequestException("Missing required header MCO.");
 			}
 		} else if (body.getEndUserId().equals(PdkHeader.ORANGE_ISE2) && ((request.getHeader(PdkHeader.ORANGE_ISE2) == null)
 				 || "".equals(request.getHeader(PdkHeader.ORANGE_ISE2)))) {
 			LOGGER.error("Missing header ISE2");
-			throw new SUMABadRequestException("Missing header ISE2.");
+			throw new SumaBadRequestException("Missing header ISE2.");
 		}
 
 		LOGGER.debug("Subscription with EndUserIdType: '{}'", endUserIdValue);
@@ -83,7 +83,7 @@ public class SubscriptionRestController {
 			location = new URI(String.format(SUMA_ENDPOINT_SUBSCRIPTION, subscriptionId));
 		} catch (Exception e) {
 			LOGGER.error("Build internal location header error: '{}'", e.getMessage());
-			throw new SUMABadRequestException(e.getMessage());
+			throw new SumaBadRequestException(e.getMessage());
 		}
 
 		return new ResponseEntity<>(location, HttpStatus.CREATED);

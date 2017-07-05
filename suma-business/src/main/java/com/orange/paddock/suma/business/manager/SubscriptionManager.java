@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 import com.orange.paddock.commons.msisdn.PdkMsisdnUtils;
 import com.orange.paddock.commons.oneapi.PdkAcrUtils;
 import com.orange.paddock.suma.business.exception.AbstractSumaException;
-import com.orange.paddock.suma.business.exception.SUMABadRequestException;
+import com.orange.paddock.suma.business.exception.SumaBadRequestException;
 import com.orange.paddock.suma.business.exception.SumaAlreadyRevokedSubException;
 import com.orange.paddock.suma.business.exception.SumaInternalErrorException;
 import com.orange.paddock.suma.business.exception.SumaUnknownSubscriptionIdException;
@@ -74,12 +74,6 @@ public class SubscriptionManager {
 	public String subscribe(SubscriptionDto subscriptionDto, String endUserIdValue, String mco) throws AbstractSumaException {
 		TECHNICAL_LOGGER.debug("Starting subscription business logic with subscriptionDto: {} and endUserIdValue: {}", subscriptionDto,
 				endUserIdValue);
-
-		/**************** Validate-Subscription-Request-Inputs: If not null --> at least one invalid input ***************/
-		if (!Objects.isNull(validateSubscriptionRequestInputs(subscriptionDto))) {
-			throw new SUMABadRequestException(validateSubscriptionRequestInputs(subscriptionDto));
-		}
-		TECHNICAL_LOGGER.debug("Inputs for subscribe method are OK !");
 
 		/** MSISDN to store in mongo: retrieved from WT or subscriptionDto body and formatted with tel:+ */
 		String userMsisdnToStore = null;
@@ -213,44 +207,6 @@ public class SubscriptionManager {
 		return subscriptionId;
 	}
 
-	/**
-	 * 
-	 * @param subscriptionDto
-	 * @return
-	 */
-	private String validateSubscriptionRequestInputs(SubscriptionDto subscriptionDto) {
-		String invalidValue = null;
-
-		if (Objects.isNull(subscriptionDto)) {
-			invalidValue = "All mandatory fields";
-		} else if (Objects.isNull(subscriptionDto.getServiceId())) {
-			invalidValue = "serviceId";
-		} else if (Objects.isNull(subscriptionDto.getOnBehalfOf())) {
-			invalidValue = "onBhealfOf";
-		} else if (Objects.isNull(subscriptionDto.getEndUserId())) {
-			invalidValue = "endUserId";
-		} else if (!Objects.isNull(subscriptionDto.getEndUserId())) {
-			// check if endUserId is well formatted
-			if (!PdkAcrUtils.ACR_ISE2.equals(subscriptionDto.getEndUserId())
-					&& !PdkAcrUtils.ACR_ORANGE_API_TOKEN.equals(subscriptionDto.getEndUserId())
-					&& !subscriptionDto.getEndUserId().startsWith(PdkMsisdnUtils.PREFIX_TEL + PdkMsisdnUtils.PREFIX_PLUS)) {
-				invalidValue = "endUserId format";
-			}
-		} else if (Objects.isNull(subscriptionDto.getDescription())) {
-			invalidValue = "description";
-		} else if (Objects.isNull(subscriptionDto.getCategoryCode())) {
-			invalidValue = "categoryCode";
-		} else if (Objects.isNull(subscriptionDto.getAmount())) {
-			invalidValue = "amount";
-		} else if (Objects.isNull(subscriptionDto.getTaxedAmount())) {
-			invalidValue = "taxedAmount";
-		} else if (Objects.isNull(subscriptionDto.getCurrency())) {
-			invalidValue = "currency";
-		} else if (Objects.isNull(subscriptionDto.getIsAdult())) {
-			invalidValue = "isAdult";
-		}
-		return invalidValue;
-	}
 
 	/**
 	 * 
@@ -369,4 +325,46 @@ public class SubscriptionManager {
 
 		return subscriptionResponseDto;
 	}
+	
+	/**************** For Provider 
+	 * Validate-Subscription-Request-Inputs: If not null --> at least one invalid input 
+	 * 
+	if (!Objects.isNull(validateSubscriptionRequestInputs(subscriptionDto))) {
+		throw new SumaBadRequestException(validateSubscriptionRequestInputs(subscriptionDto));
+	}
+	TECHNICAL_LOGGER.debug("Inputs for subscribe method are OK !");
+
+	private String validateSubscriptionRequestInputs(SubscriptionDto subscriptionDto) {
+		String invalidValue = null;
+
+		if (Objects.isNull(subscriptionDto)) {
+			invalidValue = "All mandatory fields";
+		} else if (Objects.isNull(subscriptionDto.getServiceId())) {
+			invalidValue = "serviceId";
+		} else if (Objects.isNull(subscriptionDto.getOnBehalfOf())) {
+			invalidValue = "onBhealfOf";
+		} else if (Objects.isNull(subscriptionDto.getEndUserId())) {
+			invalidValue = "endUserId";
+		} else if (!Objects.isNull(subscriptionDto.getEndUserId())) {
+			// check if endUserId is well formatted
+			if (!PdkAcrUtils.ACR_ISE2.equals(subscriptionDto.getEndUserId())
+					&& !PdkAcrUtils.ACR_ORANGE_API_TOKEN.equals(subscriptionDto.getEndUserId())
+					&& !subscriptionDto.getEndUserId().startsWith(PdkMsisdnUtils.PREFIX_TEL + PdkMsisdnUtils.PREFIX_PLUS)) {
+				invalidValue = "endUserId format";
+			}
+		} else if (Objects.isNull(subscriptionDto.getDescription())) {
+			invalidValue = "description";
+		} else if (Objects.isNull(subscriptionDto.getCategoryCode())) {
+			invalidValue = "categoryCode";
+		} else if (Objects.isNull(subscriptionDto.getAmount())) {
+			invalidValue = "amount";
+		} else if (Objects.isNull(subscriptionDto.getTaxedAmount())) {
+			invalidValue = "taxedAmount";
+		} else if (Objects.isNull(subscriptionDto.getCurrency())) {
+			invalidValue = "currency";
+		} else if (Objects.isNull(subscriptionDto.getIsAdult())) {
+			invalidValue = "isAdult";
+		}
+		return invalidValue;
+	}****************/
 }
