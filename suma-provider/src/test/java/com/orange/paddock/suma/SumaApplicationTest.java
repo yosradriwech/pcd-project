@@ -8,6 +8,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.data.mongodb.config.EnableMongoAuditing;
+import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.scheduling.annotation.EnableAsync;
 
 import com.orange.paddock.commons.log.PdkLogIdBean;
@@ -15,6 +17,8 @@ import com.orange.paddock.commons.log.PdkLogIdBean;
 @SpringBootApplication
 @EnableAsync
 @PropertySource("classpath:suma.properties")
+@EnableMongoAuditing
+@EnableMongoRepositories("com.orange.paddock.suma.dao.mongodb.repository")
 public class SumaApplicationTest extends SpringBootServletInitializer{
 	
 	public static void main(String[] args) {
@@ -26,5 +30,5 @@ public class SumaApplicationTest extends SpringBootServletInitializer{
     public PdkLogIdBean loggerId() {
             return new PdkLogIdBean();
     }
-
+    
 }

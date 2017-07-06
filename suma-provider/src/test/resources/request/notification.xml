@@ -1,0 +1,11 @@
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+   <soap:Body>
+      <v10:activate-subscription-request xmlns:v10="http://ccgw.vas.gtp.pl/service/NotificationService/v10">
+         <v10:request-id>1424852179643</v10:request-id>
+         <v10:subscription-id>500</v10:subscription-id>
+         <v10:subscriber>48500000000</v10:subscriber>
+         <v10:activation-date>2015-02-26T07:48:13.835+01:00</v10:activation-date>
+         <v10:assent-for-activation>true</v10:assent-for-activation>
+      </v10:activate-subscription-request>
+   </soap:Body>
+</soap:Envelope>

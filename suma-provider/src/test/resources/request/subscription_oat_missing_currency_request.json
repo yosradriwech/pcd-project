@@ -1,0 +1,11 @@
+{
+	"serviceId": "Fortumo",
+	"onBehalfOf": "Marc Dorcel",
+	"endUserId": "acr:OrangeAPIToken",
+	"description": "XXX Content",
+	"categoryCode": "XXX",
+	"amount": 100,
+	"taxedAmount": 120,
+	"currency": "",
+	"isAdult": true
+}
