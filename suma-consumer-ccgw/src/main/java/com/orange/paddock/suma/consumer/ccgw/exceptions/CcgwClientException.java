@@ -3,7 +3,7 @@ package com.orange.paddock.suma.consumer.ccgw.exceptions;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CcgwClientException extends Exception {
+public class CcgwClientException extends RuntimeException{
 
 	private static final long serialVersionUID = 1L;
 

@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import com.orange.paddock.commons.msisdn.PdkMsisdnUtils;
 import com.orange.paddock.commons.oneapi.PdkAcrUtils;
 import com.orange.paddock.suma.business.exception.AbstractSumaException;
-import com.orange.paddock.suma.business.exception.SumaBadRequestException;
 import com.orange.paddock.suma.business.exception.SumaAlreadyRevokedSubException;
 import com.orange.paddock.suma.business.exception.SumaInternalErrorException;
 import com.orange.paddock.suma.business.exception.SumaUnknownSubscriptionIdException;
@@ -39,6 +38,7 @@ import com.orange.paddock.suma.consumer.ccgw.model.SumaUnsubscriptionRequest;
 import com.orange.paddock.suma.dao.mongodb.document.Subscription;
 import com.orange.paddock.suma.dao.mongodb.repository.SubscriptionRepository;
 import com.orange.paddock.wtapi.client.WTApiClient;
+import com.orange.paddock.wtapi.commons.WTInfo;
 import com.orange.paddock.wtapi.commons.WTParameter;
 import com.orange.paddock.wtapi.exception.WTException;
 import com.orange.paddock.wtapi.exception.WTHttpTransportException;
@@ -85,17 +85,21 @@ public class SubscriptionManager {
 			TECHNICAL_LOGGER.debug("Trying to get MSISDN from WT..");
 
 			List<String> wtRequestedInfos = new ArrayList<String>();
-			wtRequestedInfos.add(WTParameter.MSISDN);
+			wtRequestedInfos.add(WTInfo.USER_PROFILE_MSISDN);
 
 			Map<String, String> wtInputParameters = new HashMap<>();
 			wtInputParameters.put(WTParameter.SERVICE, wtDefaultService);
-			wtInputParameters.put(subscriptionDto.getEndUserId(), endUserIdValue);
 			wtInputParameters.put(WTParameter.ENCODING, "UTF-8");
+
+			if (Objects.equals(PdkAcrUtils.ACR_ORANGE_API_TOKEN, subscriptionDto.getEndUserId())) {
+				wtInputParameters.put(WTParameter.ORANGE_API_TOKEN, subscriptionDto.getEndUserId());
+			}
 			if (Objects.equals(PdkAcrUtils.ACR_ISE2, subscriptionDto.getEndUserId())) {
 				wtInputParameters.put(WTParameter.MCO, mco);
+				wtInputParameters.put(WTParameter.ISE2, subscriptionDto.getEndUserId());
 			}
 			try {
-				String retrievedWtMsisdn = wtClient.getWassupInfos(wtRequestedInfos, wtInputParameters).get(WTParameter.MSISDN);
+				String retrievedWtMsisdn = wtClient.getWassupInfos(wtRequestedInfos, wtInputParameters).get(WTInfo.USER_PROFILE_MSISDN);
 				TECHNICAL_LOGGER.debug("WT returned MSISDN = {}", retrievedWtMsisdn);
 
 				if (Objects.isNull(retrievedWtMsisdn) || Objects.equals("", retrievedWtMsisdn)) {
@@ -119,8 +123,10 @@ public class SubscriptionManager {
 					throw new SumaWtApiIntegrationException();
 				}
 
+			} catch (AbstractSumaException e) {
+				throw e;
 			} catch (Exception e) {
-				TECHNICAL_LOGGER.error("Unexpected error while calling WT module");
+				TECHNICAL_LOGGER.error("Unexpected error while calling WT module " + e.getCause());
 				if (e.getCause() instanceof SocketTimeoutException) {
 					throw new SumaIoswUnresponsiveException();
 				} else
@@ -186,6 +192,11 @@ public class SubscriptionManager {
 
 			storedSubscription.setStatus(SubscriptionStatusUtils.STATUS_SUBSCRIPTION_ERROR);
 			subscriptionRepository.save(storedSubscription);
+
+			if (e.getCcgwFaultStatusCode().startsWith("6")) {
+				throw new SumaCcgwInternalErrorException();
+			}
+
 			switch (e.getCcgwFaultStatusCode()) {
 			case "321":
 			case "510":
@@ -206,7 +217,6 @@ public class SubscriptionManager {
 
 		return subscriptionId;
 	}
-
 
 	/**
 	 * 
@@ -269,6 +279,9 @@ public class SubscriptionManager {
 
 				subscriptionSessionFound.setStatus(SubscriptionStatusUtils.STATUS_UNSUBSCRIPTION_ERROR);
 				subscriptionRepository.save(subscriptionSessionFound);
+				if (e.getCcgwFaultStatusCode().startsWith("6")) {
+					throw new SumaCcgwInternalErrorException();
+				}
 				switch (e.getCcgwFaultStatusCode()) {
 				case "321":
 				case "510":
@@ -325,46 +338,4 @@ public class SubscriptionManager {
 
 		return subscriptionResponseDto;
 	}
-	
-	/**************** For Provider 
-	 * Validate-Subscription-Request-Inputs: If not null --> at least one invalid input 
-	 * 
-	if (!Objects.isNull(validateSubscriptionRequestInputs(subscriptionDto))) {
-		throw new SumaBadRequestException(validateSubscriptionRequestInputs(subscriptionDto));
-	}
-	TECHNICAL_LOGGER.debug("Inputs for subscribe method are OK !");
-
-	private String validateSubscriptionRequestInputs(SubscriptionDto subscriptionDto) {
-		String invalidValue = null;
-
-		if (Objects.isNull(subscriptionDto)) {
-			invalidValue = "All mandatory fields";
-		} else if (Objects.isNull(subscriptionDto.getServiceId())) {
-			invalidValue = "serviceId";
-		} else if (Objects.isNull(subscriptionDto.getOnBehalfOf())) {
-			invalidValue = "onBhealfOf";
-		} else if (Objects.isNull(subscriptionDto.getEndUserId())) {
-			invalidValue = "endUserId";
-		} else if (!Objects.isNull(subscriptionDto.getEndUserId())) {
-			// check if endUserId is well formatted
-			if (!PdkAcrUtils.ACR_ISE2.equals(subscriptionDto.getEndUserId())
-					&& !PdkAcrUtils.ACR_ORANGE_API_TOKEN.equals(subscriptionDto.getEndUserId())
-					&& !subscriptionDto.getEndUserId().startsWith(PdkMsisdnUtils.PREFIX_TEL + PdkMsisdnUtils.PREFIX_PLUS)) {
-				invalidValue = "endUserId format";
-			}
-		} else if (Objects.isNull(subscriptionDto.getDescription())) {
-			invalidValue = "description";
-		} else if (Objects.isNull(subscriptionDto.getCategoryCode())) {
-			invalidValue = "categoryCode";
-		} else if (Objects.isNull(subscriptionDto.getAmount())) {
-			invalidValue = "amount";
-		} else if (Objects.isNull(subscriptionDto.getTaxedAmount())) {
-			invalidValue = "taxedAmount";
-		} else if (Objects.isNull(subscriptionDto.getCurrency())) {
-			invalidValue = "currency";
-		} else if (Objects.isNull(subscriptionDto.getIsAdult())) {
-			invalidValue = "isAdult";
-		}
-		return invalidValue;
-	}****************/
 }

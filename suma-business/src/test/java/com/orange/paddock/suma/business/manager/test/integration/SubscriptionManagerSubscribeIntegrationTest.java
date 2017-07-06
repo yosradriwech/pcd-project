@@ -11,12 +11,14 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigInteger;
 
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
+@SpringBootTest(classes = SubscriptionManagerTestApplication.class)
 public class SubscriptionManagerSubscribeIntegrationTest extends AbstractSubscriptionManagerTest {
 
 	private static final Logger TECHNICAL_LOGGER = LoggerFactory.getLogger(SubscriptionManagerSubscribeIntegrationTest.class);

@@ -1,7 +1,7 @@
 package com.orange.paddock.suma.business.exception;
 
 
-public abstract class AbstractSumaException extends Exception {
+public abstract class AbstractSumaException extends RuntimeException{
 
 	private static final long serialVersionUID = 1L;
 

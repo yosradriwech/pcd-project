@@ -1,4 +1,4 @@
-package com.orange.paddock.suma.business.manager.test;
+package com.orange.paddock.suma.business.manager.test.integration;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -15,6 +15,11 @@ import com.orange.paddock.suma.consumer.ccgw.client.CcgwClient;
 import com.orange.paddock.suma.consumer.ccgw.susbcription.model.ObjectFactory;
 import com.orange.paddock.wtapi.client.WTApiClient;
 
+/**
+ * 
+ * Configuration class for INTEGRATION tests
+ *
+ */
 @Configuration
 @SpringBootApplication
 @PropertySource("classpath:suma-business.properties")

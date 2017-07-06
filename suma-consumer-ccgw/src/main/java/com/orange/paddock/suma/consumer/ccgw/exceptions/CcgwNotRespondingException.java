@@ -1,6 +1,6 @@
 package com.orange.paddock.suma.consumer.ccgw.exceptions;
 
-public class CcgwNotRespondingException extends Exception {
+public class CcgwNotRespondingException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 	
