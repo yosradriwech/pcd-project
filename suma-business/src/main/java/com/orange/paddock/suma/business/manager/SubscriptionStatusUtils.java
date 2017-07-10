@@ -11,5 +11,6 @@ public class SubscriptionStatusUtils {
 	public static final String STATUS_ARCHIVED = "ARCHIVED";
 	public static final String STATUS_WAITING_ARCHIVING = "WAITING-ARCHIVING";
 	public static final String STATUS_UNKNOWN_UNSUBSCRIPTION_ARCHIVED = "UNKNOWN-UNSUBSCRIPTION-ARCHIVED";
+	public static final String STATUS_ACTIVE = "ACTIVE";
 
 }

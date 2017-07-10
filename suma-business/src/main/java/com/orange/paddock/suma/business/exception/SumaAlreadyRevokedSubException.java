@@ -4,8 +4,8 @@ import org.springframework.http.HttpStatus;
 
 public class SumaAlreadyRevokedSubException extends AbstractSumaException{
 
-	private static final long serialVersionUID = 1L;
-	
+	private static final long serialVersionUID = 15007119550461543L;
+
 	public SumaAlreadyRevokedSubException() {
 		super("Subscription already revoked");
 		internalErrorCode = INTERNAL_SUMA_0003_CODE;

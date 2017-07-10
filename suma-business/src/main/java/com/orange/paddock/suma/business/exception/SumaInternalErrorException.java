@@ -4,7 +4,7 @@ import org.springframework.http.HttpStatus;
 
 public class SumaInternalErrorException extends AbstractSumaException{
 
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 7855633044300757718L;
 
 	public SumaInternalErrorException() {
 		
