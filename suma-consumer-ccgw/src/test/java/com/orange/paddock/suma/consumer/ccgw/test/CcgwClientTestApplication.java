@@ -13,7 +13,7 @@ import com.orange.paddock.suma.consumer.ccgw.susbcription.model.ObjectFactory;
 @Configuration
 @SpringBootApplication
 @PropertySource("classpath:suma-ccgw.properties")
-@ImportResource("classpath:applicationContext-test.xml")
+@ImportResource("classpath:applicationContext-ccgw-test.xml")
 public class CcgwClientTestApplication {
 	
 	@Bean 

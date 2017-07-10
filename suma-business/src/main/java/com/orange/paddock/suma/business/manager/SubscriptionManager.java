@@ -143,7 +143,8 @@ public class SubscriptionManager {
 		Subscription subscriptionSessionToStore = new Subscription();
 		subscriptionSessionToStore = subscriptionMapper.map(subscriptionDto, Subscription.class);
 		subscriptionSessionToStore.setSubscriptionId(UUID.randomUUID().toString());
-		subscriptionSessionToStore.setTransactionId(UUID.randomUUID().toString());
+		String generatedTransactionId = UUID.randomUUID().toString();
+		subscriptionSessionToStore.setTransactionId(generatedTransactionId);
 		subscriptionSessionToStore.setEndUserId(userMsisdnToStore);
 
 		subscriptionSessionToStore.setStatus(SubscriptionStatusUtils.STATUS_PENDING);
@@ -164,6 +165,7 @@ public class SubscriptionManager {
 
 		try {
 			TECHNICAL_LOGGER.debug("Trying to call CCGW..");
+			sumaSubscriptionRequest.setTransactionId(generatedTransactionId);
 			subscriptionId = ccgwClient.subscribe(sumaSubscriptionRequest);
 
 			TECHNICAL_LOGGER.debug("Received CCGW response {}", subscriptionId);

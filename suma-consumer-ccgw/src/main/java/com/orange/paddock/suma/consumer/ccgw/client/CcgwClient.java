@@ -1,5 +1,6 @@
 package com.orange.paddock.suma.consumer.ccgw.client;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 
 import com.orange.paddock.commons.date.PdkDateUtils;
+import com.orange.paddock.commons.msisdn.PdkMsisdnUtils;
 import com.orange.paddock.suma.consumer.ccgw.exceptions.CcgwClientException;
 import com.orange.paddock.suma.consumer.ccgw.exceptions.CcgwNotRespondingException;
 import com.orange.paddock.suma.consumer.ccgw.log.CcgwSubscriptionLogger;
@@ -139,13 +141,26 @@ public class CcgwClient {
 		subscribeRequestType.setProviderPass(providerPass);
 		subscribeRequestType.setSaleProviderId(sumaSubscriptionRequest.getSaleProviderId());
 		subscribeRequestType.setTransactionId(sumaSubscriptionRequest.getTransactionId());
-		subscribeRequestType.setSubscriber(sumaSubscriptionRequest.getSubscriber());
+		subscribeRequestType.setSubscriber(PdkMsisdnUtils.getMsisdnWithoutPrefix(sumaSubscriptionRequest.getSubscriber()));
 		subscribeRequestType.setAuthenticationMethod(AuthenticationMethodType.valueOf(authenticationMethod));
 		subscribeRequestType.setAuthorizationType(AuthorizationType.valueOf(authorizationType));
 		subscribeRequestType.setContentInfo(contentInfo);
-		subscribeRequestType.setTimestamp(System.currentTimeMillis());
+		subscribeRequestType.setTimestamp(System.currentTimeMillis() / 1000L);
+
+		// TODO to remove for production vused only for tests***************************************************************************
+		subscribeRequestType.setProviderId("Paddock");
+		subscribeRequestType.setSaleProviderId("Paddock");
+		subscribeRequestType.getContentInfo().setContentType("Testowe");
+		subscribeRequestType.getContentInfo().setContentName("test_subskrypcja");
+		subscribeRequestType.getContentInfo().getPrice().setAmount(new BigDecimal("0.01"));
+		subscribeRequestType.getContentInfo().setRatingLevel("99999");
+		subscribeRequestType.getContentInfo().setAdultFlag(false);
+		// TODO to remove for production vused only for tests***************************************************************************
+
 		String stringToSign = buildSubscriptionRequestString(subscribeRequestType);
-		subscribeRequestType.setVasSignature(calculateVasSignature(providerSecret, stringToSign));
+		byte[] vasSignature = calculateVasSignature(providerSecret, stringToSign);
+		TECHNICAL_LOGGER.debug("VAS SIgnature parameter: {}", String.valueOf(vasSignature));
+		subscribeRequestType.setVasSignature(vasSignature);
 
 		logs.put(CcgwSubscriptionFields.RATING_LEVEL, ratingLevel);
 		logs.put(CcgwSubscriptionFields.ADULT_FLAG, String.valueOf(sumaSubscriptionRequest.getAdultFlag()));
@@ -164,7 +179,7 @@ public class CcgwClient {
 		logs.put(CcgwSubscriptionFields.CONTENT_NAME, sumaSubscriptionRequest.getContentName());
 		logs.put(CcgwSubscriptionFields.CONTENT_TYPE, sumaSubscriptionRequest.getContentType());
 		logs.put(CcgwSubscriptionFields.TIMESTAMP, String.valueOf(subscribeRequestType.getTimestamp()));
-		logs.put(CcgwSubscriptionFields.VAS_SIGNATURE, String.valueOf(subscribeRequestType.getVasSignature()));
+		logs.put(CcgwSubscriptionFields.VAS_SIGNATURE, new String(subscribeRequestType.getVasSignature()));
 
 		try {
 			// Call CCGW remote service
@@ -291,6 +306,7 @@ public class CcgwClient {
 	public boolean unsubscribe(SumaUnsubscriptionRequest sumaUnsubscriptionRequest) throws CcgwClientException, CcgwNotRespondingException {
 
 		TECHNICAL_LOGGER.debug("Starting unsubscription method..");
+
 		// Received request = null
 		Objects.requireNonNull(sumaUnsubscriptionRequest);
 		TECHNICAL_LOGGER.debug("Received sumaUnsubscriptionRequest with fields {}", sumaUnsubscriptionRequest.toString());
@@ -307,9 +323,15 @@ public class CcgwClient {
 		UnubscribeRequestType unubscribeRequestType = subscriptionObjectFactory.createUnubscribeRequestType();
 		unubscribeRequestType.setProviderId(sumaUnsubscriptionRequest.getProviderId());
 		unubscribeRequestType.setProviderPass(providerPass);
-		unubscribeRequestType.setSubscriber(sumaUnsubscriptionRequest.getSubscriber());
+		unubscribeRequestType.setSubscriber(PdkMsisdnUtils.getMsisdnWithoutPrefix(sumaUnsubscriptionRequest.getSubscriber()));
 		unubscribeRequestType.setSubscriptionId(new BigInteger(sumaUnsubscriptionRequest.getSubscriptionId()));
-		unubscribeRequestType.setTimestamp(System.currentTimeMillis());
+		unubscribeRequestType.setTimestamp(System.currentTimeMillis() / 1000L);
+
+		//************************************************************* TODO to remove for production vused only for tests***************************************************************************
+		unubscribeRequestType.setSubscriptionId(new BigInteger("4844"));
+		unubscribeRequestType.setProviderId("Paddock");
+		// TODO to remove for production vused only for tests***************************************************************************
+
 		String stringToSign = buildUnsubscriptionRequestString(unubscribeRequestType);
 		unubscribeRequestType.setVasSignature(calculateVasSignature(providerSecret, stringToSign));
 
@@ -447,7 +469,7 @@ public class CcgwClient {
 			SecretKeySpec secretKey = new SecretKeySpec(secret.getBytes("UTF-8"), SECRET_KEY_ALGORITHM);
 			Mac mac = Mac.getInstance(SECRET_KEY_ALGORITHM);
 			mac.init(secretKey);
-			mac.doFinal(stringToSign.getBytes("UTF-8"));
+			vasSignature = mac.doFinal(stringToSign.getBytes("UTF-8"));
 		} catch (Exception e) {
 			TECHNICAL_LOGGER.debug("CCGW client : building vas signature exception ", e);
 			throw new CcgwClientException();
@@ -475,20 +497,20 @@ public class CcgwClient {
 		StringBuilder sb = new StringBuilder();
 		sb.append(KEY_TIMESTAMP).append(subscribeRequestType.getTimestamp()).append(VAS_SEPARATOR);
 		sb.append(KEY_PROVIDER_ID).append(subscribeRequestType.getProviderId()).append(VAS_SEPARATOR);
-		sb.append(KEY_PROVIDER_PASS).append(providerPass).append(VAS_SEPARATOR);
+		sb.append(KEY_PROVIDER_PASS).append(subscribeRequestType.getProviderPass()).append(VAS_SEPARATOR);
 		sb.append(KEY_SALE_PROVIDER_ID).append(subscribeRequestType.getSaleProviderId()).append(VAS_SEPARATOR);
 		sb.append(KEY_TRANSACTION_ID).append(subscribeRequestType.getTransactionId()).append(VAS_SEPARATOR);
 		sb.append(KEY_SUBSCRIBER).append(subscribeRequestType.getSubscriber()).append(VAS_SEPARATOR);
-		sb.append(KEY_AUTHENTICATION_METHOD).append(authenticationMethod).append(VAS_SEPARATOR);
-		sb.append(KEY_AUTHORIZATION_TYPE).append(authorizationType).append(VAS_SEPARATOR);
+		sb.append(KEY_AUTHENTICATION_METHOD).append(subscribeRequestType.getAuthenticationMethod().value()).append(VAS_SEPARATOR);
+		sb.append(KEY_AUTHORIZATION_TYPE).append(subscribeRequestType.getAuthorizationType().value()).append(VAS_SEPARATOR);
 		sb.append(KEY_CONTENT_NAME).append(subscribeRequestType.getContentInfo().getContentName()).append(VAS_SEPARATOR);
 		sb.append(KEY_CONTENT_TYPE).append(subscribeRequestType.getContentInfo().getContentType()).append(VAS_SEPARATOR);
-		sb.append(KEY_RATING_LEVEL).append(ratingLevel).append(VAS_SEPARATOR);
+		sb.append(KEY_RATING_LEVEL).append(subscribeRequestType.getContentInfo().getRatingLevel()).append(VAS_SEPARATOR);
 		sb.append(KEY_ADULT_FLAG).append(String.valueOf(subscribeRequestType.getContentInfo().isAdultFlag())).append(VAS_SEPARATOR);
-		sb.append(KEY_SUBSCRIPTION_MODEL).append(subscriptionModel).append(VAS_SEPARATOR);
-		sb.append(KEY_SALE_MODEL).append(saleModel).append(VAS_SEPARATOR);
-		sb.append(KEY_AMOUNT).append(String.valueOf(subscribeRequestType.getContentInfo().getPrice().getAmount())).append(VAS_SEPARATOR);
-		sb.append(KEY_TAXED_AMOUNT).append(String.valueOf(subscribeRequestType.getContentInfo().getPrice().getTaxedAmount())).append(VAS_SEPARATOR);
+		sb.append(KEY_SUBSCRIPTION_MODEL).append(subscribeRequestType.getContentInfo().getSubscriptionModel().value()).append(VAS_SEPARATOR);
+		sb.append(KEY_SALE_MODEL).append(subscribeRequestType.getContentInfo().getSaleModel().value()).append(VAS_SEPARATOR);
+		sb.append(KEY_AMOUNT).append(subscribeRequestType.getContentInfo().getPrice().getAmount()).append(VAS_SEPARATOR);
+		sb.append(KEY_TAXED_AMOUNT).append(subscribeRequestType.getContentInfo().getPrice().getTaxedAmount()).append(VAS_SEPARATOR);
 		sb.append(KEY_CURRENCY).append(subscribeRequestType.getContentInfo().getPrice().getCurrency());
 		TECHNICAL_LOGGER.debug("String to sign {}", sb.toString());
 

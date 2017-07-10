@@ -3,19 +3,59 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jaxws="http://cxf.apache.org/jaxws"
 	xmlns:http-conf="http://cxf.apache.org/transports/http/configuration"
-	xmlns:sec="http://cxf.apache.org/configuration/security"
+	xmlns:cxf="http://cxf.apache.org/core"
+	xmlns:sec="http://cxf.apache.org/configuration/security" 
 	xsi:schemaLocation="http://cxf.apache.org/transports/http/configuration http://cxf.apache.org/schemas/configuration/http-conf.xsd
     http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd 
-    http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+    http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd
+    http://cxf.apache.org/core http://cxf.apache.org/schemas/core.xsd">
+	
+	<bean id="logInbound" class="org.apache.cxf.interceptor.LoggingInInterceptor" />
+	<bean id="logOutbound" class="org.apache.cxf.interceptor.LoggingOutInterceptor" />
 
 	<jaxws:client id="ccgwSubscriptionPort"
 		serviceClass="com.orange.paddock.suma.consumer.ccgw.susbcription.model.CcgwSubscriptionPortType"
 		address="${ccgw.endpoint}">
 	</jaxws:client>
 
+	<cxf:bus>
+		<cxf:inInterceptors>
+			<ref bean="logInbound" />
+		</cxf:inInterceptors>
+		<cxf:outInterceptors>
+			<ref bean="logOutbound" />
+		</cxf:outInterceptors>
+		<cxf:outFaultInterceptors>
+			<ref bean="logOutbound" />
+		</cxf:outFaultInterceptors>
+		<cxf:inFaultInterceptors>
+			<ref bean="logInbound" />
+		</cxf:inFaultInterceptors>
+	</cxf:bus>
+
 	<!-- http-conf:conduit name={WSDL_endpoint_target_namespace}PortName.http-conduit -->
 	<http-conf:conduit
-		name="{https://ccgw.orange.pl/api/2.1}CcgwSubscriptionPortType.http-conduit">
+		name="{https://ccgw.orange.pl/api/2.1}CcgwSubscriptionPortTypePort.http-conduit">
+
+		<http-conf:tlsClientParameters
+			secureSocketProtocol="TLSv1" disableCNCheck="true"
+			useHttpsURLConnectionDefaultHostnameVerifier="false"
+			useHttpsURLConnectionDefaultSslSocketFactory="false">
+
+			<sec:keyManagers keyPassword="${ccgw.keystore.keypass}">
+				<sec:keyStore type="JKS"
+					file="./config/keystore/${ccgw.keystore.file}" />
+			</sec:keyManagers>
+
+			<sec:cipherSuitesFilter>
+				<sec:include>.*_WITH_3DES_.*</sec:include>
+				<sec:include>.*_WITH_DES_.*</sec:include>
+				<sec:exclude>.*_WITH_NULL_.*</sec:exclude>
+				<sec:exclude>.*_DH_anon_.*</sec:exclude>
+			</sec:cipherSuitesFilter>
+		</http-conf:tlsClientParameters>
+
+
 		<http-conf:client CacheControl="no-cache"
 			ReceiveTimeout="40000" ConnectionTimeout="40000" AllowChunking="false"
 			AutoRedirect="false" ProxyServer="${ccgw.proxy.host:}"
