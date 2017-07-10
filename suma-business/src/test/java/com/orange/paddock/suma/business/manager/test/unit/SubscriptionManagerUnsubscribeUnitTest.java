@@ -70,14 +70,16 @@ public class SubscriptionManagerUnsubscribeUnitTest extends AbstractSubscription
 		subscriptionSession.setCreationDate(creationDate);
 		subscriptionSession.setStatus(status);
 		subscriptionSession.setSubscriptionId(SUBSCRIPTION_ID);
-		Mockito.when(subscriptionRepository.findOne(Mockito.anyString())).thenReturn(subscriptionSession);
+		Mockito.when(subscriptionRepository.findOneBySubscriptionId(Mockito.anyString())).thenReturn(subscriptionSession);
+
+		Mockito.when(subscriptionRepository.save(Mockito.any(Subscription.class))).thenReturn(subscriptionSession);
 	}
 
 	@Test(expected = SumaUnknownSubscriptionIdException.class)
 	/* Assumes that unsubscribe method is called with invalid subscriptionId */
 	public void unsubscribeUnitUnknownIdTest() throws CcgwClientException, CcgwNotRespondingException, AbstractSumaException {
 		TECHNICAL_LOGGER.debug("Expected SumaUnknownSubscriptionIdException");
-		Mockito.when(subscriptionRepository.findOne(Mockito.anyString())).thenReturn(null);
+		Mockito.when(subscriptionRepository.findOneBySubscriptionId(Mockito.anyString())).thenReturn(null);
 		try {
 			subscriptionManager.unsubscribe(SUBSCRIPTION_ID);
 		} catch (AbstractSumaException e) {
@@ -137,14 +139,17 @@ public class SubscriptionManagerUnsubscribeUnitTest extends AbstractSubscription
 	/* Assumes saved session with status = OTHER and CCGW OK */
 	public void unsubscribeUnitSuccessfulCcgwTest() throws CcgwClientException, CcgwNotRespondingException, AbstractSumaException {
 		TECHNICAL_LOGGER.debug("Expected status = status in mongo");
-		initializeMongoDbMock(SubscriptionStatusUtils.STATUS_PENDING, new Date());
+
+		Date creationDate = new Date();
+		initializeMongoDbMock(SubscriptionStatusUtils.STATUS_PENDING, creationDate);
 
 		// Ccgw Client always returns a SUBSCRIPTION_ID
 		Mockito.when(ccgwClient.unsubscribe(Mockito.any(SumaUnsubscriptionRequest.class))).thenReturn(true);
 
 		try {
 			String status = subscriptionManager.unsubscribe(SUBSCRIPTION_ID);
-			Assert.assertEquals(status, SubscriptionStatusUtils.STATUS_PENDING);
+			initializeMongoDbMock(SubscriptionStatusUtils.STATUS_WAITING_ARCHIVING, creationDate);
+			Assert.assertEquals(status, SubscriptionStatusUtils.STATUS_WAITING_ARCHIVING);
 		} catch (AbstractSumaException e) {
 			TECHNICAL_LOGGER.error("Subscribe unit TEST error " + e);
 			throw e;
@@ -238,9 +243,9 @@ public class SubscriptionManagerUnsubscribeUnitTest extends AbstractSubscription
 		Date creationDate = new Date();
 		initializeMongoDbMock(SubscriptionStatusUtils.STATUS_PENDING, creationDate);
 
-		 SubscriptionDto subscriptionDto = initializeValidSubscriptionDto();
-		 subscriptionDto.setCreationDate(creationDate);
-		 subscriptionDto.setStatus(SubscriptionStatusUtils.STATUS_PENDING);
+		SubscriptionDto subscriptionDto = initializeValidSubscriptionDto();
+		subscriptionDto.setCreationDate(creationDate);
+		subscriptionDto.setStatus(SubscriptionStatusUtils.STATUS_PENDING);
 
 		try {
 			SubscriptionDto subscriptionDtoSession = subscriptionManager.getSubscriptionStatus(SUBSCRIPTION_ID);
@@ -252,12 +257,12 @@ public class SubscriptionManagerUnsubscribeUnitTest extends AbstractSubscription
 		}
 
 	}
-	
-	@Test(expected=SumaAlreadyRevokedSubException.class)
+
+	@Test(expected = SumaAlreadyRevokedSubException.class)
 	/* Assumes saved session with status = OTHER and CCGW KO */
 	public void getStatusUnitSessionAlreadyRevokedTest() throws CcgwClientException, CcgwNotRespondingException, AbstractSumaException {
 		TECHNICAL_LOGGER.debug("Expected get statusSumaAlreadyRevokedSubException");
-		
+
 		initializeMongoDbMock(SubscriptionStatusUtils.STATUS_WAITING_ARCHIVING, new Date());
 		try {
 			subscriptionManager.getSubscriptionStatus(SUBSCRIPTION_ID);
@@ -268,12 +273,12 @@ public class SubscriptionManagerUnsubscribeUnitTest extends AbstractSubscription
 		}
 
 	}
-	
-	@Test(expected=SumaUnknownSubscriptionIdException.class)
+
+	@Test(expected = SumaUnknownSubscriptionIdException.class)
 	/* Assumes saved session with status = OTHER and CCGW KO */
 	public void getStatusUnitSessionNotFoundTest() throws CcgwClientException, CcgwNotRespondingException, AbstractSumaException {
 		TECHNICAL_LOGGER.debug("Expected get status SumaUnknownSubscriptionIdException");
-		Mockito.when(subscriptionRepository.findOne(Mockito.anyString())).thenReturn(null);
+		Mockito.when(subscriptionRepository.findOneBySubscriptionId(Mockito.anyString())).thenReturn(null);
 		try {
 			subscriptionManager.getSubscriptionStatus(SUBSCRIPTION_ID);
 

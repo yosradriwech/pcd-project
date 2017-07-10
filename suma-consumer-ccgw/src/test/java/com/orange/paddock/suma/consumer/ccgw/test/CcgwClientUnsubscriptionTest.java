@@ -87,9 +87,7 @@ public class CcgwClientUnsubscriptionTest extends AbstractCcgwClientSubscription
 								.withStatusCode(200)
 								.withBody(
 										"<soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/' xmlns:ns='https://ccgw.orange.pl/api/2.1'>"
-												+ "<soapenv:Header/><soapenv:Body><ns:subscription-subscribe-response><ns:subscription-id>"
-												+ new BigInteger("0")
-												+ "</ns:subscription-id>"
+												+ "<soapenv:Header/><soapenv:Body><ns:subscription-subscribe-response>"
 												+ "<ns:status>"
 												+ "<ns:success>"
 												+ false

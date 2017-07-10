@@ -83,7 +83,7 @@ public class SubscriptionManagerSubscribeUnitTest extends AbstractSubscriptionMa
 		Mockito.when(subscriptionRepository.save(Mockito.any(Subscription.class))).thenReturn(subscriptionSession);
 
 		subscriptionSession.setStatus(SubscriptionStatusUtils.STATUS_PENDING);
-		Mockito.when(subscriptionRepository.findOne(Mockito.anyString())).thenReturn(subscriptionSession);
+		Mockito.when(subscriptionRepository.findOneBySubscriptionId(Mockito.anyString())).thenReturn(subscriptionSession);
 	}
 
 	@Test
@@ -254,7 +254,7 @@ public class SubscriptionManagerSubscribeUnitTest extends AbstractSubscriptionMa
 		String subscriptionId = null;
 		try {
 			subscriptionId = subscriptionManager.subscribe(subscriptionDto, endUserIdValue, mco);
-			String statusMustBeSubscriptionError = subscriptionRepository.findOne(SUBSCRIPTION_ID).getStatus();
+			String statusMustBeSubscriptionError = subscriptionRepository.findOneBySubscriptionId(SUBSCRIPTION_ID).getStatus();
 			Assert.assertEquals(statusMustBeSubscriptionError, SubscriptionStatusUtils.STATUS_SUBSCRIPTION_ERROR);
 		} catch (AbstractSumaException e1) {
 			TECHNICAL_LOGGER.error("Subscribe unit TEST error " + e1);

@@ -68,7 +68,7 @@ public class SubscriptionManager {
 	 * @param subscriptionDto
 	 * @param endUserIdValue
 	 * @param mco
-	 * @return
+	 * @return subscriptionId
 	 * @throws AbstractSumaException
 	 */
 	public String subscribe(SubscriptionDto subscriptionDto, String endUserIdValue, String mco) throws AbstractSumaException {
@@ -193,7 +193,7 @@ public class SubscriptionManager {
 			storedSubscription.setStatus(SubscriptionStatusUtils.STATUS_SUBSCRIPTION_ERROR);
 			subscriptionRepository.save(storedSubscription);
 
-			if (e.getCcgwFaultStatusCode().startsWith("6")) {
+			if (e.getCcgwFaultStatusCode().startsWith("6") && !e.getCcgwFaultStatusCode().equals("628") && !e.getCcgwFaultStatusCode().equals("629")) {
 				throw new SumaCcgwInternalErrorException();
 			}
 
@@ -221,13 +221,13 @@ public class SubscriptionManager {
 	/**
 	 * 
 	 * @param subscriptionId
-	 * @return
+	 * @return subscriptionStatus after unsubscribe CCGW response
 	 * @throws AbstractSumaException
 	 */
 	public String unsubscribe(String subscriptionId) throws AbstractSumaException {
 		TECHNICAL_LOGGER.debug("Starting unsubscription business logic with subscriptionId '{}'", subscriptionId);
 
-		Subscription subscriptionSessionFound = subscriptionRepository.findOne(subscriptionId);
+		Subscription subscriptionSessionFound = subscriptionRepository.findOneBySubscriptionId(subscriptionId);
 		String subscriptionStatus = null;
 
 		if (Objects.isNull(subscriptionSessionFound)) {
@@ -261,25 +261,30 @@ public class SubscriptionManager {
 				if (!ccgwResponseStatus) {
 					TECHNICAL_LOGGER.info("Unsubscribe call from CCGW was not successful");
 					subscriptionSessionFound.setStatus(SubscriptionStatusUtils.STATUS_UNSUBSCRIPTION_ERROR);
-					subscriptionRepository.save(subscriptionSessionFound);
+					Subscription updatedSession = subscriptionRepository.save(subscriptionSessionFound);
+					subscriptionStatus = updatedSession.getStatus();
 				} else {
 					TECHNICAL_LOGGER.debug("Unsubscribe call from CCGW OK !");
 					subscriptionSessionFound.setStatus(SubscriptionStatusUtils.STATUS_WAITING_ARCHIVING);
-					subscriptionRepository.save(subscriptionSessionFound);
+					Subscription updatedSession = subscriptionRepository.save(subscriptionSessionFound);
+					subscriptionStatus = updatedSession.getStatus();
 				}
 
 			} catch (CcgwNotRespondingException e) {
 				TECHNICAL_LOGGER.error("CCGW is unresponsive");
 				subscriptionSessionFound.setStatus(SubscriptionStatusUtils.STATUS_UNSUBSCRIPTION_ERROR);
-				subscriptionRepository.save(subscriptionSessionFound);
+				Subscription updatedSession =subscriptionRepository.save(subscriptionSessionFound);
+				subscriptionStatus = updatedSession.getStatus();
 				throw new SumaCcgwUnresponsiveException();
 
 			} catch (CcgwClientException e) {
 				TECHNICAL_LOGGER.error("An error occured while calling CCGW {}", e.toString());
 
 				subscriptionSessionFound.setStatus(SubscriptionStatusUtils.STATUS_UNSUBSCRIPTION_ERROR);
-				subscriptionRepository.save(subscriptionSessionFound);
-				if (e.getCcgwFaultStatusCode().startsWith("6")) {
+				Subscription updatedSession =	subscriptionRepository.save(subscriptionSessionFound);
+				subscriptionStatus = updatedSession.getStatus();
+				if (e.getCcgwFaultStatusCode().startsWith("6") && !e.getCcgwFaultStatusCode().equals("628")
+						&& !e.getCcgwFaultStatusCode().equals("629")) {
 					throw new SumaCcgwInternalErrorException();
 				}
 				switch (e.getCcgwFaultStatusCode()) {
@@ -296,7 +301,8 @@ public class SubscriptionManager {
 			} catch (Exception e) {
 				TECHNICAL_LOGGER.error("An unexpected error occured while calling CCGW {}", e);
 				subscriptionSessionFound.setStatus(SubscriptionStatusUtils.STATUS_UNSUBSCRIPTION_ERROR);
-				subscriptionRepository.save(subscriptionSessionFound);
+				Subscription updatedSession =subscriptionRepository.save(subscriptionSessionFound);
+				subscriptionStatus = updatedSession.getStatus();
 				throw new SumaCcgwIntegrationErrorException();
 			}
 		}
@@ -307,13 +313,13 @@ public class SubscriptionManager {
 	/**
 	 * 
 	 * @param subscriptionId
-	 * @return
+	 * @return subscriptionDto of requested subscriptionId
 	 */
 	public SubscriptionDto getSubscriptionStatus(String subscriptionId) throws AbstractSumaException {
 
 		TECHNICAL_LOGGER.debug("Starting getStatus business logic with subscriptionId '{}'", subscriptionId);
 
-		Subscription subscriptionSessionFound = subscriptionRepository.findOne(subscriptionId);
+		Subscription subscriptionSessionFound = subscriptionRepository.findOneBySubscriptionId(subscriptionId);
 		if (Objects.isNull(subscriptionSessionFound)) {
 			TECHNICAL_LOGGER.error("No session found for identifier {}", subscriptionId);
 			throw new SumaUnknownSubscriptionIdException(subscriptionId);

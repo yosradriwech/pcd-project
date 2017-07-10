@@ -6,4 +6,7 @@ import com.orange.paddock.suma.dao.mongodb.document.Subscription;
 
 public interface SubscriptionRepository extends MongoRepository<Subscription, String>{
 
+	Subscription findOneBySubscriptionId(String subscriptionId);
+	Subscription findOneByTransactionId(String transactionId);
+
 }
