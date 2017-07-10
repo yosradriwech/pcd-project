@@ -4,6 +4,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.orange.paddock.suma.business.manager.NotificationManager;
 import com.orange.paddock.suma.business.manager.SubscriptionManager;
 import com.orange.paddock.suma.business.mapper.SubscriptionDtoMapper;
 import com.orange.paddock.suma.consumer.ccgw.client.CcgwClient;
@@ -42,4 +43,9 @@ public class SubscriptionUnitTestConfiguration {
 	public SubscriptionManager subscriptionManager() {
 		return new SubscriptionManager();
 	};
+	
+	@Bean
+	public NotificationManager notificationManager() {
+		return new NotificationManager();
+	}
 }

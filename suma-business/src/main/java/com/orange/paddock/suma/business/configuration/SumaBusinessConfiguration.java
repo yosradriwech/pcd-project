@@ -9,7 +9,7 @@ import com.orange.paddock.suma.consumer.ccgw.client.CcgwClient;
 import com.orange.paddock.wtapi.client.WTApiClient;
 
 @Configuration
-//@ImportResource("classpath:applicationContext-business.xml")
+@ImportResource("classpath:applicationContext-business.xml")
 public class SumaBusinessConfiguration {
 
 	@Bean
@@ -26,4 +26,6 @@ public class SumaBusinessConfiguration {
 	public WTApiClient wtClient() {
 		return new WTApiClient();
 	}
+
+	
 }

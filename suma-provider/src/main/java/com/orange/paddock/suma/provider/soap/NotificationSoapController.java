@@ -7,7 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.orange.paddock.suma.business.exception.AbstractSumaException;
 import com.orange.paddock.suma.business.manager.NotificationManager;
+import com.orange.paddock.suma.business.manager.SubscriptionStatusUtils;
 import com.orange.paddock.suma.provider.soap.model.NotificationPortType;
 import com.orange.paddock.suma.provider.soap.model.Status;
 import com.orange.paddock.suma.provider.soap.model.SubscriptionNotificationRequestType;
@@ -29,12 +31,11 @@ public class NotificationSoapController implements NotificationPortType {
 
 		// TODO CALL BUSINESS 
 		SubscriptionNotificationResponseType response = new SubscriptionNotificationResponseType();
-		
 		Status status = new Status();
 		status.setSuccess(true);
 		response.setStatus(status);
 		
-		manager.notificationSubscription(parameters.getSubscriptionId());
+		manager.notificationSubscription(parameters.getSubscriptionId(), parameters.getRequestId(), parameters.getActivationDate().toGregorianCalendar().getTime(), parameters.getSubscriber());
 
 		return response;
 	}
@@ -52,7 +53,7 @@ public class NotificationSoapController implements NotificationPortType {
 		status.setSuccess(true);
 		response.setStatus(status);
 		
-		manager.notificationUnsubscription(parameters.getSubscriptionId());
+		manager.notificationUnsubscription(parameters.getSubscriptionId(), parameters.getRequestId(), parameters.getSubscriber());
 
 		return response;
 	}

@@ -55,7 +55,7 @@ public abstract class AbstractControllerTest {
 	@Autowired
 	protected SubscriptionRestController restController;
 	
-	@Autowired
+	@MockBean
 	protected SubscriptionRepository repository;
 	
 	@MockBean
