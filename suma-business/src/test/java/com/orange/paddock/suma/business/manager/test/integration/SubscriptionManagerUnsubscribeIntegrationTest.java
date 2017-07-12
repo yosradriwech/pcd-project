@@ -18,6 +18,7 @@ import com.orange.paddock.suma.business.manager.SubscriptionManager;
 import com.orange.paddock.suma.business.manager.SubscriptionStatusUtils;
 import com.orange.paddock.suma.business.manager.test.AbstractSubscriptionManagerTest;
 import com.orange.paddock.suma.business.model.SubscriptionDto;
+import com.orange.paddock.suma.business.model.SubscriptionResponse;
 
 @SpringBootTest(classes = SubscriptionManagerTestApplication.class)
 public class SubscriptionManagerUnsubscribeIntegrationTest extends AbstractSubscriptionManagerTest {
@@ -54,10 +55,10 @@ public class SubscriptionManagerUnsubscribeIntegrationTest extends AbstractSubsc
 
 		SubscriptionDto subscriptionReceived = initializeValidSubscriptionDto();
 
-		String subscriptionId = subscriptionManager.subscribe(subscriptionReceived, endUserIdValue, mco);
+		SubscriptionResponse subscription = subscriptionManager.subscribe(subscriptionReceived, endUserIdValue, mco);
 
 		// Get status
-		SubscriptionDto subscriptionSessionFound = subscriptionManager.getSubscriptionStatus(subscriptionId);
+		SubscriptionDto subscriptionSessionFound = subscriptionManager.getSubscriptionStatus(subscription.getSubscriptionId());
 
 		// Following fields are set in MongoDb by SUMA
 		subscriptionReceived.setStatus(SubscriptionStatusUtils.STATUS_WAITING_ACTIVATION);
@@ -85,8 +86,8 @@ public class SubscriptionManagerUnsubscribeIntegrationTest extends AbstractSubsc
 
 		SubscriptionDto subscriptionReceived = initializeValidSubscriptionDto();
 
-		subscriptionId = subscriptionManager.subscribe(subscriptionReceived, endUserIdValue, mco);
-		Assert.assertNotNull(subscriptionId);
+		SubscriptionResponse subscription = subscriptionManager.subscribe(subscriptionReceived, endUserIdValue, mco);
+		Assert.assertNotNull(subscription.getSubscriptionId());
 
 		// Successful unsubscribe request to set status WAITING_ARCHIVING
 		TECHNICAL_LOGGER.debug("Sending unsubscription request expected success");
@@ -98,12 +99,12 @@ public class SubscriptionManagerUnsubscribeIntegrationTest extends AbstractSubsc
 								+ "</ns:success></ns:status>"
 								+ "<ns:vas-signature></ns:vas-signature></ns:subscription-unsubscribe-response></soapenv:Body></soapenv:Envelope>"));
 		
-		String unsubscribeStatus = subscriptionManager.unsubscribe(subscriptionId);
+		String unsubscribeStatus = subscriptionManager.unsubscribe(subscription.getSubscriptionId());
 		TECHNICAL_LOGGER.debug("Session status after unsubscription {}");
 		Assert.assertEquals(unsubscribeStatus, SubscriptionStatusUtils.STATUS_WAITING_ARCHIVING);
 		
 		// Get status
-		subscriptionManager.getSubscriptionStatus(subscriptionId);
+		subscriptionManager.getSubscriptionStatus(subscription.getSubscriptionId());
 
 	}
 

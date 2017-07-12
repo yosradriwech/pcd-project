@@ -30,6 +30,7 @@ import com.orange.paddock.suma.business.exception.wt.SumaWtApiIntegrationExcepti
 import com.orange.paddock.suma.business.exception.wt.SumaWtApiInternalErrorException;
 import com.orange.paddock.suma.business.mapper.SubscriptionDtoMapper;
 import com.orange.paddock.suma.business.model.SubscriptionDto;
+import com.orange.paddock.suma.business.model.SubscriptionResponse;
 import com.orange.paddock.suma.consumer.ccgw.client.CcgwClient;
 import com.orange.paddock.suma.consumer.ccgw.exceptions.CcgwClientException;
 import com.orange.paddock.suma.consumer.ccgw.exceptions.CcgwNotRespondingException;
@@ -71,10 +72,12 @@ public class SubscriptionManager {
 	 * @return subscriptionId
 	 * @throws AbstractSumaException
 	 */
-	public String subscribe(SubscriptionDto subscriptionDto, String endUserIdValue, String mco) throws AbstractSumaException {
+	public SubscriptionResponse subscribe(SubscriptionDto subscriptionDto, String endUserIdValue, String mco) throws AbstractSumaException {
 		TECHNICAL_LOGGER.debug("Starting subscription business logic with subscriptionDto: {} and endUserIdValue: {}", subscriptionDto,
 				endUserIdValue);
 
+		SubscriptionResponse subId = new SubscriptionResponse();
+		
 		/** MSISDN to store in mongo: retrieved from WT or subscriptionDto body and formatted with tel:+ */
 		String userMsisdnToStore = null;
 
@@ -216,8 +219,12 @@ public class SubscriptionManager {
 			subscriptionRepository.save(storedSubscription);
 			throw new SumaCcgwIntegrationErrorException();
 		}
-
-		return subscriptionId;
+		
+		subId.setMsisdn(PdkMsisdnUtils.getMsisdnWithoutPrefix(userMsisdnToStore));
+		subId.setSubscriptionId(subscriptionSessionToStore.getSubscriptionId());
+		subId.setCcgwSubscriptionId(subscriptionId);
+		
+		return subId;
 	}
 
 	/**

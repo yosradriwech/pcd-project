@@ -11,10 +11,10 @@
 	
 	<appender name="ccgw-subscription-appender"
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${logs.directory}/PA-PDK-SUMA-SOUTH-SUB.log
+		<file>${logs.directory}/PA-PDK-SUMA-SUB-CCGW-South-access.log
 		</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>${logs.directory}/archive/PA-PDK-SUMA-SOUTH-SUB.log.%d{yyyyMMdd}.gz
+			<fileNamePattern>${logs.directory}/archive/PA-PDK-SUMA-SUB-CCGW-South-access.log.%d{yyyyMMdd}.gz
 			</fileNamePattern>
 			<maxHistory>30</maxHistory>
 		</rollingPolicy>
@@ -23,17 +23,13 @@
 			</pattern>
 		</encoder>
 	</appender>
-
-	<logger name="ccgw-subscription-logger">
-		<appender-ref ref="ccgw-subscription-appender"></appender-ref>
-	</logger>
 
 	<appender name="ccgw-unsubscription-appender"
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${logs.directory}/PA-PDK-SUMA-SOUTH-UNSUB.log
+		<file>${logs.directory}/PA-PDK-SUMA-UNSUB-CCGW-South-access.log
 		</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>${logs.directory}/archive/PA-PDK-SUMA-SOUTH-UNSUB.log.%d{yyyyMMdd}.gz
+			<fileNamePattern>${logs.directory}/archive/PA-PDK-SUMA-UNSUB-CCGW-South-access.log.%d{yyyyMMdd}.gz
 			</fileNamePattern>
 			<maxHistory>30</maxHistory>
 		</rollingPolicy>
@@ -42,16 +38,13 @@
 			</pattern>
 		</encoder>
 	</appender>
-
-	<logger name="ccgw-unsubscription-logger">
-		<appender-ref ref="ccgw-unsubscription-appender"></appender-ref>
-	</logger>
-	<appender name="technical-log-appender"
+	
+	<appender name="north-subscription-logger"
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${logs.directory}/PA-PDK-SUMA-technical.log
+		<file>${logs.directory}/PA-PDK-SUMA-SUB-North-access.log
 		</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>${logs.directory}/archive/PA-PDK-SUMA-technical.log.%d{yyyyMMdd}.gz
+			<fileNamePattern>${logs.directory}/archive/PA-PDK-SUMA-SUB-North-access.log.%d{yyyyMMdd}.gz
 			</fileNamePattern>
 			<maxHistory>30</maxHistory>
 		</rollingPolicy>
@@ -61,6 +54,78 @@
 			</pattern>
 		</encoder>
 	</appender>
+	
+	<appender name="north-unsubscription-logger"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${logs.directory}/PA-PDK-SUMA-UNSUB-North-access.log
+		</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${logs.directory}/archive/PA-PDK-SUMA-UNSUB-North-access.log.%d{yyyyMMdd}.gz
+			</fileNamePattern>
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%d{yyyy/MM/dd HH:mm:ss,Europe/Paris} [%thread] %-5level
+				%logger{36} - %m %throwable{full}%n
+			</pattern>
+		</encoder>
+	</appender>
+	
+	<appender name="north-get-status-logger"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${logs.directory}/PA-PDK-SUMA-STATUS-North-access-access.log
+		</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${logs.directory}/archive/PA-PDK-SUMA-STATUS-North-access.log.%d{yyyyMMdd}.gz
+			</fileNamePattern>
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%d{yyyy/MM/dd HH:mm:ss,Europe/Paris} [%thread] %-5level
+				%logger{36} - %m %throwable{full}%n
+			</pattern>
+		</encoder>
+	</appender>
+	
+	<appender name="north-notification-logger"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${logs.directory}/PA-PDK-SUMA-NOTIFY-North-access.log
+		</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${logs.directory}/archive/PA-PDK-SUMA-NOTIFY-North-access.log.%d{yyyyMMdd}.gz
+			</fileNamePattern>
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%d{yyyy/MM/dd HH:mm:ss,Europe/Paris} [%thread] %-5level
+				%logger{36} - %m %throwable{full}%n
+			</pattern>
+		</encoder>
+	</appender>
+	
+	<logger name="ccgw-subscription-logger">
+		<appender-ref ref="ccgw-subscription-appender"></appender-ref>
+	</logger>
+
+	<logger name="ccgw-unsubscription-logger">
+		<appender-ref ref="ccgw-unsubscription-appender"></appender-ref>
+	</logger>
+	
+	<logger name="north-subscription-logger">
+		<appender-ref ref="north-subscription-appender"></appender-ref>
+	</logger>
+	
+	<logger name="north-unsubscription-logger">
+		<appender-ref ref="north-unsubscription-appender"></appender-ref>
+	</logger>
+	
+	<logger name="north-get-status-logger">
+		<appender-ref ref="north-get-status-appender"></appender-ref>
+	</logger>
+	
+	<logger name="north-notification-logger">
+		<appender-ref ref="north-notification-appender"></appender-ref>
+	</logger>
 
 	<root level="DEBUG">
 		<!-- <appender-ref ref="console-appender" /> -->

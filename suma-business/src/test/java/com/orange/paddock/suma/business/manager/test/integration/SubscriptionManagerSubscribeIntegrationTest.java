@@ -21,6 +21,7 @@ import com.orange.paddock.suma.business.exception.wt.SumaWtApiIntegrationExcepti
 import com.orange.paddock.suma.business.exception.wt.SumaWtApiInternalErrorException;
 import com.orange.paddock.suma.business.manager.SubscriptionManager;
 import com.orange.paddock.suma.business.manager.test.AbstractSubscriptionManagerTest;
+import com.orange.paddock.suma.business.model.SubscriptionResponse;
 import com.orange.paddock.wtapi.client.WTApiClient;
 
 @SpringBootTest(classes = SubscriptionManagerTestApplication.class)
@@ -70,9 +71,9 @@ public class SubscriptionManagerSubscribeIntegrationTest extends AbstractSubscri
 								+ " <identifiers>" + "  <ident name=\"mco\" value=\"\" />" + "  <ident name=\"msisdn\" value=\" \" />"
 								+ "  <ident name=\"mss\" value=\" \" />" + " </identifiers>" + "</WTResponse>"));
 
-		String subscriptionId = subscriptionManager.subscribe(initializeValidSubscriptionDto(), endUserIdValue, mco);
-		TECHNICAL_LOGGER.debug("Test result : subscriptionId {}", subscriptionId);
-		Assert.assertNotNull(subscriptionId);
+		SubscriptionResponse subscription = subscriptionManager.subscribe(initializeValidSubscriptionDto(), endUserIdValue, mco);
+		TECHNICAL_LOGGER.debug("Test result : subscriptionId {}", subscription.getSubscriptionId());
+		Assert.assertNotNull(subscription.getSubscriptionId());
 	}
 
 	// Error 3001
