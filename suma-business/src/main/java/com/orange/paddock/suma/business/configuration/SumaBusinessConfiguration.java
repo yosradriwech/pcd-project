@@ -26,6 +26,5 @@ public class SumaBusinessConfiguration {
 	public WTApiClient wtClient() {
 		return new WTApiClient();
 	}
-
 	
 }

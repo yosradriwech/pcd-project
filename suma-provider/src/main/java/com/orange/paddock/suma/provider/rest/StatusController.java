@@ -1,7 +1,5 @@
 package com.orange.paddock.suma.provider.rest;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -18,13 +16,13 @@ import com.orange.paddock.suma.business.manager.StatusManager;
 @RequestMapping("/status")
 public class StatusController {
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(StatusController.class);
-
-	private static final String sumaComponentName = "SUMA";
 	private static final String mongoDbComponentName = "MongoDB";
 	
 	@Value("${application.version}")
-	String version;
+	private String appVersion;
+	
+	@Value("${application.title}")
+	private String appTitle;
 	
 	@Autowired
 	private StatusManager manager;
@@ -34,7 +32,7 @@ public class StatusController {
 		
 		HttpStatus httpStatus = HttpStatus.OK;
 		
-		Component response = new Component(sumaComponentName, version);
+		Component response = new Component(appTitle, appVersion);
 		response.setStatus(Status.ok);
 		
 		Component mongoDbComponent = new Component(mongoDbComponentName);

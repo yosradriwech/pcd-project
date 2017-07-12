@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:jaxws="http://cxf.apache.org/jaxws" xmlns:http-conf="http://cxf.apache.org/transports/http/configuration"
+	xmlns:sec="http://cxf.apache.org/configuration/security" xmlns:cxf="http://cxf.apache.org/core"
+	xsi:schemaLocation="http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+	http://cxf.apache.org/core http://cxf.apache.org/schemas/core.xsd 
+	http://cxf.apache.org/transports/http/configuration http://cxf.apache.org/schemas/configuration/http-conf.xsd 
+    http://cxf.apache.org/configuration/security http://cxf.apache.org/schemas/configuration/security.xsd
+	http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd"
+	default-autowire="no" default-lazy-init="false">
+	
+	
+	<bean id="logInbound" class="org.apache.cxf.interceptor.LoggingInInterceptor" />
+	<bean id="logOutbound" class="org.apache.cxf.interceptor.LoggingOutInterceptor" />
+
+	<cxf:bus>
+		<cxf:inInterceptors>
+			<ref bean="logInbound" />
+		</cxf:inInterceptors>
+		<cxf:outInterceptors>
+			<ref bean="logOutbound" />
+		</cxf:outInterceptors>
+		<cxf:outFaultInterceptors>
+			<ref bean="logOutbound" />
+		</cxf:outFaultInterceptors>
+		<cxf:inFaultInterceptors>
+			<ref bean="logInbound" />
+		</cxf:inFaultInterceptors>
+	</cxf:bus>
+	
+	
+	<jaxws:client id="ccgwSubscriptionPort"
+		serviceClass="com.orange.paddock.suma.consumer.ccgw.susbcription.model.CcgwSubscriptionPortType"
+		address="${ccgw.endpoint}">
+	</jaxws:client>
+
+
+	<!-- http-conf:conduit name={WSDL_endpoint_target_namespace}PortName.http-conduit -->
+	<http-conf:conduit name="{https://ccgw.orange.pl/api/2.1}CcgwSubscriptionPortTypePort.http-conduit">
+		
+		<http-conf:tlsClientParameters
+			secureSocketProtocol="TLSv1" disableCNCheck="true"
+			useHttpsURLConnectionDefaultHostnameVerifier="false"
+			useHttpsURLConnectionDefaultSslSocketFactory="false">
+
+			<sec:keyManagers keyPassword="${ccgw.keystore.keypass}">
+				<sec:keyStore type="JKS" file="${ccgw.keystore.file}" />
+			</sec:keyManagers>
+
+			<sec:cipherSuitesFilter>
+				<sec:include>.*_WITH_3DES_.*</sec:include>
+				<sec:include>.*_WITH_DES_.*</sec:include>
+				<sec:exclude>.*_WITH_NULL_.*</sec:exclude>
+				<sec:exclude>.*_DH_anon_.*</sec:exclude>
+			</sec:cipherSuitesFilter>
+		</http-conf:tlsClientParameters>
+		
+		
+		<http-conf:client CacheControl="no-cache"
+			ReceiveTimeout="40000" ConnectionTimeout="40000" AllowChunking="false"
+			AutoRedirect="false" ProxyServer="${ccgw.proxy.host:}"
+			ProxyServerPort="${ccgw.proxy.port:3128}" ProxyServerType="HTTP" />
+		
+		<http-conf:proxyAuthorization>
+			<sec:UserName>${ccgw.proxy.credentials.login:}</sec:UserName>
+			<sec:Password>${ccgw.proxy.credentials.password:}</sec:Password>
+			<sec:AuthorizationType>Basic</sec:AuthorizationType>
+		</http-conf:proxyAuthorization>
+		
+	</http-conf:conduit>
+
+
+	<bean id="ccgwIntegrationErrorExceptionFactory" class="com.orange.paddock.suma.business.factory.CcgwIntegrationErrorExceptionFactory" />
+	<bean id="ccgwInternalErrorExceptionFactory" class="com.orange.paddock.suma.business.factory.CcgwInternalErrorExceptionFactory" />
+	
+	<util:map id="exceptionFactoryMapping">
+		<entry key="(?!321|510|512|513)(^1[0-9]{2}$|^2[0-9]{2}$|^3[0-9]{2}$|^4[0-9]{2}$|^5[0-9]{2}$)" value-ref="ccgwIntegrationErrorExceptionFactory" />
+		<entry key="(?!628|629)(^6[0-9]{2}$|321|510|512|513)" value-ref="ccgwInternalErrorExceptionFactory" />
+	</util:map>
+
+</beans>

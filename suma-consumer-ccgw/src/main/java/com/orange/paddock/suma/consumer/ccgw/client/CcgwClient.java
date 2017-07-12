@@ -94,8 +94,7 @@ public class CcgwClient {
 	@Autowired
 	private CcgwSubscriptionPortType ccgwSubscriptionPort;
 
-	@Autowired
-	private ObjectFactory subscriptionObjectFactory;
+	private ObjectFactory subscriptionObjectFactory = new ObjectFactory();
 
 	/**
 	 * 

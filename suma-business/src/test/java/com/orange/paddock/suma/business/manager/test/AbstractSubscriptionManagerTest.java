@@ -31,7 +31,7 @@ public abstract class AbstractSubscriptionManagerTest {
 
 	protected static final String SERVICE_ID = "SERVICE_ID";
 	protected static final String ON_BEHALF_OF = "ON_BEHALF_OF";
-	protected static final String END_USER_ID = "tel:+33979795544";
+	protected static final String END_USER_ID = "33979795544";
 	protected static final String DESCRIPTION = "DESCRIPTION";
 	protected static final String CATEGORY_CODE = "CATEGORY_CODE";
 	protected static final BigDecimal AMOUNT = new BigDecimal(1.0);

@@ -21,7 +21,6 @@ import com.orange.paddock.suma.business.exception.wt.SumaWtApiIntegrationExcepti
 import com.orange.paddock.suma.business.exception.wt.SumaWtApiInternalErrorException;
 import com.orange.paddock.suma.business.manager.SubscriptionManager;
 import com.orange.paddock.suma.business.manager.test.AbstractSubscriptionManagerTest;
-import com.orange.paddock.wtapi.client.WTApiClient;
 
 @SpringBootTest(classes = SubscriptionManagerTestApplication.class)
 public class SubscriptionManagerSubscribeIntegrationTest extends AbstractSubscriptionManagerTest {
@@ -48,9 +47,6 @@ public class SubscriptionManagerSubscribeIntegrationTest extends AbstractSubscri
 
 	@Value("${orange.wtpapi.default.serv}")
 	private String wtDefaultService;
-
-	@Autowired
-	private WTApiClient wtApiClient;
 
 	@Test
 	public void subscribeSuccessfulTest() throws AbstractSumaException {

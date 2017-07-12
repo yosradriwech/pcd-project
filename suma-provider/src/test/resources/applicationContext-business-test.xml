@@ -5,6 +5,7 @@
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 	   http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
 	   
+	<import resource="classpath:applicationContext-consumer-ccgw.xml"/>
 	   
 	<task:executor id="subscriptionNotificationExecutor" pool-size="5-20" queue-capacity="100" rejection-policy="CALLER_RUNS" keep-alive="60" />
 	<bean id="asyncExceptionHandlerSubscribe" class="com.orange.paddock.suma.business.exception.ManagementAsyncUncaughtExceptionHandler" />

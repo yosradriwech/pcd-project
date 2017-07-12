@@ -8,13 +8,17 @@
 	<logger name="org.apache.cxf" level="INFO" />
 	<logger name="org.apache.http" level="INFO" />
 
-	<appender name="technical-log-appender"
-		class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${logs.directory}/PA-PDK-SUMA-technical-test.log
-		</file>
+	<appender name="console-appender" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
+			</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="technical-log-appender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${logs.directory}/PA-PDK-SUMA-technical-test.log</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>${logs.directory}/archive/PA-PDK-SUMA-technical-test.log.%d{yyyyMMdd}.gz
-			</fileNamePattern>
+			<fileNamePattern>${logs.directory}/archive/PA-PDK-SUMA-technical-test.log.%d{yyyyMMdd}.gz</fileNamePattern>
 			<maxHistory>30</maxHistory>
 		</rollingPolicy>
 		<encoder>
@@ -24,11 +28,9 @@
 		</encoder>
 	</appender>
 
-	<logger name="org.apache.cxf.services" level="WARN" />
-	<logger name="org.springframework" level="INFO" />
-	<root level="DEBUG">
-		<!-- <appender-ref ref="console-appender" /> -->
-		<appender-ref ref="technical-log-appender" />
+	<root level="WARN">
+		<appender-ref ref="console-appender" />
+		<!-- appender-ref ref="technical-log-appender" / -->
 	</root>
 
 </configuration>

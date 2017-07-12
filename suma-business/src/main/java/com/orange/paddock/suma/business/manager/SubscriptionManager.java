@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.orange.paddock.commons.msisdn.PdkMsisdnUtils;
@@ -21,13 +21,13 @@ import com.orange.paddock.suma.business.exception.SumaAlreadyRevokedSubException
 import com.orange.paddock.suma.business.exception.SumaInternalErrorException;
 import com.orange.paddock.suma.business.exception.SumaUnknownSubscriptionIdException;
 import com.orange.paddock.suma.business.exception.ccgw.SumaCcgwIntegrationErrorException;
-import com.orange.paddock.suma.business.exception.ccgw.SumaCcgwInternalErrorException;
 import com.orange.paddock.suma.business.exception.ccgw.SumaCcgwUnresponsiveException;
 import com.orange.paddock.suma.business.exception.iosw.SumaIoswInternalErrorException;
 import com.orange.paddock.suma.business.exception.iosw.SumaIoswUnresponsiveException;
 import com.orange.paddock.suma.business.exception.wt.SumaWtApiAuthenticationFailureException;
 import com.orange.paddock.suma.business.exception.wt.SumaWtApiIntegrationException;
 import com.orange.paddock.suma.business.exception.wt.SumaWtApiInternalErrorException;
+import com.orange.paddock.suma.business.factory.IExceptionFactory;
 import com.orange.paddock.suma.business.mapper.SubscriptionDtoMapper;
 import com.orange.paddock.suma.business.model.SubscriptionDto;
 import com.orange.paddock.suma.consumer.ccgw.client.CcgwClient;
@@ -48,9 +48,6 @@ public class SubscriptionManager {
 
 	private static final Logger TECHNICAL_LOGGER = LoggerFactory.getLogger(SubscriptionManager.class);
 
-	@Value("${orange.wtpapi.default.serv}")
-	private String wtDefaultService;
-
 	@Autowired
 	private WTApiClient wtClient;
 
@@ -63,6 +60,9 @@ public class SubscriptionManager {
 	@Autowired
 	private SubscriptionRepository subscriptionRepository;
 
+	@Autowired
+	private Map<String, IExceptionFactory> exceptionFactoryMapping;
+	
 	/**
 	 * 
 	 * @param subscriptionDto
@@ -88,8 +88,8 @@ public class SubscriptionManager {
 			wtRequestedInfos.add(WTInfo.USER_PROFILE_MSISDN);
 
 			Map<String, String> wtInputParameters = new HashMap<>();
-			wtInputParameters.put(WTParameter.SERVICE, wtDefaultService);
-			wtInputParameters.put(WTParameter.ENCODING, "UTF-8");
+			//wtInputParameters.put(WTParameter.SERVICE, wtDefaultService);
+			//wtInputParameters.put(WTParameter.ENCODING, "UTF-8");
 
 			if (Objects.equals(PdkAcrUtils.ACR_ORANGE_API_TOKEN, subscriptionDto.getEndUserId())) {
 				wtInputParameters.put(WTParameter.ORANGE_API_TOKEN, subscriptionDto.getEndUserId());
@@ -105,8 +105,10 @@ public class SubscriptionManager {
 				if (Objects.isNull(retrievedWtMsisdn) || Objects.equals("", retrievedWtMsisdn)) {
 					TECHNICAL_LOGGER.error("WT module returns invalid MSISDN value");
 					throw new SumaWtApiIntegrationException();
-				} else
-					userMsisdnToStore = PdkMsisdnUtils.formatMsisdn(retrievedWtMsisdn);
+				}
+				
+				userMsisdnToStore = retrievedWtMsisdn;
+				
 			} catch (WTHttpTransportException wtHttpException) {
 				TECHNICAL_LOGGER.error("Http Transport Exception caugh when trying to reach WT module");
 				throw new SumaIoswInternalErrorException();
@@ -135,7 +137,7 @@ public class SubscriptionManager {
 
 		} else {
 			// endUserId == tel:+xxx
-			userMsisdnToStore = subscriptionDto.getEndUserId();
+			userMsisdnToStore = PdkMsisdnUtils.getMsisdnWithoutPrefix(subscriptionDto.getEndUserId());
 		}
 		TECHNICAL_LOGGER.debug("MSISDN after retrieve and formatting : {}", userMsisdnToStore);
 
@@ -161,6 +163,7 @@ public class SubscriptionManager {
 		SumaSubscriptionRequest sumaSubscriptionRequest = new SumaSubscriptionRequest();
 		sumaSubscriptionRequest = subscriptionMapper.map(subscriptionDto, SumaSubscriptionRequest.class);
 		sumaSubscriptionRequest.setSubscriber(userMsisdnToStore);
+		sumaSubscriptionRequest.setTransactionId(subscriptionSessionToStore.getTransactionId());
 
 		try {
 			TECHNICAL_LOGGER.debug("Trying to call CCGW..");
@@ -192,22 +195,20 @@ public class SubscriptionManager {
 
 			storedSubscription.setStatus(SubscriptionStatusUtils.STATUS_SUBSCRIPTION_ERROR);
 			subscriptionRepository.save(storedSubscription);
-
-			if (e.getCcgwFaultStatusCode().startsWith("6") && !e.getCcgwFaultStatusCode().equals("628") && !e.getCcgwFaultStatusCode().equals("629")) {
-				throw new SumaCcgwInternalErrorException();
+			
+			IExceptionFactory exceptionFactory = null;
+			for (String pattern : exceptionFactoryMapping.keySet()) {
+				if (Pattern.matches(pattern, e.getCcgwFaultStatusCode())) {
+					exceptionFactory = exceptionFactoryMapping.get(pattern);
+				}
 			}
-
-			switch (e.getCcgwFaultStatusCode()) {
-			case "321":
-			case "510":
-			case "512":
-			case "513":
-				throw new SumaCcgwInternalErrorException();
-
-			default:
+			
+			if (null == exceptionFactory) {
 				throw new SumaCcgwIntegrationErrorException();
 			}
-
+			
+			exceptionFactory.throwException();
+			
 		} catch (Exception e) {
 			TECHNICAL_LOGGER.error("An unexpected error occured while calling CCGW {}", e);
 			storedSubscription.setStatus(SubscriptionStatusUtils.STATUS_SUBSCRIPTION_ERROR);
@@ -283,21 +284,20 @@ public class SubscriptionManager {
 				subscriptionSessionFound.setStatus(SubscriptionStatusUtils.STATUS_UNSUBSCRIPTION_ERROR);
 				Subscription updatedSession =	subscriptionRepository.save(subscriptionSessionFound);
 				subscriptionStatus = updatedSession.getStatus();
-				if (e.getCcgwFaultStatusCode().startsWith("6") && !e.getCcgwFaultStatusCode().equals("628")
-						&& !e.getCcgwFaultStatusCode().equals("629")) {
-					throw new SumaCcgwInternalErrorException();
+				
+				IExceptionFactory exceptionFactory = null;
+				for (String pattern : exceptionFactoryMapping.keySet()) {
+					if (Pattern.matches(pattern, e.getCcgwFaultStatusCode())) {
+						exceptionFactory = exceptionFactoryMapping.get(pattern);
+					}
 				}
-				switch (e.getCcgwFaultStatusCode()) {
-				case "321":
-				case "510":
-				case "512":
-				case "513":
-					throw new SumaCcgwInternalErrorException();
-
-				default:
+				
+				if (null == exceptionFactory) {
 					throw new SumaCcgwIntegrationErrorException();
 				}
-
+				
+				exceptionFactory.throwException();
+				
 			} catch (Exception e) {
 				TECHNICAL_LOGGER.error("An unexpected error occured while calling CCGW {}", e);
 				subscriptionSessionFound.setStatus(SubscriptionStatusUtils.STATUS_UNSUBSCRIPTION_ERROR);

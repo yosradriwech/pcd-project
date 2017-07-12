@@ -1,8 +1,6 @@
 package com.orange.paddock.suma.business.manager.test.unit;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -27,13 +25,11 @@ import com.orange.paddock.suma.business.model.SubscriptionDto;
 import com.orange.paddock.suma.consumer.ccgw.client.CcgwClient;
 import com.orange.paddock.suma.consumer.ccgw.exceptions.CcgwClientException;
 import com.orange.paddock.suma.consumer.ccgw.exceptions.CcgwNotRespondingException;
-import com.orange.paddock.suma.consumer.ccgw.model.SumaSubscriptionRequest;
 import com.orange.paddock.suma.consumer.ccgw.model.SumaUnsubscriptionRequest;
 import com.orange.paddock.suma.consumer.ccgw.susbcription.model.ObjectFactory;
 import com.orange.paddock.suma.dao.mongodb.document.Subscription;
 import com.orange.paddock.suma.dao.mongodb.repository.SubscriptionRepository;
 import com.orange.paddock.wtapi.client.WTApiClient;
-import com.sun.xml.bind.v2.schemagen.xmlschema.List;
 
 /**
  * Unit tests for subscription manager (unsubscribe + getStatus)
