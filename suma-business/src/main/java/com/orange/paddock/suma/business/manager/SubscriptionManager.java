@@ -201,7 +201,8 @@ public class SubscriptionManager {
 			if (e.getCcgwFaultStatusCode().startsWith("6") && !e.getCcgwFaultStatusCode().equals("628") && !e.getCcgwFaultStatusCode().equals("629")) {
 				throw new SumaCcgwInternalErrorException();
 			}
-
+			String fault = e.getCcgwFaultStatusCode();
+			TECHNICAL_LOGGER.debug("================================  ", fault);
 			switch (e.getCcgwFaultStatusCode()) {
 			case "321":
 			case "510":

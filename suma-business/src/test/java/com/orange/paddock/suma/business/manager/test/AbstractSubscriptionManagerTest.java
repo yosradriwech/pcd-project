@@ -9,9 +9,11 @@ import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockserver.integration.ClientAndServer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
+import com.orange.paddock.commons.log.PdkLogIdBean;
 import com.orange.paddock.suma.business.model.SubscriptionDto;
 import com.orange.paddock.suma.dao.mongodb.repository.SubscriptionRepository;
 
@@ -47,6 +49,9 @@ public abstract class AbstractSubscriptionManagerTest {
 	
 	@Autowired
 	private SubscriptionRepository subscriptionRepository;
+	
+	@MockBean
+	protected PdkLogIdBean loggerId;
 	
 	
 	@Before

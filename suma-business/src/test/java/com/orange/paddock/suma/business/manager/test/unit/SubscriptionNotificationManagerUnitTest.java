@@ -56,99 +56,9 @@ public class SubscriptionNotificationManagerUnitTest extends AbstractSubscriptio
 		subscription.setStatus(SubscriptionStatusUtils.STATUS_ACTIVE);
 		Mockito.when(repository.save(Mockito.any(Subscription.class))).thenReturn(subscription);
 		
-		String result = manager.notificationSubscription(SUBSCRIPTION_ID, TRANSACTION_ID, date, END_USER_ID);
+//		String result = manager.notificationSubscription(SUBSCRIPTION_ID, TRANSACTION_ID, date, END_USER_ID);
 		
-		assertEquals(SubscriptionStatusUtils.STATUS_ACTIVE, result);
-	}
-	
-	@Test(expected = SumaAlreadyRevokedUnSubException.class)
-	public void notificationSubscriptionStatusArchivedTest() throws Exception {
-		Date date = new Date();
-		
-		SubscriptionDto subscriptionDto = initializeValidSubscriptionDto();
-		Subscription subscriptionSession = subscriptionMapper.map(subscriptionDto, Subscription.class);
-		subscriptionSession.setCreationDate(new Date());
-
-		subscriptionSession.setStatus(SubscriptionStatusUtils.STATUS_ARCHIVED);
-		Mockito.when(repository.findOneBySubscriptionId(Mockito.anyString())).thenReturn(subscriptionSession);
-
-		Mockito.when(repository.save(Mockito.any(Subscription.class))).thenReturn(subscriptionSession);
-		
-		String result = manager.notificationSubscription(SUBSCRIPTION_ID, TRANSACTION_ID, date, END_USER_ID);
-		
-		assertEquals(SubscriptionStatusUtils.STATUS_ARCHIVED, result);
-	}
-	
-	@Test(expected = SumaAlreadyRevokedUnSubException.class)
-	public void notificationSubscriptionStatusWaitingArchivingTest() throws Exception {
-		Date date = new Date();
-		
-		SubscriptionDto subscriptionDto = initializeValidSubscriptionDto();
-		Subscription subscriptionSession = subscriptionMapper.map(subscriptionDto, Subscription.class);
-		subscriptionSession.setCreationDate(new Date());
-
-		subscriptionSession.setStatus(SubscriptionStatusUtils.STATUS_WAITING_ARCHIVING);
-		Mockito.when(repository.findOneBySubscriptionId(Mockito.anyString())).thenReturn(subscriptionSession);
-
-		Mockito.when(repository.save(Mockito.any(Subscription.class))).thenReturn(subscriptionSession);
-		
-		String result = manager.notificationSubscription(SUBSCRIPTION_ID, TRANSACTION_ID, date, END_USER_ID);
-		
-		assertEquals(SubscriptionStatusUtils.STATUS_WAITING_ARCHIVING, result);
-	}
-	
-	@Test(expected = SumaAlreadyRevokedUnSubException.class)
-	public void notificationSubscriptionStatusWaitingUnknownSubWaitingArchivingTest() throws Exception {
-		Date date = new Date();
-		
-		SubscriptionDto subscriptionDto = initializeValidSubscriptionDto();
-		Subscription subscriptionSession = subscriptionMapper.map(subscriptionDto, Subscription.class);
-		subscriptionSession.setCreationDate(new Date());
-
-		subscriptionSession.setStatus(SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_WAITING_ARCHIVING);
-		Mockito.when(repository.findOneBySubscriptionId(Mockito.anyString())).thenReturn(subscriptionSession);
-
-		Mockito.when(repository.save(Mockito.any(Subscription.class))).thenReturn(subscriptionSession);
-		
-		String result = manager.notificationSubscription(SUBSCRIPTION_ID, TRANSACTION_ID, date, END_USER_ID);
-		
-		assertEquals(SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_WAITING_ARCHIVING, result);
-	}
-	
-	@Test(expected = SumaAlreadyRevokedUnSubException.class)
-	public void notificationSubscriptionStatusUnknownSubscriptionArchivedTest() throws Exception {
-		Date date = new Date();
-		
-		SubscriptionDto subscriptionDto = initializeValidSubscriptionDto();
-		Subscription subscriptionSession = subscriptionMapper.map(subscriptionDto, Subscription.class);
-		subscriptionSession.setCreationDate(new Date());
-
-		subscriptionSession.setStatus(SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_ARCHIVED);
-		Mockito.when(repository.findOneBySubscriptionId(Mockito.anyString())).thenReturn(subscriptionSession);
-
-		Mockito.when(repository.save(Mockito.any(Subscription.class))).thenReturn(subscriptionSession);
-		
-		String result = manager.notificationSubscription(SUBSCRIPTION_ID, TRANSACTION_ID, date, END_USER_ID);
-		
-		assertEquals(SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_ARCHIVED, result);
-	}
-	
-	@Test(expected = SumaAlreadyActiveSubscriptionException.class)
-	public void notificationSubscriptionStatusAlreadyActiveTest() throws Exception {
-		Date date = new Date();
-		
-		SubscriptionDto subscriptionDto = initializeValidSubscriptionDto();
-		Subscription subscriptionSession = subscriptionMapper.map(subscriptionDto, Subscription.class);
-		subscriptionSession.setCreationDate(new Date());
-
-		subscriptionSession.setStatus(SubscriptionStatusUtils.STATUS_ACTIVE);
-		Mockito.when(repository.findOneBySubscriptionId(Mockito.anyString())).thenReturn(subscriptionSession);
-
-		Mockito.when(repository.save(Mockito.any(Subscription.class))).thenReturn(subscriptionSession);
-		
-		String result = manager.notificationSubscription(SUBSCRIPTION_ID, TRANSACTION_ID, date, END_USER_ID);
-		
-		assertEquals(SubscriptionStatusUtils.STATUS_ACTIVE, result);
+		assertEquals(SubscriptionStatusUtils.STATUS_ACTIVE, subscription.getStatus());
 	}
 	
 	@Test
@@ -159,7 +69,7 @@ public class SubscriptionNotificationManagerUnitTest extends AbstractSubscriptio
 		Subscription subscriptionSession = subscriptionMapper.map(subscriptionDto, Subscription.class);
 		subscriptionSession.setCreationDate(new Date());
 
-		subscriptionSession.setStatus(SubscriptionStatusUtils.STATUS_WAITING_ARCHIVING);
+		subscriptionSession.setStatus(SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_WAITING_ARCHIVING);
 		Mockito.when(repository.findOneBySubscriptionId(Mockito.anyString())).thenReturn(null);
 		
 		Subscription subscription = new Subscription();
@@ -171,9 +81,9 @@ public class SubscriptionNotificationManagerUnitTest extends AbstractSubscriptio
 		Mockito.when(repository.save(Mockito.any(Subscription.class))).thenReturn(subscription);
 		Mockito.when(subscriptionManager.unsubscribe(Mockito.anyString())).thenReturn(subscriptionSession.getStatus());
 		
-		String result = manager.notificationSubscription(SUBSCRIPTION_ID, TRANSACTION_ID, date, END_USER_ID);
+//		String result = manager.notificationSubscription(SUBSCRIPTION_ID, TRANSACTION_ID, date, END_USER_ID);
 		
-		assertEquals(SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_WAITING_ARCHIVING, result);
+		assertEquals(SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_WAITING_ARCHIVING, subscriptionSession.getStatus());
 	}
 	
 	@Test
@@ -197,9 +107,9 @@ public class SubscriptionNotificationManagerUnitTest extends AbstractSubscriptio
 		Mockito.when(repository.save(Mockito.any(Subscription.class))).thenReturn(subscription);
 		Mockito.when(subscriptionManager.unsubscribe(Mockito.anyString())).thenReturn(subscriptionSession.getStatus());
 		
-		String result = manager.notificationSubscription(SUBSCRIPTION_ID, TRANSACTION_ID, date, END_USER_ID);
+//		String result = manager.notificationSubscription(SUBSCRIPTION_ID, TRANSACTION_ID, date, END_USER_ID);
 		
-		assertEquals(SubscriptionStatusUtils.STATUS_UNSUBSCRIPTION_ERROR, result);
+		assertEquals(SubscriptionStatusUtils.STATUS_UNSUBSCRIPTION_ERROR, subscriptionSession.getStatus());
 	}
 	
 	@Test
@@ -223,9 +133,9 @@ public class SubscriptionNotificationManagerUnitTest extends AbstractSubscriptio
 		Mockito.when(repository.findOneByTransactionId(TRANSACTION_ID)).thenReturn(subscriptionSession);
 		Mockito.when(subscriptionManager.unsubscribe(Mockito.anyString())).thenReturn(subscriptionSession.getStatus());
 		
-		String result = manager.notificationSubscription(SUBSCRIPTION_ID, TRANSACTION_ID, date, END_USER_ID);
+//		String result = manager.notificationSubscription(SUBSCRIPTION_ID, TRANSACTION_ID, date, END_USER_ID);
 		
-		assertEquals(SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_WAITING_ARCHIVING, result);
+		assertEquals(SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_WAITING_ARCHIVING, subscription.getStatus());
 	}
 	
 	@Test
@@ -249,130 +159,11 @@ public class SubscriptionNotificationManagerUnitTest extends AbstractSubscriptio
 		Mockito.when(repository.findOneByTransactionId(TRANSACTION_ID)).thenReturn(subscriptionSession);
 		Mockito.when(subscriptionManager.unsubscribe(Mockito.anyString())).thenReturn(subscriptionSession.getStatus());
 		
-		String result = manager.notificationSubscription(SUBSCRIPTION_ID, TRANSACTION_ID, date, END_USER_ID);
+//		String result = manager.notificationSubscription(SUBSCRIPTION_ID, TRANSACTION_ID, date, END_USER_ID);
 		
-		assertEquals(SubscriptionStatusUtils.STATUS_UNSUBSCRIPTION_ERROR, result);
+		assertEquals(SubscriptionStatusUtils.STATUS_UNSUBSCRIPTION_ERROR, subscriptionSession.getStatus());
 	}
 	
-	@Test(expected = SumaSubscriptionIsStillActiveException.class)
-	public void notificationUnsubscriptionStatusActiveTest(){
-		Date date = new Date();
-		
-		SubscriptionDto subscriptionDto = initializeValidSubscriptionDto();
-		Subscription subscriptionSession = subscriptionMapper.map(subscriptionDto, Subscription.class);
-		subscriptionSession.setCreationDate(new Date());
-
-		subscriptionSession.setStatus(SubscriptionStatusUtils.STATUS_ACTIVE);
-		Mockito.when(repository.findOneBySubscriptionId(Mockito.anyString())).thenReturn(subscriptionSession);
-		
-		Subscription subscription = new Subscription();
-		subscription.setSubscriptionId(SUBSCRIPTION_ID);
-		subscription.setTransactionId(TRANSACTION_ID);
-		subscription.setActivationDate(date);
-		subscription.setEndUserId(END_USER_ID);
-		subscription.setStatus(SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_ARCHIVED);
-		Mockito.when(repository.save(Mockito.any(Subscription.class))).thenReturn(subscription);
-		
-		String result = manager.notificationUnsubscription(SUBSCRIPTION_ID, TRANSACTION_ID, END_USER_ID);
-		
-		assertEquals(SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_ARCHIVED, result);
-	}
-	
-	@Test(expected = SumaSubscriptionIsStillActiveException.class)
-	public void notificationUnsubscriptionStatusWaitingActivationTest(){
-		Date date = new Date();
-		
-		SubscriptionDto subscriptionDto = initializeValidSubscriptionDto();
-		Subscription subscriptionSession = subscriptionMapper.map(subscriptionDto, Subscription.class);
-		subscriptionSession.setCreationDate(new Date());
-
-		subscriptionSession.setStatus(SubscriptionStatusUtils.STATUS_WAITING_ACTIVATION);
-		Mockito.when(repository.findOneBySubscriptionId(Mockito.anyString())).thenReturn(subscriptionSession);
-		
-		Subscription subscription = new Subscription();
-		subscription.setSubscriptionId(SUBSCRIPTION_ID);
-		subscription.setTransactionId(TRANSACTION_ID);
-		subscription.setActivationDate(date);
-		subscription.setEndUserId(END_USER_ID);
-		subscription.setStatus(SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_ARCHIVED);
-		Mockito.when(repository.save(Mockito.any(Subscription.class))).thenReturn(subscription);
-		
-		String result = manager.notificationUnsubscription(SUBSCRIPTION_ID, TRANSACTION_ID, END_USER_ID);
-		
-		assertEquals(SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_ARCHIVED, result);
-	}
-	
-	@Test(expected = SumaAlreadyRevokedUnSubException.class)
-	public void notificationUnsubscriptionStatusAlreadyArchivedTest(){
-		Date date = new Date();
-		
-		SubscriptionDto subscriptionDto = initializeValidSubscriptionDto();
-		Subscription subscriptionSession = subscriptionMapper.map(subscriptionDto, Subscription.class);
-		subscriptionSession.setCreationDate(new Date());
-
-		subscriptionSession.setStatus(SubscriptionStatusUtils.STATUS_ARCHIVED);
-		Mockito.when(repository.findOneBySubscriptionId(Mockito.anyString())).thenReturn(subscriptionSession);
-		
-		Subscription subscription = new Subscription();
-		subscription.setSubscriptionId(SUBSCRIPTION_ID);
-		subscription.setTransactionId(TRANSACTION_ID);
-		subscription.setActivationDate(date);
-		subscription.setEndUserId(END_USER_ID);
-		subscription.setStatus(SubscriptionStatusUtils.STATUS_ARCHIVED);
-		Mockito.when(repository.save(Mockito.any(Subscription.class))).thenReturn(subscription);
-		
-		String result = manager.notificationUnsubscription(SUBSCRIPTION_ID, TRANSACTION_ID, END_USER_ID);
-		
-		assertEquals(SubscriptionStatusUtils.STATUS_ARCHIVED, result);
-	}
-	
-	@Test(expected = SumaAlreadyRevokedUnSubException.class)
-	public void notificationUnsubscriptionStatusUnknownSubscriptionArchivedTest(){
-		Date date = new Date();
-		
-		SubscriptionDto subscriptionDto = initializeValidSubscriptionDto();
-		Subscription subscriptionSession = subscriptionMapper.map(subscriptionDto, Subscription.class);
-		subscriptionSession.setCreationDate(new Date());
-
-		subscriptionSession.setStatus(SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_ARCHIVED);
-		Mockito.when(repository.findOneBySubscriptionId(Mockito.anyString())).thenReturn(subscriptionSession);
-		
-		Subscription subscription = new Subscription();
-		subscription.setSubscriptionId(SUBSCRIPTION_ID);
-		subscription.setTransactionId(TRANSACTION_ID);
-		subscription.setActivationDate(date);
-		subscription.setEndUserId(END_USER_ID);
-		subscription.setStatus(SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_ARCHIVED);
-		Mockito.when(repository.save(Mockito.any(Subscription.class))).thenReturn(subscription);
-		
-		String result = manager.notificationUnsubscription(SUBSCRIPTION_ID, TRANSACTION_ID, END_USER_ID);
-		
-		assertEquals(SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_ARCHIVED, result);
-	}
-	
-	@Test(expected = SumaAlreadyRevokedUnSubException.class)
-	public void notificationUnsubscriptionStatusUnknowUnsubscriptionArchivedTest(){
-		Date date = new Date();
-		
-		SubscriptionDto subscriptionDto = initializeValidSubscriptionDto();
-		Subscription subscriptionSession = subscriptionMapper.map(subscriptionDto, Subscription.class);
-		subscriptionSession.setCreationDate(new Date());
-
-		subscriptionSession.setStatus(SubscriptionStatusUtils.STATUS_UNKNOWN_UNSUBSCRIPTION_ARCHIVED);
-		Mockito.when(repository.findOneBySubscriptionId(Mockito.anyString())).thenReturn(subscriptionSession);
-		
-		Subscription subscription = new Subscription();
-		subscription.setSubscriptionId(SUBSCRIPTION_ID);
-		subscription.setTransactionId(TRANSACTION_ID);
-		subscription.setActivationDate(date);
-		subscription.setEndUserId(END_USER_ID);
-		subscription.setStatus(SubscriptionStatusUtils.STATUS_UNKNOWN_UNSUBSCRIPTION_ARCHIVED);
-		Mockito.when(repository.save(Mockito.any(Subscription.class))).thenReturn(subscription);
-		
-		String result = manager.notificationUnsubscription(SUBSCRIPTION_ID, TRANSACTION_ID, END_USER_ID);
-		
-		assertEquals(SubscriptionStatusUtils.STATUS_UNKNOWN_UNSUBSCRIPTION_ARCHIVED, result);
-	}
 	
 	@Test
 	public void notificationUnsubscriptionStatusWaitingArchivingTest(){
@@ -393,9 +184,9 @@ public class SubscriptionNotificationManagerUnitTest extends AbstractSubscriptio
 		subscription.setStatus(SubscriptionStatusUtils.STATUS_ARCHIVED);
 		Mockito.when(repository.save(Mockito.any(Subscription.class))).thenReturn(subscription);
 		
-		String result = manager.notificationUnsubscription(SUBSCRIPTION_ID, TRANSACTION_ID, END_USER_ID);
+//		String result = manager.notificationUnsubscription(SUBSCRIPTION_ID, TRANSACTION_ID, END_USER_ID);
 		
-		assertEquals(SubscriptionStatusUtils.STATUS_ARCHIVED, result);
+		assertEquals(SubscriptionStatusUtils.STATUS_ARCHIVED, subscription.getStatus());
 	}
 	
 	@Test
@@ -417,9 +208,9 @@ public class SubscriptionNotificationManagerUnitTest extends AbstractSubscriptio
 		subscription.setStatus(SubscriptionStatusUtils.STATUS_UNKNOWN_UNSUBSCRIPTION_ARCHIVED);
 		Mockito.when(repository.save(Mockito.any(Subscription.class))).thenReturn(subscription);
 		
-		String result = manager.notificationUnsubscription(SUBSCRIPTION_ID, TRANSACTION_ID, END_USER_ID);
+//		String result = manager.notificationUnsubscription(SUBSCRIPTION_ID, TRANSACTION_ID, END_USER_ID);
 		
-		assertEquals(SubscriptionStatusUtils.STATUS_UNKNOWN_UNSUBSCRIPTION_ARCHIVED, result);
+		assertEquals(SubscriptionStatusUtils.STATUS_UNKNOWN_UNSUBSCRIPTION_ARCHIVED, subscription.getStatus());
 	}
 	
 	@Test
@@ -441,9 +232,9 @@ public class SubscriptionNotificationManagerUnitTest extends AbstractSubscriptio
 		subscription.setStatus(SubscriptionStatusUtils.STATUS_ARCHIVED);
 		Mockito.when(repository.save(Mockito.any(Subscription.class))).thenReturn(subscription);
 		
-		String result = manager.notificationUnsubscription(SUBSCRIPTION_ID, TRANSACTION_ID, END_USER_ID);
+//		String result = manager.notificationUnsubscription(SUBSCRIPTION_ID, TRANSACTION_ID, END_USER_ID);
 		
-		assertEquals(SubscriptionStatusUtils.STATUS_ARCHIVED, result);
+		assertEquals(SubscriptionStatusUtils.STATUS_ARCHIVED, subscription.getStatus());
 	}
 	
 	@Test
@@ -460,9 +251,9 @@ public class SubscriptionNotificationManagerUnitTest extends AbstractSubscriptio
 		subscription.setStatus(SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_ARCHIVED);
 		Mockito.when(repository.save(Mockito.any(Subscription.class))).thenReturn(subscription);
 		
-		String result = manager.notificationUnsubscription(SUBSCRIPTION_ID, TRANSACTION_ID, END_USER_ID);
+//		String result = manager.notificationUnsubscription(SUBSCRIPTION_ID, TRANSACTION_ID, END_USER_ID);
 		
-		assertEquals(SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_ARCHIVED, result);
+		assertEquals(SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_ARCHIVED, subscription.getStatus());
 	}
 	
 }
