@@ -55,7 +55,14 @@ public class SubscriptionManagerUnsubscribeIntegrationTest extends AbstractSubsc
 		SubscriptionDto subscriptionReceived = initializeValidSubscriptionDto();
 
 		SubscriptionResponse subscription = subscriptionManager.subscribe(subscriptionReceived, endUserIdValue, mco);
-
+		
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		// Get status
 		SubscriptionDto subscriptionSessionFound = subscriptionManager.getSubscriptionStatus(subscription.getSubscriptionId());
 
