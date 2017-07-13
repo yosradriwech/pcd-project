@@ -6,9 +6,13 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
+import com.orange.paddock.commons.log.PdkLogIdBean;
 import com.orange.paddock.suma.business.manager.NotificationManager;
 import com.orange.paddock.suma.business.model.SubscriptionDto;
 import com.orange.paddock.suma.dao.mongodb.repository.SubscriptionRepository;
@@ -22,7 +26,16 @@ public abstract class AbstractSubscriptionNotificationManagerTest {
 	protected NotificationManager manager;
 	
 //	@MockBean
+//	protected PdkLogIdBean loggerId;
+	
+//	@MockBean
 //	protected SubscriptionRepository repository;
+	
+	@Bean
+	@Scope(value = "request", proxyMode = ScopedProxyMode.TARGET_CLASS)
+	public PdkLogIdBean loggerId() {
+		return new PdkLogIdBean();
+	}
 
 	protected static final String SERVICE_ID = "SERVICE_ID";
 	protected static final String TRANSACTION_ID = "TRANSACTION_ID";

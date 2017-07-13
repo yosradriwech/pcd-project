@@ -11,10 +11,10 @@
 	
 	<appender name="technical-log-appender"
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${logs.directory}/PA-PDK-SUMA-technical-test.log
+		<file>${logs.directory}/PA-PDK-SUMA-technical.log
 		</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>${logs.directory}/archive/PA-PDK-SUMA-technical-test.log.%d{yyyyMMdd}.gz
+			<fileNamePattern>${logs.directory}/archive/PA-PDK-SUMA-technical.log.%d{yyyyMMdd}.gz
 			</fileNamePattern>
 			<maxHistory>30</maxHistory>
 		</rollingPolicy>
@@ -119,6 +119,39 @@
 		</encoder>
 	</appender>
 	
+	<appender name="internal-notification-sub-appender"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${logs.directory}/PA-PDK-SUMA-SUB-Internal.log
+		</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${logs.directory}/archive/PA-PDK-SUMA-SUB-Internal.log.%d{yyyyMMdd}.gz
+			</fileNamePattern>
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%d{yyyy/MM/dd HH:mm:ss,Europe/Paris} [%thread] %-5level
+				%logger{36} - %m %throwable{full}%n
+			</pattern>
+		</encoder>
+	</appender>
+	
+	<appender name="internal-notification-unsub-appender"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${logs.directory}/PA-PDK-SUMA-UNSUB-Internal.log
+		</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${logs.directory}/archive/PA-PDK-SUMA-UNSUB-Internal.log.%d{yyyyMMdd}.gz
+			</fileNamePattern>
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%d{yyyy/MM/dd HH:mm:ss,Europe/Paris} [%thread] %-5level
+				%logger{36} - %m %throwable{full}%n
+			</pattern>
+		</encoder>
+	</appender>
+	
+	
 	<logger name="ccgw-subscription-logger" level="DEBUG" additivity="false">
 		<appender-ref ref="ccgw-subscription-appender" />
 	</logger>
@@ -141,6 +174,14 @@
 	
 	<logger name="north-notification-logger" level="DEBUG" additivity="false">
 		<appender-ref ref="north-notification-appender" />
+	</logger>
+	
+	<logger name="internal-notification-sub-logger">
+		<appender-ref ref="internal-notification-sub-appender"></appender-ref>
+	</logger>
+	
+	<logger name="internal-notification-unsub-logger">
+		<appender-ref ref="internal-notification-unsub-appender"></appender-ref>
 	</logger>
 
 	

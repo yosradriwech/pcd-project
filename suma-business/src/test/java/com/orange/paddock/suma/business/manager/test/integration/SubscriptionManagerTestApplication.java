@@ -9,9 +9,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.data.mongodb.config.EnableMongoAuditing;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
+import com.orange.paddock.commons.log.PdkLogIdBean;
 import com.orange.paddock.suma.business.factory.CcgwIntegrationErrorExceptionFactory;
 import com.orange.paddock.suma.business.factory.CcgwInternalErrorExceptionFactory;
 import com.orange.paddock.suma.business.factory.IExceptionFactory;
@@ -57,6 +60,12 @@ public class SubscriptionManagerTestApplication {
 	@Bean
 	public WTApiClient wtClient() {
 		return new WTApiClient();
+	}
+	
+	@Bean
+	@Scope(value = "request", proxyMode = ScopedProxyMode.TARGET_CLASS)
+	public PdkLogIdBean loggerId() {
+		return new PdkLogIdBean();
 	}
 
 	@Bean

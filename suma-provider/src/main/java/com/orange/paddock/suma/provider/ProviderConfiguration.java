@@ -38,10 +38,4 @@ public class ProviderConfiguration {
 		return new NorthNotificationLogger();
 	}
 	
-	@Bean
-	@Scope(value = "request", proxyMode = ScopedProxyMode.TARGET_CLASS)
-	public PdkLogIdBean loggerId() {
-		return new PdkLogIdBean();
-	}
-
 }
