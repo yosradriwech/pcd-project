@@ -34,7 +34,7 @@
 		<wt.version>2.0.3</wt.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<application.name>PA-PDK-SUMA</application.name>
-		<application.version>G01R01C0</application.version>
+		<application.version>${sumaVersion}</application.version>
 		<application.title>Subscription manager</application.title>
 		<package.name>${application.name}-${application.version}</package.name>
 	</properties>
