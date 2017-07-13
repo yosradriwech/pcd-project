@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import com.orange.paddock.commons.log.PdkLogIdBean;
 import com.orange.paddock.suma.business.manager.SubscriptionManager;
 import com.orange.paddock.suma.dao.mongodb.repository.SubscriptionRepository;
 import com.orange.paddock.suma.provider.rest.SubscriptionRestController;
@@ -54,6 +55,9 @@ public abstract class AbstractControllerTest {
 
 	@Autowired
 	protected SubscriptionRestController restController;
+	
+	@MockBean
+	protected PdkLogIdBean loggerId;
 	
 	@MockBean
 	protected SubscriptionRepository repository;

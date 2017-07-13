@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jaxws="http://cxf.apache.org/jaxws"
+	xmlns:http-conf="http://cxf.apache.org/transports/http/configuration"
+	xmlns:sec="http://cxf.apache.org/configuration/security"
+	xsi:schemaLocation="http://cxf.apache.org/transports/http/configuration http://cxf.apache.org/schemas/configuration/http-conf.xsd
+    http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd 
+    http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+
+	
+	<jaxws:client id="ccgwSubscriptionPort"
+	serviceClass="com.orange.paddock.suma.consumer.ccgw.susbcription.model.CcgwSubscriptionPortType"
+	address="${ccgw.endpoint}">
+	</jaxws:client>
+
+	
+	<http-conf:conduit
+	name="{https://ccgw.orange.pl/api/2.1}CcgwSubscriptionPortType.http-conduit">
+
+
+	<http-conf:client CacheControl="no-cache"
+	ReceiveTimeout="40000" ConnectionTimeout="40000" AllowChunking="false"
+	AutoRedirect="false" ProxyServer="${ccgw.proxy.host:}"
+	ProxyServerPort="${ccgw.proxy.port:3128}" ProxyServerType="HTTP" />
+	<http-conf:proxyAuthorization>
+	<sec:UserName>${ccgw.proxy.credentials.login:}</sec:UserName>
+	<sec:Password>${ccgw.proxy.credentials.password:}</sec:Password>
+	<sec:AuthorizationType>Basic</sec:AuthorizationType>
+	</http-conf:proxyAuthorization>
+	</http-conf:conduit>
+
+</beans>

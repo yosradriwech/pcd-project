@@ -26,6 +26,7 @@ import com.orange.paddock.suma.business.manager.SubscriptionStatusUtils;
 import com.orange.paddock.suma.business.manager.test.AbstractSubscriptionManagerTest;
 import com.orange.paddock.suma.business.mapper.SubscriptionDtoMapper;
 import com.orange.paddock.suma.business.model.SubscriptionDto;
+import com.orange.paddock.suma.business.model.SubscriptionResponse;
 import com.orange.paddock.suma.consumer.ccgw.client.CcgwClient;
 import com.orange.paddock.suma.consumer.ccgw.exceptions.CcgwClientException;
 import com.orange.paddock.suma.consumer.ccgw.exceptions.CcgwNotRespondingException;
@@ -93,15 +94,15 @@ public class SubscriptionManagerSubscribeUnitTest extends AbstractSubscriptionMa
 		initializeMocksForSuccessful();
 		SubscriptionDto subscriptionDto = new SubscriptionDto();
 		subscriptionDto = initializeValidSubscriptionDto();
-		String subscriptionId = null;
+		SubscriptionResponse subscription = null;
 		try {
-			subscriptionId = subscriptionManager.subscribe(subscriptionDto, endUserIdValue, mco);
+			subscription = subscriptionManager.subscribe(subscriptionDto, endUserIdValue, mco);
 		} catch (AbstractSumaException e) {
 			TECHNICAL_LOGGER.error("Subscribe unit TEST error " + e);
 			throw e;
 		}
-		TECHNICAL_LOGGER.debug("Test result : subscriptionId {}", subscriptionId);
-		Assert.assertEquals(subscriptionId, SUBSCRIPTION_ID);
+		TECHNICAL_LOGGER.debug("Test result : subscriptionId {}", subscription.getSubscriptionId());
+		Assert.assertEquals(subscription.getCcgwSubscriptionId(), SUBSCRIPTION_ID);
 	}
 
 	@Test(expected = SumaWtApiIntegrationException.class)
@@ -116,14 +117,14 @@ public class SubscriptionManagerSubscribeUnitTest extends AbstractSubscriptionMa
 		SubscriptionDto subscriptionDto = new SubscriptionDto();
 		subscriptionDto = initializeValidSubscriptionDto();
 		subscriptionDto.setEndUserId(PdkAcrUtils.ACR_ORANGE_API_TOKEN);
-		String subscriptionId = null;
+		SubscriptionResponse subscription = null;
 		try {
-			subscriptionId = subscriptionManager.subscribe(subscriptionDto, endUserIdValue, mco);
+			subscription = subscriptionManager.subscribe(subscriptionDto, endUserIdValue, mco);
 		} catch (AbstractSumaException e) {
 			TECHNICAL_LOGGER.error("Subscribe unit TEST error " + e);
 			throw e;
 		}
-		Assert.assertNull(subscriptionId);
+		Assert.assertNull(subscription.getSubscriptionId());
 	}
 
 	@Test
@@ -137,14 +138,14 @@ public class SubscriptionManagerSubscribeUnitTest extends AbstractSubscriptionMa
 		subscriptionDto = initializeValidSubscriptionDto();
 		subscriptionDto.setEndUserId(PdkAcrUtils.ACR_ISE2);
 
-		String subscriptionId = null;
+		SubscriptionResponse subscription = null;
 		try {
-			subscriptionId = subscriptionManager.subscribe(subscriptionDto, endUserIdValue, mco);
+			subscription = subscriptionManager.subscribe(subscriptionDto, endUserIdValue, mco);
 		} catch (AbstractSumaException e1) {
 			TECHNICAL_LOGGER.error("Subscribe unit TEST error " + e1);
 			throw e1;
 		}
-		Assert.assertEquals(subscriptionId, SUBSCRIPTION_ID);
+		Assert.assertEquals(subscription.getCcgwSubscriptionId(), SUBSCRIPTION_ID);
 	}
 
 	@Test(expected = SumaWtApiInternalErrorException.class)
@@ -160,14 +161,14 @@ public class SubscriptionManagerSubscribeUnitTest extends AbstractSubscriptionMa
 		subscriptionDto = initializeValidSubscriptionDto();
 		subscriptionDto.setEndUserId(PdkAcrUtils.ACR_ORANGE_API_TOKEN);
 
-		String subscriptionId = null;
+		SubscriptionResponse subscription = null;
 		try {
-			subscriptionId = subscriptionManager.subscribe(subscriptionDto, endUserIdValue, mco);
+			subscription = subscriptionManager.subscribe(subscriptionDto, endUserIdValue, mco);
 		} catch (AbstractSumaException e) {
 			TECHNICAL_LOGGER.error("Subscribe unit TEST error " + e);
 			throw e;
 		}
-		Assert.assertNull(subscriptionId);
+		Assert.assertNull(subscription.getCcgwSubscriptionId());
 	}
 
 	@Test(expected = SumaWtApiAuthenticationFailureException.class)
@@ -183,14 +184,14 @@ public class SubscriptionManagerSubscribeUnitTest extends AbstractSubscriptionMa
 		subscriptionDto = initializeValidSubscriptionDto();
 		subscriptionDto.setEndUserId(PdkAcrUtils.ACR_ORANGE_API_TOKEN);
 
-		String subscriptionId = null;
+		SubscriptionResponse subscription = null;
 		try {
-			subscriptionId = subscriptionManager.subscribe(subscriptionDto, endUserIdValue, mco);
+			subscription = subscriptionManager.subscribe(subscriptionDto, endUserIdValue, mco);
 		} catch (AbstractSumaException e) {
 			TECHNICAL_LOGGER.error("Subscribe unit TEST error " + e);
 			throw e;
 		}
-		Assert.assertNull(subscriptionId);
+		Assert.assertNull(subscription.getSubscriptionId());
 	}
 
 	@Test(expected = SumaWtApiIntegrationException.class)
@@ -206,14 +207,14 @@ public class SubscriptionManagerSubscribeUnitTest extends AbstractSubscriptionMa
 		subscriptionDto = initializeValidSubscriptionDto();
 		subscriptionDto.setEndUserId(PdkAcrUtils.ACR_ORANGE_API_TOKEN);
 
-		String subscriptionId = null;
+		SubscriptionResponse subscription = null;
 		try {
-			subscriptionId = subscriptionManager.subscribe(subscriptionDto, endUserIdValue, mco);
+			subscription = subscriptionManager.subscribe(subscriptionDto, endUserIdValue, mco);
 		} catch (AbstractSumaException e) {
 			TECHNICAL_LOGGER.error("Subscribe unit TEST error " + e);
 			throw e;
 		}
-		Assert.assertNull(subscriptionId);
+		Assert.assertNull(subscription.getSubscriptionId());
 	}
 
 	@Test(expected = SumaInternalErrorException.class)
@@ -227,14 +228,14 @@ public class SubscriptionManagerSubscribeUnitTest extends AbstractSubscriptionMa
 		subscriptionDto = initializeValidSubscriptionDto();
 		subscriptionDto.setEndUserId(PdkAcrUtils.ACR_ORANGE_API_TOKEN);
 
-		String subscriptionId = null;
+		SubscriptionResponse subscription = null;
 		try {
-			subscriptionId = subscriptionManager.subscribe(subscriptionDto, endUserIdValue, mco);
+			subscription = subscriptionManager.subscribe(subscriptionDto, endUserIdValue, mco);
 		} catch (AbstractSumaException e1) {
 			TECHNICAL_LOGGER.error("Subscribe unit TEST error " + e1);
 			throw e1;
 		}
-		Assert.assertNull(subscriptionId);
+		Assert.assertNull(subscription.getSubscriptionId());
 	}
 
 	@Test
@@ -251,16 +252,16 @@ public class SubscriptionManagerSubscribeUnitTest extends AbstractSubscriptionMa
 		subscriptionDto = initializeValidSubscriptionDto();
 		subscriptionDto.setEndUserId(PdkAcrUtils.ACR_ORANGE_API_TOKEN);
 
-		String subscriptionId = null;
+		SubscriptionResponse subscription = null;
 		try {
-			subscriptionId = subscriptionManager.subscribe(subscriptionDto, endUserIdValue, mco);
+			subscription = subscriptionManager.subscribe(subscriptionDto, endUserIdValue, mco);
 			String statusMustBeSubscriptionError = subscriptionRepository.findOneBySubscriptionId(SUBSCRIPTION_ID).getStatus();
 			Assert.assertEquals(statusMustBeSubscriptionError, SubscriptionStatusUtils.STATUS_SUBSCRIPTION_ERROR);
 		} catch (AbstractSumaException e1) {
 			TECHNICAL_LOGGER.error("Subscribe unit TEST error " + e1);
 			throw e1;
 		}
-		Assert.assertNull(subscriptionId);
+		Assert.assertNull(subscription.getCcgwSubscriptionId());
 	}
 
 	@Test(expected = SumaCcgwUnresponsiveException.class)
@@ -277,14 +278,14 @@ public class SubscriptionManagerSubscribeUnitTest extends AbstractSubscriptionMa
 		subscriptionDto = initializeValidSubscriptionDto();
 		subscriptionDto.setEndUserId(PdkAcrUtils.ACR_ORANGE_API_TOKEN);
 
-		String subscriptionId = null;
+		SubscriptionResponse subscription = null;
 		try {
-			subscriptionId = subscriptionManager.subscribe(subscriptionDto, endUserIdValue, mco);
+			subscription = subscriptionManager.subscribe(subscriptionDto, endUserIdValue, mco);
 		} catch (AbstractSumaException e1) {
 			TECHNICAL_LOGGER.error("Subscribe unit TEST error " + e1);
 			throw e1;
 		}
-		Assert.assertNull(subscriptionId);
+		Assert.assertNull(subscription.getSubscriptionId());
 
 	}
 
@@ -304,14 +305,14 @@ public class SubscriptionManagerSubscribeUnitTest extends AbstractSubscriptionMa
 		subscriptionDto = initializeValidSubscriptionDto();
 		subscriptionDto.setEndUserId(PdkAcrUtils.ACR_ORANGE_API_TOKEN);
 
-		String subscriptionId = null;
+		SubscriptionResponse subscription = null;
 		try {
-			subscriptionId = subscriptionManager.subscribe(subscriptionDto, endUserIdValue, mco);
+			subscription = subscriptionManager.subscribe(subscriptionDto, endUserIdValue, mco);
 		} catch (AbstractSumaException e1) {
 			TECHNICAL_LOGGER.error("Subscribe unit TEST error " + e1);
 			throw e1;
 		}
-		Assert.assertNull(subscriptionId);
+		Assert.assertNull(subscription.getSubscriptionId());
 	}
 
 	@Test(expected = SumaCcgwIntegrationErrorException.class)
@@ -330,14 +331,14 @@ public class SubscriptionManagerSubscribeUnitTest extends AbstractSubscriptionMa
 		subscriptionDto = initializeValidSubscriptionDto();
 		subscriptionDto.setEndUserId(PdkAcrUtils.ACR_ORANGE_API_TOKEN);
 
-		String subscriptionId = null;
+		SubscriptionResponse subscription = null;
 		try {
-			subscriptionId = subscriptionManager.subscribe(subscriptionDto, endUserIdValue, mco);
+			subscription = subscriptionManager.subscribe(subscriptionDto, endUserIdValue, mco);
 		} catch (AbstractSumaException e1) {
 			TECHNICAL_LOGGER.error("Subscribe unit TEST error " + e1);
 			throw e1;
 		}
-		Assert.assertNull(subscriptionId);
+		Assert.assertNull(subscription.getSubscriptionId());
 	}
 
 }

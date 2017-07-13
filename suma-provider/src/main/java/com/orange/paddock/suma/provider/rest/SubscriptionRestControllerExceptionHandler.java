@@ -12,7 +12,7 @@ import com.orange.paddock.suma.provider.rest.model.SumaError;
 
 @ControllerAdvice
 public class SubscriptionRestControllerExceptionHandler {
-	
+
 	@ExceptionHandler(value = AbstractSumaException.class)
 	public ResponseEntity<SumaError> handleInteralException(HttpServletRequest req, AbstractSumaException e) throws Exception {
 		
@@ -21,8 +21,8 @@ public class SubscriptionRestControllerExceptionHandler {
 		error.setInternalErrorCode(e.getInternalErrorCode());
 		error.setErrorCode(e.getErrorCode());
 		error.setHttpStatusCode(e.getHttpStatusCode());
-		
-		// LOG EXCEPTION HERE
+
+		// TODO LOG EXCEPTION HERE
 		
 		return new ResponseEntity<SumaError>(error, HttpStatus.BAD_REQUEST);
 	}

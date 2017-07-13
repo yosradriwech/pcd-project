@@ -9,6 +9,8 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+import javax.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +32,7 @@ import com.orange.paddock.suma.business.exception.wt.SumaWtApiInternalErrorExcep
 import com.orange.paddock.suma.business.factory.IExceptionFactory;
 import com.orange.paddock.suma.business.mapper.SubscriptionDtoMapper;
 import com.orange.paddock.suma.business.model.SubscriptionDto;
+import com.orange.paddock.suma.business.model.SubscriptionResponse;
 import com.orange.paddock.suma.consumer.ccgw.client.CcgwClient;
 import com.orange.paddock.suma.consumer.ccgw.exceptions.CcgwClientException;
 import com.orange.paddock.suma.consumer.ccgw.exceptions.CcgwNotRespondingException;
@@ -60,7 +63,7 @@ public class SubscriptionManager {
 	@Autowired
 	private SubscriptionRepository subscriptionRepository;
 
-	@Autowired
+	@Resource
 	private Map<String, IExceptionFactory> exceptionFactoryMapping;
 	
 	/**
@@ -71,10 +74,12 @@ public class SubscriptionManager {
 	 * @return subscriptionId
 	 * @throws AbstractSumaException
 	 */
-	public String subscribe(SubscriptionDto subscriptionDto, String endUserIdValue, String mco) throws AbstractSumaException {
+	public SubscriptionResponse subscribe(SubscriptionDto subscriptionDto, String endUserIdValue, String mco) throws AbstractSumaException {
 		TECHNICAL_LOGGER.debug("Starting subscription business logic with subscriptionDto: {} and endUserIdValue: {}", subscriptionDto,
 				endUserIdValue);
 
+		SubscriptionResponse subId = new SubscriptionResponse();
+		
 		/** MSISDN to store in mongo: retrieved from WT or subscriptionDto body and formatted with tel:+ */
 		String userMsisdnToStore = null;
 
@@ -145,7 +150,8 @@ public class SubscriptionManager {
 		Subscription subscriptionSessionToStore = new Subscription();
 		subscriptionSessionToStore = subscriptionMapper.map(subscriptionDto, Subscription.class);
 		subscriptionSessionToStore.setSubscriptionId(UUID.randomUUID().toString());
-		subscriptionSessionToStore.setTransactionId(UUID.randomUUID().toString());
+		String generatedTransactionId = UUID.randomUUID().toString();
+		subscriptionSessionToStore.setTransactionId(generatedTransactionId);
 		subscriptionSessionToStore.setEndUserId(userMsisdnToStore);
 
 		subscriptionSessionToStore.setStatus(SubscriptionStatusUtils.STATUS_PENDING);
@@ -167,6 +173,7 @@ public class SubscriptionManager {
 
 		try {
 			TECHNICAL_LOGGER.debug("Trying to call CCGW..");
+			sumaSubscriptionRequest.setTransactionId(generatedTransactionId);
 			subscriptionId = ccgwClient.subscribe(sumaSubscriptionRequest);
 
 			TECHNICAL_LOGGER.debug("Received CCGW response {}", subscriptionId);
@@ -196,18 +203,7 @@ public class SubscriptionManager {
 			storedSubscription.setStatus(SubscriptionStatusUtils.STATUS_SUBSCRIPTION_ERROR);
 			subscriptionRepository.save(storedSubscription);
 			
-			IExceptionFactory exceptionFactory = null;
-			for (String pattern : exceptionFactoryMapping.keySet()) {
-				if (Pattern.matches(pattern, e.getCcgwFaultStatusCode())) {
-					exceptionFactory = exceptionFactoryMapping.get(pattern);
-				}
-			}
-			
-			if (null == exceptionFactory) {
-				throw new SumaCcgwIntegrationErrorException();
-			}
-			
-			exceptionFactory.throwException();
+			mapCcgwErrorAndThrowSumaException(e.getCcgwFaultStatusCode());
 			
 		} catch (Exception e) {
 			TECHNICAL_LOGGER.error("An unexpected error occured while calling CCGW {}", e);
@@ -215,8 +211,12 @@ public class SubscriptionManager {
 			subscriptionRepository.save(storedSubscription);
 			throw new SumaCcgwIntegrationErrorException();
 		}
-
-		return subscriptionId;
+		
+		subId.setMsisdn(PdkMsisdnUtils.getMsisdnWithoutPrefix(userMsisdnToStore));
+		subId.setSubscriptionId(subscriptionSessionToStore.getSubscriptionId());
+		subId.setCcgwSubscriptionId(subscriptionId);
+		
+		return subId;
 	}
 
 	/**
@@ -285,18 +285,7 @@ public class SubscriptionManager {
 				Subscription updatedSession =	subscriptionRepository.save(subscriptionSessionFound);
 				subscriptionStatus = updatedSession.getStatus();
 				
-				IExceptionFactory exceptionFactory = null;
-				for (String pattern : exceptionFactoryMapping.keySet()) {
-					if (Pattern.matches(pattern, e.getCcgwFaultStatusCode())) {
-						exceptionFactory = exceptionFactoryMapping.get(pattern);
-					}
-				}
-				
-				if (null == exceptionFactory) {
-					throw new SumaCcgwIntegrationErrorException();
-				}
-				
-				exceptionFactory.throwException();
+				mapCcgwErrorAndThrowSumaException(e.getCcgwFaultStatusCode());
 				
 			} catch (Exception e) {
 				TECHNICAL_LOGGER.error("An unexpected error occured while calling CCGW {}", e);
@@ -344,4 +333,23 @@ public class SubscriptionManager {
 
 		return subscriptionResponseDto;
 	}
+	
+	private void mapCcgwErrorAndThrowSumaException(String ccgwFaultStatusCode) {
+		TECHNICAL_LOGGER.debug("map CCGW error code {}", ccgwFaultStatusCode);
+		
+		IExceptionFactory exceptionFactory = null;
+		for (String pattern : exceptionFactoryMapping.keySet()) {
+			if (Pattern.matches(pattern, ccgwFaultStatusCode)) {
+				TECHNICAL_LOGGER.debug("Found matching pattern {}", pattern);
+				exceptionFactory = exceptionFactoryMapping.get(pattern);
+			}
+		}
+		
+		if (null == exceptionFactory) {
+			throw new SumaCcgwIntegrationErrorException();
+		}
+		
+		exceptionFactory.throwException();
+	}
+	
 }

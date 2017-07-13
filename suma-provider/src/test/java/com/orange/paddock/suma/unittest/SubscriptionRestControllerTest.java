@@ -1,6 +1,7 @@
 package com.orange.paddock.suma.unittest;
 
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -8,12 +9,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.Date;
+
 import org.junit.Test;
 import org.springframework.http.MediaType;
 
 import com.orange.paddock.commons.http.PdkHeader;
 import com.orange.paddock.suma.AbstractControllerTest;
 import com.orange.paddock.suma.business.model.SubscriptionDto;
+import com.orange.paddock.suma.business.model.SubscriptionResponse;
 
 public class SubscriptionRestControllerTest extends AbstractControllerTest {
 
@@ -21,6 +25,8 @@ public class SubscriptionRestControllerTest extends AbstractControllerTest {
 	public void subscribeTest() throws Exception {
 
 		String content = readResourceFile("request/subscription_request.json");
+		
+		given(manager.subscribe(any(SubscriptionDto.class), any(String.class), any(String.class))).willReturn(new SubscriptionResponse());
 
 		mockMvc.perform(
 				post(SUMA_ENDPOINT_SUBSCRIPTION).accept(MediaType.APPLICATION_JSON)
@@ -33,6 +39,8 @@ public class SubscriptionRestControllerTest extends AbstractControllerTest {
 
 		String content = readResourceFile("request/subscription_oat_request.json");
 		String headerValue = "OAT";
+		
+		given(manager.subscribe(any(SubscriptionDto.class), any(String.class), any(String.class))).willReturn(new SubscriptionResponse());
 
 		mockMvc.perform(
 				post(SUMA_ENDPOINT_SUBSCRIPTION).header(PdkHeader.ORANGE_API_TOKEN, headerValue)
@@ -47,6 +55,8 @@ public class SubscriptionRestControllerTest extends AbstractControllerTest {
 		String content = String.format(readResourceFile("request/subscription_ise2_request.json"));
 		String headerValue = "ISE2";
 		String mco = "OFR";
+		
+		given(manager.subscribe(any(SubscriptionDto.class), any(String.class), any(String.class))).willReturn(new SubscriptionResponse());
 
 		mockMvc.perform(
 				post(SUMA_ENDPOINT_SUBSCRIPTION).header(PdkHeader.ORANGE_ISE2, headerValue).header(PdkHeader.ORANGE_MCO, mco)
@@ -76,6 +86,7 @@ public class SubscriptionRestControllerTest extends AbstractControllerTest {
 		subscriptionDto.setAmount(amount);
 		subscriptionDto.setTaxedAmount(taxedAmount);
 		subscriptionDto.setCurrency(currency);
+		subscriptionDto.setCreationDate(new Date());
 //		subscriptionDto.isAdult();
 		subscriptionDto.setStatus("ACTIVE");
 		

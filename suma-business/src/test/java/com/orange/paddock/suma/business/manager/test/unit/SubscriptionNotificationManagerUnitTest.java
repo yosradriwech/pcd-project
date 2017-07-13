@@ -465,6 +465,4 @@ public class SubscriptionNotificationManagerUnitTest extends AbstractSubscriptio
 		assertEquals(SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_ARCHIVED, result);
 	}
 	
-	
-
 }

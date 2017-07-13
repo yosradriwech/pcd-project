@@ -1,6 +1,6 @@
 # File managed by Ansible, do not edit manually
 [Unit]
-Description=SMS Wrapper
+Description=Subscription Manager
 After=default.target
 [Service]
 User=suma

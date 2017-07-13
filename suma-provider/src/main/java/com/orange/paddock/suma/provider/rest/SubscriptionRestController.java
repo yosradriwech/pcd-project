@@ -1,6 +1,7 @@
 package com.orange.paddock.suma.provider.rest;
 
 import java.net.URI;
+import java.text.SimpleDateFormat;
 import java.util.Objects;
 
 import javax.servlet.http.HttpServletRequest;
@@ -18,13 +19,20 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.orange.paddock.commons.date.PdkDateUtils;
 import com.orange.paddock.commons.http.PdkHeader;
+import com.orange.paddock.commons.log.PdkLogIdBean;
 import com.orange.paddock.commons.msisdn.PdkMsisdnUtils;
 import com.orange.paddock.commons.oneapi.PdkAcrUtils;
 import com.orange.paddock.suma.business.exception.AbstractSumaException;
 import com.orange.paddock.suma.business.exception.SumaBadRequestException;
 import com.orange.paddock.suma.business.manager.SubscriptionManager;
+import com.orange.paddock.suma.business.manager.SubscriptionStatusUtils;
 import com.orange.paddock.suma.business.model.SubscriptionDto;
+import com.orange.paddock.suma.business.model.SubscriptionResponse;
+import com.orange.paddock.suma.provider.log.NorthGetSubUnsubStatusLogger;
+import com.orange.paddock.suma.provider.log.NorthSubscriptionLogger;
+import com.orange.paddock.suma.provider.log.NorthUnsubscriptionLogger;
 
 @RestController
 @RequestMapping("subscription/v1")
@@ -37,74 +45,148 @@ public class SubscriptionRestController {
 	@Autowired
 	private SubscriptionManager manager;
 
+	@Autowired
+	private PdkLogIdBean loggerId;
+
+	@Autowired
+	private NorthSubscriptionLogger northSubscriptionLogger;
+
+	@Autowired
+	private NorthUnsubscriptionLogger northUnsubscriptionLogger;
+
+	@Autowired
+	private NorthGetSubUnsubStatusLogger northGetSubUnsubStatusLogger;
+
 	@PostMapping("/subscriptions")
-	public ResponseEntity<URI> subscribe(HttpServletRequest request, @RequestBody(required=true) SubscriptionDto body)
+	public ResponseEntity<URI> subscribe(HttpServletRequest request, @RequestBody(required = true) SubscriptionDto body)
 			throws AbstractSumaException {
 
 		LOGGER.debug("Subscription request receive with service '{}' for endUser '{}'", body.getServiceId(),
 				body.getEndUserId());
 
+		northSubscriptionLogger.setInternalId(loggerId.getInternalId());
+		northSubscriptionLogger.setRequestTimestamp(PdkDateUtils.getCurrentDateTimestamp());
+
+		URI location = null;
 		String endUserIdValue = "msisdn";
 		String mco = null;
-		
-		if (body.getEndUserId().equals(PdkAcrUtils.ACR_ORANGE_API_TOKEN) && request.getHeader(PdkHeader.ORANGE_API_TOKEN) != null
-				&& !"".equals(request.getHeader(PdkHeader.ORANGE_API_TOKEN))) {
-			LOGGER.debug("EndUserId is an OAT and Header value is '{}'", request.getHeader(PdkHeader.ORANGE_API_TOKEN));
-			endUserIdValue = request.getHeader(PdkHeader.ORANGE_API_TOKEN);
+		try {
+			if (!Objects.isNull(validateSubscriptionRequestInputs(body))) {
+				LOGGER.error("Subscription -- request invalid input");
+				throw new SumaBadRequestException(validateSubscriptionRequestInputs(body));
+			}
 
-		} else if (body.getEndUserId().equals(PdkAcrUtils.ACR_ORANGE_API_TOKEN) && (request
-				.getHeader(PdkHeader.ORANGE_API_TOKEN) == null	|| "".equals(request.getHeader(PdkHeader.ORANGE_API_TOKEN)))) {
+			if (body.getEndUserId().equals(PdkAcrUtils.ACR_ORANGE_API_TOKEN)) {
 
-			LOGGER.error("Missing header OrangeAPIToken");
-			throw new SumaBadRequestException("Missing header Orange API Token.");
-		}
-		
-		if (body.getEndUserId().equals(PdkAcrUtils.ACR_ISE2) && request.getHeader(PdkHeader.ORANGE_ISE2) != null
-				&& !"".equals(request.getHeader(PdkHeader.ORANGE_ISE2))) {
-			if (request.getHeader(PdkHeader.ORANGE_MCO) != null && !"".equals(request.getHeader(PdkHeader.ORANGE_MCO))) {
+				if (request.getHeader(PdkHeader.ORANGE_API_TOKEN) == null
+						|| "".equals(request.getHeader(PdkHeader.ORANGE_API_TOKEN))) {
+					LOGGER.error("Subscription -- Missing header OrangeAPIToken");
+					throw new SumaBadRequestException("Missing header Orange API Token.");
+				}
 
-				LOGGER.debug("EndUserId is an ISE2, Header ISE2 value is '{}' and header MCO value is '{}'",
+				LOGGER.debug("Subscription -- EndUserId is an OAT with value is '{}'",
+						request.getHeader(PdkHeader.ORANGE_API_TOKEN));
+
+				northSubscriptionLogger.setOrangeApiToken(request.getHeader(PdkHeader.ORANGE_API_TOKEN));
+
+				endUserIdValue = request.getHeader(PdkHeader.ORANGE_API_TOKEN);
+
+			} else if (body.getEndUserId().equals(PdkAcrUtils.ACR_ISE2)) {
+
+				if (request.getHeader(PdkHeader.ORANGE_ISE2) == null
+						|| "".equals(request.getHeader(PdkHeader.ORANGE_ISE2))) {
+					LOGGER.error("Subscription -- Missing header ISE2");
+					throw new SumaBadRequestException("Missing header ISE2.");
+				}
+
+				if (request.getHeader(PdkHeader.ORANGE_MCO) == null
+						|| "".equals(request.getHeader(PdkHeader.ORANGE_MCO))) {
+					LOGGER.error("Subscription -- Missing required header MCO");
+					throw new SumaBadRequestException("Missing required header MCO.");
+				}
+
+				LOGGER.debug(
+						"Subscription -- EndUserId is an ISE2, Header ISE2 value is '{}' and header MCO value is '{}'",
 						request.getHeader(PdkHeader.ORANGE_ISE2), request.getHeader(PdkHeader.ORANGE_MCO));
+
+				northSubscriptionLogger.setIse2(request.getHeader(PdkHeader.ORANGE_ISE2));
+				northSubscriptionLogger.setMco(request.getHeader(PdkHeader.ORANGE_MCO));
 
 				endUserIdValue = request.getHeader(PdkHeader.ORANGE_ISE2);
 				mco = request.getHeader(PdkHeader.ORANGE_MCO);
-			} else {
-				LOGGER.error("Missing required header MCO");
-				throw new SumaBadRequestException("Missing required header MCO.");
 			}
-		} else if (body.getEndUserId().equals(PdkAcrUtils.ACR_ISE2) && (request.getHeader(PdkHeader.ORANGE_ISE2) == null
-				 || "".equals(request.getHeader(PdkHeader.ORANGE_ISE2)))) {
-			LOGGER.error("Missing header ISE2");
-			throw new SumaBadRequestException("Missing header ISE2.");
-		}
-		
-		if (!Objects.isNull(validateSubscriptionRequestInputs(body))) {
-			throw new SumaBadRequestException(validateSubscriptionRequestInputs(body));
-		}
-		
-		LOGGER.debug("Inputs for subscribe method are OK !");
 
-		LOGGER.debug("Subscription with EndUserIdValue: '{}'", endUserIdValue);
-		String subscriptionId = manager.subscribe(body, endUserIdValue, mco);
+			LOGGER.debug("Inputs for subscribe method are OK !");
 
-		URI location = null;
-		try {
-			// build Location header
-			location = new URI(String.format(SUMA_ENDPOINT_SUBSCRIPTION, subscriptionId));
-		} catch (Exception e) {
-			LOGGER.error("Build internal location header error: '{}'", e.getMessage());
-			throw new SumaBadRequestException(e.getMessage());
+			northSubscriptionLogger.setServiceId(body.getServiceId());
+			northSubscriptionLogger.setOnBehalfOf(body.getOnBehalfOf());
+			northSubscriptionLogger.setEndUserId(body.getDescription());
+			northSubscriptionLogger.setCategoryCode(body.getCategoryCode());
+			northSubscriptionLogger.setAmount(String.valueOf(body.getAmount()));
+			northSubscriptionLogger.setTaxedAmount(String.valueOf(body.getTaxedAmount()));
+			northSubscriptionLogger.setCurrency(body.getCurrency());
+			northSubscriptionLogger.setIsAdult(String.valueOf(body.getIsAdult()));
+
+			LOGGER.debug("Subscription with EndUserIdValue: '{}'", endUserIdValue);
+			SubscriptionResponse subId = manager.subscribe(body, endUserIdValue, mco);
+
+			try {
+				// build Location header
+				location = new URI(String.format(SUMA_ENDPOINT_SUBSCRIPTION, subId.getCcgwSubscriptionId()));
+			} catch (Exception e) {
+				LOGGER.error("Build internal location header error: '{}'", e.getMessage());
+				throw new SumaBadRequestException(e.getMessage());
+			}
+
+			northSubscriptionLogger.setMsisdn(subId.getMsisdn());
+			northSubscriptionLogger.setSubscriptionId(subId.getSubscriptionId());
+			northSubscriptionLogger.setReturnedSubscriptionId(subId.getCcgwSubscriptionId());
+			northSubscriptionLogger.setHttpResponseCode(HttpStatus.CREATED.toString());
+		} catch (AbstractSumaException e) {
+			northSubscriptionLogger.setHttpResponseCode(String.valueOf(e.getHttpStatusCode()));
+			northSubscriptionLogger.setInternalErrorCode(e.getInternalErrorCode());
+			northSubscriptionLogger.setInternalErrorDescription(e.getErrorDescription());
+			northSubscriptionLogger.setReturnedErrorCode(e.getErrorCode());
+			throw e;
+		} finally {
+
+			northSubscriptionLogger.setResponseTimestamp(PdkDateUtils.getCurrentDateTimestamp());
+
+			northSubscriptionLogger.write();
 		}
-
 		return new ResponseEntity<>(location, HttpStatus.CREATED);
 	}
 
 	@DeleteMapping("/subscriptions/{subscriptionId}")
-	public ResponseEntity<Void> unsubscribe(HttpServletRequest request, @PathVariable String subscriptionId) throws AbstractSumaException {
+	public ResponseEntity<Void> unsubscribe(HttpServletRequest request, @PathVariable String subscriptionId)
+			throws AbstractSumaException {
 
 		LOGGER.debug("Unsubscription request receive for subscriptionId '{}'", subscriptionId);
 
-		manager.unsubscribe(subscriptionId);
+		northUnsubscriptionLogger.setInternalId(loggerId.getInternalId());
+		northUnsubscriptionLogger.setRequestTimestamp(PdkDateUtils.getCurrentDateTimestamp());
+		northUnsubscriptionLogger.setSubscriptionId(subscriptionId);
+		northUnsubscriptionLogger.setHttpResponseCode(String.valueOf(HttpStatus.NO_CONTENT));
+
+		try {
+			String status = manager.unsubscribe(subscriptionId);
+
+			if (null != status && (status.equals(SubscriptionStatusUtils.STATUS_ARCHIVED)
+					|| status.equals(SubscriptionStatusUtils.STATUS_WAITING_ARCHIVING))) {
+				northUnsubscriptionLogger.setIdempotency("true");
+			} else {
+				northUnsubscriptionLogger.setIdempotency("false");
+			}
+		} catch (AbstractSumaException e) {
+			northUnsubscriptionLogger.setHttpResponseCode(String.valueOf(e.getHttpStatusCode()));
+			northUnsubscriptionLogger.setInternalErrorCode(e.getInternalErrorCode());
+			northUnsubscriptionLogger.setInternalErrorDescription(e.getErrorDescription());
+			northUnsubscriptionLogger.setReturnedErrorCode(e.getErrorCode());
+			throw e;
+		} finally {
+			northUnsubscriptionLogger.setResponseTimestamp(PdkDateUtils.getCurrentDateTimestamp());
+			northUnsubscriptionLogger.write();
+		}
 
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
@@ -113,13 +195,48 @@ public class SubscriptionRestController {
 	public ResponseEntity<SubscriptionDto> getSubscriptionStatus(HttpServletRequest request,
 			@PathVariable String subscriptionId) throws AbstractSumaException {
 
+		northGetSubUnsubStatusLogger.setInternalId(loggerId.getInternalId());
+		northGetSubUnsubStatusLogger.setRequestTimestamp(PdkDateUtils.getCurrentDateTimestamp());
+		northGetSubUnsubStatusLogger.setSubscriptionId(subscriptionId);
+
 		LOGGER.debug("Get subscription status for subscriptionId '{}'", subscriptionId);
 
-		SubscriptionDto subscription = manager.getSubscriptionStatus(subscriptionId);
+		SubscriptionDto subscription = null;
+		try {
+			subscription = manager.getSubscriptionStatus(subscriptionId);
+
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+
+			northGetSubUnsubStatusLogger.setCreationDate(formatter.format(subscription.getCreationDate()));
+			northGetSubUnsubStatusLogger.setTransactionId(subscription.getTransactionId());
+			northGetSubUnsubStatusLogger.setServiceId(subscription.getServiceId());
+			northGetSubUnsubStatusLogger.setOnBehalfOf(subscription.getOnBehalfOf());
+			northGetSubUnsubStatusLogger.setEndUserId(subscription.getEndUserId());
+			northGetSubUnsubStatusLogger.setDescription(subscription.getDescription());
+			northGetSubUnsubStatusLogger.setCategoryCode(subscription.getCategoryCode());
+			northGetSubUnsubStatusLogger.setAmount(String.valueOf(subscription.getAmount()));
+			northGetSubUnsubStatusLogger.setTaxedAmount(String.valueOf(subscription.getTaxedAmount()));
+			northGetSubUnsubStatusLogger.setCurrency(subscription.getCurrency());
+			northGetSubUnsubStatusLogger.setIsAdult(String.valueOf(subscription.getIsAdult()));
+			northGetSubUnsubStatusLogger.setStatus(subscription.getStatus());
+
+			northGetSubUnsubStatusLogger.setHttpResponseCode(String.valueOf(HttpStatus.OK));
+			
+		} catch (AbstractSumaException e) {
+			northGetSubUnsubStatusLogger.setHttpResponseCode(String.valueOf(e.getHttpStatusCode()));
+			northGetSubUnsubStatusLogger.setInternalErrorCode(e.getInternalErrorCode());
+			northGetSubUnsubStatusLogger.setInternalErrorDescription(e.getErrorDescription());
+			northGetSubUnsubStatusLogger.setReturnedErrorCode(e.getErrorCode());
+			throw e;
+		} finally {
+			northGetSubUnsubStatusLogger.setResponseTimestamp(PdkDateUtils.getCurrentDateTimestamp());
+
+			northGetSubUnsubStatusLogger.write();
+		}
 
 		return new ResponseEntity<SubscriptionDto>(subscription, HttpStatus.OK);
 	}
-	
+
 	private String validateSubscriptionRequestInputs(SubscriptionDto subscriptionDto) {
 		String invalidValue = null;
 
@@ -146,13 +263,12 @@ public class SubscriptionRestController {
 		} else if (!Objects.isNull(subscriptionDto.getEndUserId())) {
 			// check if endUserId is well formatted
 			if (!PdkAcrUtils.ACR_ISE2.equals(subscriptionDto.getEndUserId())
-					&& !PdkAcrUtils.ACR_ORANGE_API_TOKEN.equals(subscriptionDto.getEndUserId())
-					&& !subscriptionDto.getEndUserId().startsWith(PdkMsisdnUtils.PREFIX_TEL + PdkMsisdnUtils.PREFIX_PLUS)) {
+					&& !PdkAcrUtils.ACR_ORANGE_API_TOKEN.equals(subscriptionDto.getEndUserId()) && !subscriptionDto
+							.getEndUserId().startsWith(PdkMsisdnUtils.PREFIX_TEL + PdkMsisdnUtils.PREFIX_PLUS)) {
 				invalidValue = "endUserId format";
 			}
 		}
-		
-		
+
 		return invalidValue;
 	}
 

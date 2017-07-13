@@ -76,7 +76,7 @@
 	<bean id="ccgwInternalErrorExceptionFactory" class="com.orange.paddock.suma.business.factory.CcgwInternalErrorExceptionFactory" />
 	
 	<util:map id="exceptionFactoryMapping">
-		<entry key="(?!321|510|512|513)(^1[0-9]{2}$|^2[0-9]{2}$|^3[0-9]{2}$|^4[0-9]{2}$|^5[0-9]{2}$)" value-ref="ccgwIntegrationErrorExceptionFactory" />
+		<entry key="(?!321|510|512|513)(^1[0-9]{2}$|^2[0-9]{2}$|^3[0-9]{2}$|^4[0-9]{2}$|^5[0-9]{2}$|628|629)" value-ref="ccgwIntegrationErrorExceptionFactory" />
 		<entry key="(?!628|629)(^6[0-9]{2}$|321|510|512|513)" value-ref="ccgwInternalErrorExceptionFactory" />
 	</util:map>
 
