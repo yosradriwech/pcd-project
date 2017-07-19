@@ -7,9 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.regex.Pattern;
-
-import javax.annotation.Resource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,21 +20,17 @@ import com.orange.paddock.suma.business.exception.SumaAlreadyRevokedSubException
 import com.orange.paddock.suma.business.exception.SumaInternalErrorException;
 import com.orange.paddock.suma.business.exception.SumaUnknownSubscriptionIdException;
 import com.orange.paddock.suma.business.exception.ccgw.SumaCcgwIntegrationErrorException;
+import com.orange.paddock.suma.business.exception.ccgw.SumaCcgwInternalErrorException;
 import com.orange.paddock.suma.business.exception.ccgw.SumaCcgwUnresponsiveException;
 import com.orange.paddock.suma.business.exception.iosw.SumaIoswInternalErrorException;
 import com.orange.paddock.suma.business.exception.iosw.SumaIoswUnresponsiveException;
 import com.orange.paddock.suma.business.exception.wt.SumaWtApiAuthenticationFailureException;
 import com.orange.paddock.suma.business.exception.wt.SumaWtApiIntegrationException;
 import com.orange.paddock.suma.business.exception.wt.SumaWtApiInternalErrorException;
-import com.orange.paddock.suma.business.factory.IExceptionFactory;
 import com.orange.paddock.suma.business.mapper.SubscriptionDtoMapper;
 import com.orange.paddock.suma.business.model.SubscriptionDto;
 import com.orange.paddock.suma.business.model.SubscriptionResponse;
-import com.orange.paddock.suma.consumer.ccgw.client.CcgwClient;
-import com.orange.paddock.suma.consumer.ccgw.exceptions.CcgwClientException;
-import com.orange.paddock.suma.consumer.ccgw.exceptions.CcgwNotRespondingException;
-import com.orange.paddock.suma.consumer.ccgw.model.SumaSubscriptionRequest;
-import com.orange.paddock.suma.consumer.ccgw.model.SumaUnsubscriptionRequest;
+import com.orange.paddock.suma.business.service.SubscriptionService;
 import com.orange.paddock.suma.dao.mongodb.document.Subscription;
 import com.orange.paddock.suma.dao.mongodb.repository.SubscriptionRepository;
 import com.orange.paddock.wtapi.client.WTApiClient;
@@ -55,7 +48,7 @@ public class SubscriptionManager {
 	private WTApiClient wtClient;
 
 	@Autowired
-	private CcgwClient ccgwClient;
+	private SubscriptionService subscriptionService;
 
 	@Autowired
 	private SubscriptionDtoMapper subscriptionMapper;
@@ -63,9 +56,6 @@ public class SubscriptionManager {
 	@Autowired
 	private SubscriptionRepository subscriptionRepository;
 
-	@Resource
-	private Map<String, IExceptionFactory> exceptionFactoryMapping;
-	
 	/**
 	 * 
 	 * @param subscriptionDto
@@ -74,84 +64,47 @@ public class SubscriptionManager {
 	 * @return subscriptionId
 	 * @throws AbstractSumaException
 	 */
-	public SubscriptionResponse subscribe(SubscriptionDto subscriptionDto, String endUserIdValue, String mco) throws AbstractSumaException {
-		TECHNICAL_LOGGER.debug("Starting subscription business logic with subscriptionDto: {} and endUserIdValue: {}", subscriptionDto,
-				endUserIdValue);
+	public SubscriptionResponse subscribe(SubscriptionDto subscriptionDto, String endUserIdValue, String mco)
+			throws AbstractSumaException {
+		TECHNICAL_LOGGER.debug("Starting subscription business logic with subscriptionDto: {} and endUserIdValue: {}",
+				subscriptionDto, endUserIdValue);
 
 		SubscriptionResponse subId = new SubscriptionResponse();
-		
-		/** MSISDN to store in mongo: retrieved from WT or subscriptionDto body and formatted with tel:+ */
+
+		/**
+		 * MSISDN to store in mongo: retrieved from WT or subscriptionDto body
+		 * and formatted with tel:+
+		 */
 		String userMsisdnToStore = null;
 
-		/**************** call WT to get MSISDN : endUserId acr:X-Orange-ISE2, acr:OrangeAPIToken **************/
+		/**
+		 * call WT to dealiase ISE2/MCO or acr:OrangeAPIToken
+		 */
 		if (Objects.equals(PdkAcrUtils.ACR_ISE2, subscriptionDto.getEndUserId())
 				|| Objects.equals(PdkAcrUtils.ACR_ORANGE_API_TOKEN, subscriptionDto.getEndUserId())) {
 
-			TECHNICAL_LOGGER.debug("Trying to get MSISDN from WT..");
-
-			List<String> wtRequestedInfos = new ArrayList<String>();
-			wtRequestedInfos.add(WTInfo.USER_PROFILE_MSISDN);
-
 			Map<String, String> wtInputParameters = new HashMap<>();
-			//wtInputParameters.put(WTParameter.SERVICE, wtDefaultService);
-			//wtInputParameters.put(WTParameter.ENCODING, "UTF-8");
 
 			if (Objects.equals(PdkAcrUtils.ACR_ORANGE_API_TOKEN, subscriptionDto.getEndUserId())) {
 				wtInputParameters.put(WTParameter.ORANGE_API_TOKEN, subscriptionDto.getEndUserId());
-			}
-			if (Objects.equals(PdkAcrUtils.ACR_ISE2, subscriptionDto.getEndUserId())) {
+			} else if (Objects.equals(PdkAcrUtils.ACR_ISE2, subscriptionDto.getEndUserId())) {
 				wtInputParameters.put(WTParameter.MCO, mco);
 				wtInputParameters.put(WTParameter.ISE2, subscriptionDto.getEndUserId());
 			}
-			try {
-				String retrievedWtMsisdn = wtClient.getWassupInfos(wtRequestedInfos, wtInputParameters).get(WTInfo.USER_PROFILE_MSISDN);
-				TECHNICAL_LOGGER.debug("WT returned MSISDN = {}", retrievedWtMsisdn);
 
-				if (Objects.isNull(retrievedWtMsisdn) || Objects.equals("", retrievedWtMsisdn)) {
-					TECHNICAL_LOGGER.error("WT module returns invalid MSISDN value");
-					throw new SumaWtApiIntegrationException();
-				}
-				
-				userMsisdnToStore = retrievedWtMsisdn;
-				
-			} catch (WTHttpTransportException wtHttpException) {
-				TECHNICAL_LOGGER.error("Http Transport Exception caugh when trying to reach WT module");
-				throw new SumaIoswInternalErrorException();
-
-			} catch (WTException wtException) {
-				TECHNICAL_LOGGER.error("Error while calling WT module");
-
-				switch (wtException.getHttpStatusCode()) {
-				case 500:
-					throw new SumaWtApiInternalErrorException();
-				case 403:
-					throw new SumaWtApiAuthenticationFailureException();
-				default:// 401, 404, default
-					throw new SumaWtApiIntegrationException();
-				}
-
-			} catch (AbstractSumaException e) {
-				throw e;
-			} catch (Exception e) {
-				TECHNICAL_LOGGER.error("Unexpected error while calling WT module " + e.getCause());
-				if (e.getCause() instanceof SocketTimeoutException) {
-					throw new SumaIoswUnresponsiveException();
-				} else
-					throw new SumaInternalErrorException();
-			}
+			userMsisdnToStore = this.dealiasing(wtInputParameters);
 
 		} else {
 			// endUserId == tel:+xxx
 			userMsisdnToStore = PdkMsisdnUtils.getMsisdnWithoutPrefix(subscriptionDto.getEndUserId());
 		}
-		TECHNICAL_LOGGER.debug("MSISDN after retrieve and formatting : {}", userMsisdnToStore);
+		TECHNICAL_LOGGER.debug("MSISDN after dealiasing or formatting : {}", userMsisdnToStore);
 
 		/**************** Store subscription session **************/
 		Subscription subscriptionSessionToStore = new Subscription();
 		subscriptionSessionToStore = subscriptionMapper.map(subscriptionDto, Subscription.class);
 		subscriptionSessionToStore.setSubscriptionId(UUID.randomUUID().toString());
-		String generatedTransactionId = UUID.randomUUID().toString();
-		subscriptionSessionToStore.setTransactionId(generatedTransactionId);
+		subscriptionSessionToStore.setTransactionId(UUID.randomUUID().toString());
 		subscriptionSessionToStore.setEndUserId(userMsisdnToStore);
 
 		subscriptionSessionToStore.setStatus(SubscriptionStatusUtils.STATUS_PENDING);
@@ -166,56 +119,34 @@ public class SubscriptionManager {
 
 		/**************** Call CCGW to get subscriptionId **************/
 		String subscriptionId = null;
-		SumaSubscriptionRequest sumaSubscriptionRequest = new SumaSubscriptionRequest();
-		sumaSubscriptionRequest = subscriptionMapper.map(subscriptionDto, SumaSubscriptionRequest.class);
-		sumaSubscriptionRequest.setSubscriber(userMsisdnToStore);
-		sumaSubscriptionRequest.setTransactionId(subscriptionSessionToStore.getTransactionId());
-
 		try {
-			TECHNICAL_LOGGER.debug("Trying to call CCGW..");
-			sumaSubscriptionRequest.setTransactionId(generatedTransactionId);
-			subscriptionId = ccgwClient.subscribe(sumaSubscriptionRequest);
+			subscriptionId = subscriptionService.subscribe(subscriptionDto, userMsisdnToStore,
+					subscriptionSessionToStore.getTransactionId());
 
-			TECHNICAL_LOGGER.debug("Received CCGW response {}", subscriptionId);
-			if (!Objects.isNull(subscriptionId)) {// CCGW response OK
-				TECHNICAL_LOGGER.debug("Received subscriptionId is NOOOT NULL, update session");
+			if (Objects.isNull(subscriptionId)) {
+				TECHNICAL_LOGGER.debug("Received subscriptionId is NULL, update session");
+				storedSubscription.setStatus(SubscriptionStatusUtils.STATUS_SUBSCRIPTION_ERROR);
+			} else {
+				TECHNICAL_LOGGER.debug("Received subscriptionId '{}'", subscriptionId);
 				storedSubscription.setSubscriptionId(subscriptionId);
 				storedSubscription.setStatus(SubscriptionStatusUtils.STATUS_WAITING_ACTIVATION);
-				subscriptionRepository.save(storedSubscription);
-
-			} else {// CCGW response NOT OK
-				TECHNICAL_LOGGER.debug("Received subscriptionId is NULL, update session");
-				// Store session with status SUBSCRIPTION-ERROR
-				storedSubscription.setStatus(SubscriptionStatusUtils.STATUS_SUBSCRIPTION_ERROR);
-				subscriptionRepository.save(storedSubscription);
 			}
 
-		} catch (CcgwNotRespondingException e) {
-			TECHNICAL_LOGGER.error("CCGW is unresponsive");
+		} catch (SumaCcgwUnresponsiveException | SumaCcgwIntegrationErrorException | SumaCcgwInternalErrorException e) {
+			TECHNICAL_LOGGER.error("CCGW error: {}", e.getMessage());
 
 			storedSubscription.setStatus(SubscriptionStatusUtils.STATUS_SUBSCRIPTION_ERROR);
-			subscriptionRepository.save(storedSubscription);
-			throw new SumaCcgwUnresponsiveException();
 
-		} catch (CcgwClientException e) {
-			TECHNICAL_LOGGER.error("An error occured while calling CCGW {}", e.toString());
+			throw e;
 
-			storedSubscription.setStatus(SubscriptionStatusUtils.STATUS_SUBSCRIPTION_ERROR);
+		} finally {
 			subscriptionRepository.save(storedSubscription);
-			
-			mapCcgwErrorAndThrowSumaException(e.getCcgwFaultStatusCode());
-			
-		} catch (Exception e) {
-			TECHNICAL_LOGGER.error("An unexpected error occured while calling CCGW {}", e);
-			storedSubscription.setStatus(SubscriptionStatusUtils.STATUS_SUBSCRIPTION_ERROR);
-			subscriptionRepository.save(storedSubscription);
-			throw new SumaCcgwIntegrationErrorException();
 		}
-		
+
 		subId.setMsisdn(PdkMsisdnUtils.getMsisdnWithoutPrefix(userMsisdnToStore));
 		subId.setSubscriptionId(subscriptionSessionToStore.getSubscriptionId());
 		subId.setCcgwSubscriptionId(subscriptionId);
-		
+
 		return subId;
 	}
 
@@ -229,74 +160,49 @@ public class SubscriptionManager {
 		TECHNICAL_LOGGER.debug("Starting unsubscription business logic with subscriptionId '{}'", subscriptionId);
 
 		Subscription subscriptionSessionFound = subscriptionRepository.findOneBySubscriptionId(subscriptionId);
-		String subscriptionStatus = null;
 
 		if (Objects.isNull(subscriptionSessionFound)) {
 			TECHNICAL_LOGGER.error("No subscription session found for '{}'", subscriptionId);
-			throw new SumaUnknownSubscriptionIdException();
-		} else {
-			subscriptionStatus = subscriptionSessionFound.getStatus();
+			throw new SumaUnknownSubscriptionIdException(subscriptionId);
 		}
 
-		if (Objects.equals(subscriptionStatus, SubscriptionStatusUtils.STATUS_UNSUBSCRIPTION_ERROR)) {
+		if (Objects.equals(subscriptionSessionFound.getStatus(), SubscriptionStatusUtils.STATUS_UNSUBSCRIPTION_ERROR)) {
 			TECHNICAL_LOGGER.error("Subscription session found with status UNSUBSCRIPTION_ERROR");
 			throw new SumaInternalErrorException();
-		} else if (Objects.equals(subscriptionStatus, SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_ARCHIVED)
-				|| Objects.equals(subscriptionStatus, SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_WAITING_ARCHIVING)) {
-			TECHNICAL_LOGGER.error("Subscription session found with status {}", subscriptionStatus);
+		} else if (Objects.equals(subscriptionSessionFound.getStatus(),
+				SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_ARCHIVED)
+				|| Objects.equals(subscriptionSessionFound.getStatus(),
+						SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_WAITING_ARCHIVING)) {
+			TECHNICAL_LOGGER.error("Subscription session found with status {}", subscriptionSessionFound.getStatus());
 			throw new SumaAlreadyRevokedSubException(subscriptionId);
-		} else if (Objects.equals(subscriptionStatus, SubscriptionStatusUtils.STATUS_ARCHIVED)
-				|| Objects.equals(subscriptionStatus, SubscriptionStatusUtils.STATUS_WAITING_ARCHIVING)) {
-			TECHNICAL_LOGGER.info("Nothin to do, subscription status: {}", subscriptionStatus);
+		} else if (Objects.equals(subscriptionSessionFound.getStatus(), SubscriptionStatusUtils.STATUS_ARCHIVED)
+				|| Objects.equals(subscriptionSessionFound.getStatus(),
+						SubscriptionStatusUtils.STATUS_WAITING_ARCHIVING)) {
+			TECHNICAL_LOGGER.info("Nothin to do, subscription status: {}", subscriptionSessionFound.getStatus());
 		} else {
-
-			// Calls CCGW to unsubscribe
-			SumaUnsubscriptionRequest sumaUnsubscriptionRequest = new SumaUnsubscriptionRequest();
-			sumaUnsubscriptionRequest.setProviderId(subscriptionSessionFound.getServiceId());
-			sumaUnsubscriptionRequest.setSubscriptionId(subscriptionId);
-			sumaUnsubscriptionRequest.setSubscriber(subscriptionSessionFound.getEndUserId());
-
 			try {
-				Boolean ccgwResponseStatus = ccgwClient.unsubscribe(sumaUnsubscriptionRequest);
-
-				if (!ccgwResponseStatus) {
-					TECHNICAL_LOGGER.info("Unsubscribe call from CCGW was not successful");
-					subscriptionSessionFound.setStatus(SubscriptionStatusUtils.STATUS_UNSUBSCRIPTION_ERROR);
-					Subscription updatedSession = subscriptionRepository.save(subscriptionSessionFound);
-					subscriptionStatus = updatedSession.getStatus();
-				} else {
+				if (subscriptionService.unsubscribe(subscriptionId, subscriptionSessionFound.getServiceId(),
+						subscriptionSessionFound.getEndUserId())) {
 					TECHNICAL_LOGGER.debug("Unsubscribe call from CCGW OK !");
 					subscriptionSessionFound.setStatus(SubscriptionStatusUtils.STATUS_WAITING_ARCHIVING);
-					Subscription updatedSession = subscriptionRepository.save(subscriptionSessionFound);
-					subscriptionStatus = updatedSession.getStatus();
+				} else {
+					TECHNICAL_LOGGER.info("Unsubscribe call from CCGW was not successful");
+					subscriptionSessionFound.setStatus(SubscriptionStatusUtils.STATUS_UNSUBSCRIPTION_ERROR);
 				}
 
-			} catch (CcgwNotRespondingException e) {
-				TECHNICAL_LOGGER.error("CCGW is unresponsive");
-				subscriptionSessionFound.setStatus(SubscriptionStatusUtils.STATUS_UNSUBSCRIPTION_ERROR);
-				Subscription updatedSession =subscriptionRepository.save(subscriptionSessionFound);
-				subscriptionStatus = updatedSession.getStatus();
-				throw new SumaCcgwUnresponsiveException();
-
-			} catch (CcgwClientException e) {
-				TECHNICAL_LOGGER.error("An error occured while calling CCGW {}", e.toString());
+			} catch (SumaCcgwUnresponsiveException | SumaCcgwIntegrationErrorException
+					| SumaCcgwInternalErrorException e) {
+				TECHNICAL_LOGGER.error("CCGW error: {}", e.getMessage());
 
 				subscriptionSessionFound.setStatus(SubscriptionStatusUtils.STATUS_UNSUBSCRIPTION_ERROR);
-				Subscription updatedSession =	subscriptionRepository.save(subscriptionSessionFound);
-				subscriptionStatus = updatedSession.getStatus();
-				
-				mapCcgwErrorAndThrowSumaException(e.getCcgwFaultStatusCode());
-				
-			} catch (Exception e) {
-				TECHNICAL_LOGGER.error("An unexpected error occured while calling CCGW {}", e);
-				subscriptionSessionFound.setStatus(SubscriptionStatusUtils.STATUS_UNSUBSCRIPTION_ERROR);
-				Subscription updatedSession =subscriptionRepository.save(subscriptionSessionFound);
-				subscriptionStatus = updatedSession.getStatus();
-				throw new SumaCcgwIntegrationErrorException();
+
+				throw e;
+			} finally {
+				subscriptionRepository.save(subscriptionSessionFound);
 			}
 		}
 
-		return subscriptionStatus;
+		return subscriptionSessionFound.getStatus();
 	}
 
 	/**
@@ -333,23 +239,54 @@ public class SubscriptionManager {
 
 		return subscriptionResponseDto;
 	}
-	
-	private void mapCcgwErrorAndThrowSumaException(String ccgwFaultStatusCode) {
-		TECHNICAL_LOGGER.debug("map CCGW error code {}", ccgwFaultStatusCode);
-		
-		IExceptionFactory exceptionFactory = null;
-		for (String pattern : exceptionFactoryMapping.keySet()) {
-			if (Pattern.matches(pattern, ccgwFaultStatusCode)) {
-				TECHNICAL_LOGGER.debug("Found matching pattern {}", pattern);
-				exceptionFactory = exceptionFactoryMapping.get(pattern);
+
+	private String dealiasing(Map<String, String> wtInputParameters)
+			throws SumaIoswInternalErrorException, SumaIoswUnresponsiveException, SumaInternalErrorException,
+			SumaWtApiIntegrationException, SumaWtApiInternalErrorException, SumaWtApiAuthenticationFailureException {
+
+		String msisdn = null;
+
+		TECHNICAL_LOGGER.debug("Trying to get MSISDN from WT..");
+
+		List<String> wtRequestedInfos = new ArrayList<String>();
+		wtRequestedInfos.add(WTInfo.USER_PROFILE_MSISDN);
+
+		try {
+			msisdn = wtClient.getWassupInfos(wtRequestedInfos, wtInputParameters).get(WTInfo.USER_PROFILE_MSISDN);
+			TECHNICAL_LOGGER.debug("WT returned MSISDN = {}", msisdn);
+
+			if (Objects.isNull(msisdn) || Objects.equals("", msisdn)) {
+				TECHNICAL_LOGGER.error("WT module returns invalid MSISDN value");
+				throw new SumaWtApiIntegrationException();
 			}
+
+		} catch (WTHttpTransportException wtHttpException) {
+			TECHNICAL_LOGGER.error("Http Transport Exception caugh when trying to reach WT module");
+			throw new SumaIoswInternalErrorException();
+
+		} catch (WTException wtException) {
+			TECHNICAL_LOGGER.error("Error while calling WT module");
+
+			switch (wtException.getHttpStatusCode()) {
+			case 500:
+				throw new SumaWtApiInternalErrorException();
+			case 403:
+				throw new SumaWtApiAuthenticationFailureException();
+			default:// 401, 404, default
+				throw new SumaWtApiIntegrationException();
+			}
+
+		} catch (AbstractSumaException e) {
+			throw e;
+		} catch (Exception e) {
+			TECHNICAL_LOGGER.error("Unexpected error while calling WT module " + e.getCause());
+			if (e.getCause() instanceof SocketTimeoutException) {
+				throw new SumaIoswUnresponsiveException();
+			} else
+				throw new SumaInternalErrorException();
 		}
-		
-		if (null == exceptionFactory) {
-			throw new SumaCcgwIntegrationErrorException();
-		}
-		
-		exceptionFactory.throwException();
+
+		return msisdn;
 	}
-	
+
 }

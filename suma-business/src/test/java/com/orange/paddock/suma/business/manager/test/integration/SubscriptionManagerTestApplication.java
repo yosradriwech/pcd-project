@@ -20,6 +20,7 @@ import com.orange.paddock.suma.business.factory.CcgwInternalErrorExceptionFactor
 import com.orange.paddock.suma.business.factory.IExceptionFactory;
 import com.orange.paddock.suma.business.manager.SubscriptionManager;
 import com.orange.paddock.suma.business.mapper.SubscriptionDtoMapper;
+import com.orange.paddock.suma.business.service.SubscriptionService;
 import com.orange.paddock.suma.consumer.ccgw.client.CcgwClient;
 import com.orange.paddock.suma.consumer.ccgw.susbcription.model.ObjectFactory;
 import com.orange.paddock.wtapi.client.WTApiClient;
@@ -45,6 +46,11 @@ public class SubscriptionManagerTestApplication {
 	@Bean
 	public SubscriptionManager subscriptionManager() {
 		return new SubscriptionManager();
+	}
+	
+	@Bean
+	public SubscriptionService subscriptionService() {
+		return new SubscriptionService();
 	}
 
 	@Bean

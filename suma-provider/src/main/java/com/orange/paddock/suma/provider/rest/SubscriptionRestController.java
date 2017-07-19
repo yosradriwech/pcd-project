@@ -178,6 +178,8 @@ public class SubscriptionRestController {
 				northUnsubscriptionLogger.setIdempotency("false");
 			}
 		} catch (AbstractSumaException e) {
+			LOGGER.error("SUMA Functional error {}", e.getMessage());
+			
 			northUnsubscriptionLogger.setHttpResponseCode(String.valueOf(e.getHttpStatusCode()));
 			northUnsubscriptionLogger.setInternalErrorCode(e.getInternalErrorCode());
 			northUnsubscriptionLogger.setInternalErrorDescription(e.getErrorDescription());

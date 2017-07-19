@@ -14,7 +14,7 @@
 			</pattern>
 		</encoder>
 	</appender>
-
+<!--
 	<appender name="technical-log-appender" class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<file>${logs.directory}/PA-PDK-SUMA-technical-test.log</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
@@ -27,7 +27,7 @@
 			</pattern>
 		</encoder>
 	</appender>
-
+-->
 	<root level="WARN">
 		<appender-ref ref="console-appender" />
 		<!-- appender-ref ref="technical-log-appender" / -->

@@ -21,7 +21,7 @@ public class SumaAlreadyRevokedSubException extends AbstractSumaException{
 		internalErrorCode = INTERNAL_SUMA_0003_CODE;
 		errorCode = SUMA_ERROR_CODE_00004;
 		
-		errorDescription = new StringBuilder().append("Subscription already revoked :").append(subscriptionId).toString();
+		errorDescription = new StringBuilder().append("Subscription already revoked: ").append(subscriptionId).toString();
 		httpStatusCode = HttpStatus.NOT_FOUND.value();
 	}
 

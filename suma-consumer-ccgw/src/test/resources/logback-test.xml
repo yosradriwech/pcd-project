@@ -8,6 +8,14 @@
 	<logger name="org.apache.cxf" level="INFO" />
 	<logger name="org.apache.http" level="INFO" />
 
+	
+	<appender name="console-appender" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
+			</pattern>
+		</encoder>
+	</appender>
+<!--	
 	<appender name="technical-log-appender"
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<file>${logs.directory}/PA-PDK-SUMA-technical-test.log
@@ -23,50 +31,11 @@
 			</pattern>
 		</encoder>
 	</appender>
-
-	<appender name="ccgw-subscription-appender"
-		class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${logs.directory}/PA-PDK-SUMA-SOUTH-SUB-test.log
-		</file>
-		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>${logs.directory}/archive/PA-PDK-SUMA-SOUTH-SUB-test.log.%d{yyyyMMdd}.gz
-			</fileNamePattern>
-			<maxHistory>30</maxHistory>
-		</rollingPolicy>
-		<encoder>
-			<pattern>%m%n
-			</pattern>
-		</encoder>
-	</appender>
-
-	<logger name="ccgw-subscription-logger">
-		<appender-ref ref="ccgw-subscription-appender"></appender-ref>
-	</logger>
-
-	<appender name="ccgw-unsubscription-appender"
-		class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${logs.directory}/PA-PDK-SUMA-SOUTH-UNSUB-test.log
-		</file>
-		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>${logs.directory}/archive/PA-PDK-SUMA-SOUTH-UNSUB-test.log.%d{yyyyMMdd}.gz
-			</fileNamePattern>
-			<maxHistory>30</maxHistory>
-		</rollingPolicy>
-		<encoder>
-			<pattern>%m%n
-			</pattern>
-		</encoder>
-	</appender>
-
-	<logger name="ccgw-unsubscription-logger">
-		<appender-ref ref="ccgw-unsubscription-appender"></appender-ref>
-	</logger>
-
-	<logger name="org.apache.cxf.services" level="WARN" />
-	<logger name="org.springframework" level="INFO" />
+-->
+	
 	<root level="DEBUG">
-		<!-- <appender-ref ref="console-appender" /> -->
-		<appender-ref ref="technical-log-appender" />
+		<appender-ref ref="console-appender" />
+		<!-- <appender-ref ref="technical-log-appender" /> -->
 	</root>
 
 </configuration>

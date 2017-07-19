@@ -1,35 +1,33 @@
 package com.orange.paddock.suma.provider.rest.model;
 
 public class SumaError {
-	
-	protected String internalErrorCode;
-	protected String errorCode;
-	protected String errorDescription;
-	protected int httpStatusCode;
-	
-	public String getInternalErrorCode() {
-		return internalErrorCode;
+
+	private String code;
+	private String message;
+	private String description;
+
+	public String getCode() {
+		return code;
 	}
-	public void setInternalErrorCode(String internalErrorCode) {
-		this.internalErrorCode = internalErrorCode;
+
+	public void setCode(String code) {
+		this.code = code;
 	}
-	public String getErrorCode() {
-		return errorCode;
+
+	public String getMessage() {
+		return message;
 	}
-	public void setErrorCode(String errorCode) {
-		this.errorCode = errorCode;
+
+	public void setMessage(String message) {
+		this.message = message;
 	}
-	public String getErrorDescription() {
-		return errorDescription;
+
+	public String getDescription() {
+		return description;
 	}
-	public void setErrorDescription(String errorDescription) {
-		this.errorDescription = errorDescription;
-	}
-	public int getHttpStatusCode() {
-		return httpStatusCode;
-	}
-	public void setHttpStatusCode(int httpStatusCode) {
-		this.httpStatusCode = httpStatusCode;
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 }

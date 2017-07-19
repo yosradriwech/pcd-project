@@ -16,6 +16,8 @@ import org.springframework.http.MediaType;
 
 import com.orange.paddock.commons.http.PdkHeader;
 import com.orange.paddock.suma.AbstractControllerTest;
+import com.orange.paddock.suma.business.exception.SumaAlreadyRevokedSubException;
+import com.orange.paddock.suma.business.exception.SumaUnknownSubscriptionIdException;
 import com.orange.paddock.suma.business.model.SubscriptionDto;
 import com.orange.paddock.suma.business.model.SubscriptionResponse;
 
@@ -73,6 +75,35 @@ public class SubscriptionRestControllerTest extends AbstractControllerTest {
 	}
 	
 	@Test
+	public void unsubscribeWithUnknownSubscriptionId() throws Exception {
+		
+		String unknownSubscriptionId = "unknown_subscription_id";
+		
+		given(this.manager.unsubscribe(unknownSubscriptionId)).willThrow(new SumaUnknownSubscriptionIdException(unknownSubscriptionId));
+		
+		mockMvc.perform(
+				delete(SUMA_ENDPOINT_UNSUBSCRIPTION + unknownSubscriptionId).contentType(MediaType.APPLICATION_JSON))
+				.andDo(print()).andExpect(status().isNotFound())
+				.andExpect(jsonPath("code").value("00004"))
+				.andExpect(jsonPath("message").value("Unknown subscription identifier"))
+				.andExpect(jsonPath("description").value("Unknown subscription: " + unknownSubscriptionId));
+	}
+	
+	@Test
+	public void unsubscribeWithRevokedSubscriptionId() throws Exception {
+		String revokedSubscriptionId = "revoked_subscription_id";
+		
+		given(this.manager.unsubscribe(revokedSubscriptionId)).willThrow(new SumaAlreadyRevokedSubException(revokedSubscriptionId));
+		
+		mockMvc.perform(
+				delete(SUMA_ENDPOINT_UNSUBSCRIPTION + revokedSubscriptionId).contentType(MediaType.APPLICATION_JSON))
+				.andDo(print()).andExpect(status().isNotFound())
+				.andExpect(jsonPath("code").value("00004"))
+				.andExpect(jsonPath("message").value("Subscription already revoked"))
+				.andExpect(jsonPath("description").value("Subscription already revoked: " + revokedSubscriptionId));
+	}
+	
+	@Test
 	public void getSubscriptionStatusTest() throws Exception {
 		
 		SubscriptionDto subscriptionDto = new SubscriptionDto();
@@ -106,7 +137,6 @@ public class SubscriptionRestControllerTest extends AbstractControllerTest {
 				.andExpect(jsonPath("taxedAmount").value("120"))
 				.andExpect(jsonPath("currency").value("PLN"))
 				.andExpect(jsonPath("status").value("ACTIVE"));
-		
 	}
 	
 	@Test
@@ -120,11 +150,9 @@ public class SubscriptionRestControllerTest extends AbstractControllerTest {
 						.accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON).content(content))
 				.andDo(print())
 				.andExpect(status().isBadRequest())
-                .andExpect(jsonPath("internalErrorCode").value("PDK_SUMA_0001"))
-				.andExpect(jsonPath("errorCode").value("00003"))
-				.andExpect(jsonPath("errorDescription").value("Invalid or missing parameter :Missing header Orange API Token."))
-				.andExpect(jsonPath("httpStatusCode").value(400));
-	
+				.andExpect(jsonPath("code").value("00003"))
+				.andExpect(jsonPath("message").value("Bad request"))
+				.andExpect(jsonPath("description").value("Invalid or missing parameter :Missing header Orange API Token."));
 	}
 	
 	@Test
@@ -139,11 +167,9 @@ public class SubscriptionRestControllerTest extends AbstractControllerTest {
 						.accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON).content(content))
 				.andDo(print())
 				.andExpect(status().isBadRequest())
-				.andExpect(jsonPath("internalErrorCode").value("PDK_SUMA_0001"))
-				.andExpect(jsonPath("errorCode").value("00003"))
-				.andExpect(jsonPath("errorDescription").value("Invalid or missing parameter :Missing header ISE2."))
-				.andExpect(jsonPath("httpStatusCode").value(400));
-		
+				.andExpect(jsonPath("code").value("00003"))
+				.andExpect(jsonPath("message").value("Bad request"))
+				.andExpect(jsonPath("description").value("Invalid or missing parameter :Missing header ISE2."));
 	}
 	
 	@Test
@@ -157,11 +183,9 @@ public class SubscriptionRestControllerTest extends AbstractControllerTest {
 						.accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON).content(content))
 				.andDo(print())
 				.andExpect(status().isBadRequest())
-				.andExpect(jsonPath("internalErrorCode").value("PDK_SUMA_0001"))
-				.andExpect(jsonPath("errorCode").value("00003"))
-				.andExpect(jsonPath("errorDescription").value("Invalid or missing parameter :Missing required header MCO."))
-				.andExpect(jsonPath("httpStatusCode").value(400));
-		
+				.andExpect(jsonPath("code").value("00003"))
+				.andExpect(jsonPath("message").value("Bad request"))
+				.andExpect(jsonPath("description").value("Invalid or missing parameter :Missing required header MCO."));
 	}
 	
 	@Test
@@ -175,10 +199,9 @@ public class SubscriptionRestControllerTest extends AbstractControllerTest {
 						.accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON).content(content))
 				.andDo(print())
 				.andExpect(status().isBadRequest())
-				.andExpect(jsonPath("internalErrorCode").value("PDK_SUMA_0001"))
-				.andExpect(jsonPath("errorCode").value("00003"))
-				.andExpect(jsonPath("errorDescription").value("Invalid or missing parameter :endUserId format"))
-				.andExpect(jsonPath("httpStatusCode").value(400));
+				.andExpect(jsonPath("code").value("00003"))
+				.andExpect(jsonPath("message").value("Bad request"))
+				.andExpect(jsonPath("description").value("Invalid or missing parameter :endUserId format"));
 	}
 	
 	@Test
@@ -192,10 +215,9 @@ public class SubscriptionRestControllerTest extends AbstractControllerTest {
 						.accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON).content(content))
 				.andDo(print())
 				.andExpect(status().isBadRequest())
-				.andExpect(jsonPath("internalErrorCode").value("PDK_SUMA_0001"))
-				.andExpect(jsonPath("errorCode").value("00003"))
-				.andExpect(jsonPath("errorDescription").value("Invalid or missing parameter :serviceId"))
-				.andExpect(jsonPath("httpStatusCode").value(400));
+				.andExpect(jsonPath("code").value("00003"))
+				.andExpect(jsonPath("message").value("Bad request"))
+				.andExpect(jsonPath("description").value("Invalid or missing parameter :serviceId"));
 	}
 	
 	@Test
@@ -210,10 +232,9 @@ public class SubscriptionRestControllerTest extends AbstractControllerTest {
 						.accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON).content(content))
 				.andDo(print())
 				.andExpect(status().isBadRequest())
-				.andExpect(jsonPath("internalErrorCode").value("PDK_SUMA_0001"))
-				.andExpect(jsonPath("errorCode").value("00003"))
-				.andExpect(jsonPath("errorDescription").value("Invalid or missing parameter :onBehalfOf"))
-				.andExpect(jsonPath("httpStatusCode").value(400));
+				.andExpect(jsonPath("code").value("00003"))
+				.andExpect(jsonPath("message").value("Bad request"))
+				.andExpect(jsonPath("description").value("Invalid or missing parameter :onBehalfOf"));
 	}
 	
 	@Test
@@ -227,10 +248,9 @@ public class SubscriptionRestControllerTest extends AbstractControllerTest {
 						.accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON).content(content))
 				.andDo(print())
 				.andExpect(status().isBadRequest())
-				.andExpect(jsonPath("internalErrorCode").value("PDK_SUMA_0001"))
-				.andExpect(jsonPath("errorCode").value("00003"))
-				.andExpect(jsonPath("errorDescription").value("Invalid or missing parameter :description"))
-				.andExpect(jsonPath("httpStatusCode").value(400));
+				.andExpect(jsonPath("code").value("00003"))
+				.andExpect(jsonPath("message").value("Bad request"))
+				.andExpect(jsonPath("description").value("Invalid or missing parameter :description"));
 	}
 	
 	@Test
@@ -244,10 +264,9 @@ public class SubscriptionRestControllerTest extends AbstractControllerTest {
 						.accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON).content(content))
 				.andDo(print())
 				.andExpect(status().isBadRequest())
-				.andExpect(jsonPath("internalErrorCode").value("PDK_SUMA_0001"))
-				.andExpect(jsonPath("errorCode").value("00003"))
-				.andExpect(jsonPath("errorDescription").value("Invalid or missing parameter :categoryCode"))
-				.andExpect(jsonPath("httpStatusCode").value(400));
+				.andExpect(jsonPath("code").value("00003"))
+				.andExpect(jsonPath("message").value("Bad request"))
+				.andExpect(jsonPath("description").value("Invalid or missing parameter :categoryCode"));
 	}
 	
 	@Test
@@ -261,10 +280,9 @@ public class SubscriptionRestControllerTest extends AbstractControllerTest {
 						.accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON).content(content))
 				.andDo(print())
 				.andExpect(status().isBadRequest())
-				.andExpect(jsonPath("internalErrorCode").value("PDK_SUMA_0001"))
-				.andExpect(jsonPath("errorCode").value("00003"))
-				.andExpect(jsonPath("errorDescription").value("Invalid or missing parameter :amount"))
-				.andExpect(jsonPath("httpStatusCode").value(400));
+				.andExpect(jsonPath("code").value("00003"))
+				.andExpect(jsonPath("message").value("Bad request"))
+				.andExpect(jsonPath("description").value("Invalid or missing parameter :amount"));
 	}
 	
 	@Test
@@ -278,10 +296,9 @@ public class SubscriptionRestControllerTest extends AbstractControllerTest {
 						.accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON).content(content))
 				.andDo(print())
 				.andExpect(status().isBadRequest())
-				.andExpect(jsonPath("internalErrorCode").value("PDK_SUMA_0001"))
-				.andExpect(jsonPath("errorCode").value("00003"))
-				.andExpect(jsonPath("errorDescription").value("Invalid or missing parameter :taxedAmount"))
-				.andExpect(jsonPath("httpStatusCode").value(400));
+				.andExpect(jsonPath("code").value("00003"))
+				.andExpect(jsonPath("message").value("Bad request"))
+				.andExpect(jsonPath("description").value("Invalid or missing parameter :taxedAmount"));
 	}
 	
 	@Test
@@ -295,10 +312,9 @@ public class SubscriptionRestControllerTest extends AbstractControllerTest {
 						.accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON).content(content))
 				.andDo(print())
 				.andExpect(status().isBadRequest())
-				.andExpect(jsonPath("internalErrorCode").value("PDK_SUMA_0001"))
-				.andExpect(jsonPath("errorCode").value("00003"))
-				.andExpect(jsonPath("errorDescription").value("Invalid or missing parameter :currency"))
-				.andExpect(jsonPath("httpStatusCode").value(400));
+				.andExpect(jsonPath("code").value("00003"))
+				.andExpect(jsonPath("message").value("Bad request"))
+				.andExpect(jsonPath("description").value("Invalid or missing parameter :currency"));
 	}
 	
 	@Test
@@ -312,10 +328,9 @@ public class SubscriptionRestControllerTest extends AbstractControllerTest {
 						.accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON).content(content))
 				.andDo(print())
 				.andExpect(status().isBadRequest())
-				.andExpect(jsonPath("internalErrorCode").value("PDK_SUMA_0001"))
-				.andExpect(jsonPath("errorCode").value("00003"))
-				.andExpect(jsonPath("errorDescription").value("Invalid or missing parameter :isAdult"))
-				.andExpect(jsonPath("httpStatusCode").value(400));
+				.andExpect(jsonPath("code").value("00003"))
+				.andExpect(jsonPath("message").value("Bad request"))
+				.andExpect(jsonPath("description").value("Invalid or missing parameter :isAdult"));
 	}
 	
 //	@Test

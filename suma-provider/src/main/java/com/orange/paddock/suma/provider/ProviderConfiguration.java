@@ -5,7 +5,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 
-import com.orange.paddock.commons.log.PdkLogIdBean;
 import com.orange.paddock.suma.provider.log.NorthGetSubUnsubStatusLogger;
 import com.orange.paddock.suma.provider.log.NorthNotificationLogger;
 import com.orange.paddock.suma.provider.log.NorthSubscriptionLogger;

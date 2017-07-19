@@ -24,6 +24,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import com.orange.paddock.commons.log.PdkLogIdBean;
 import com.orange.paddock.suma.business.manager.SubscriptionManager;
+import com.orange.paddock.suma.business.service.SubscriptionService;
 import com.orange.paddock.suma.dao.mongodb.repository.SubscriptionRepository;
 import com.orange.paddock.suma.provider.rest.SubscriptionRestController;
 import com.orange.paddock.suma.provider.soap.NotificationSoapController;
@@ -65,6 +66,9 @@ public abstract class AbstractControllerTest {
 	@MockBean
 	protected SubscriptionManager manager;
 
+	@MockBean
+	protected SubscriptionService service;
+	
 	protected MockMvc mockMvc;
 
 	protected ClientAndServer mockServer;

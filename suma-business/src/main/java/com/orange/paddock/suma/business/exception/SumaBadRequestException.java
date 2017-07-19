@@ -7,7 +7,7 @@ public class SumaBadRequestException extends AbstractSumaException {
 	private static final long serialVersionUID = 1L;
 
 	public SumaBadRequestException() {
-		super("Bad request received");
+		super("Bad request");
 		internalErrorCode = INTERNAL_SUMA_0001_CODE;
 		errorCode = SUMA_ERROR_CODE_00003;
 		errorDescription = "Invalid or missing parameter";
@@ -16,7 +16,7 @@ public class SumaBadRequestException extends AbstractSumaException {
 	}
 
 	public SumaBadRequestException(String invalidParameter) {
-		super("Bad request received");
+		super("Bad request");
 		internalErrorCode = INTERNAL_SUMA_0001_CODE;
 		errorCode = SUMA_ERROR_CODE_00003;
 		errorDescription = new StringBuilder().append("Invalid or missing parameter :").append(invalidParameter).toString();
