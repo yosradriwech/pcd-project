@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -40,7 +41,7 @@ public class SubscriptionRestController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SubscriptionRestController.class);
 
-	private static String SUMA_ENDPOINT_SUBSCRIPTION = "subscription/v1/subscriptions";
+	private static String SUMA_ENDPOINT_SUBSCRIPTION = "subscription/v1/subscriptions/%s";
 
 	@Autowired
 	private SubscriptionManager manager;
@@ -58,7 +59,7 @@ public class SubscriptionRestController {
 	private NorthGetSubUnsubStatusLogger northGetSubUnsubStatusLogger;
 
 	@PostMapping("/subscriptions")
-	public ResponseEntity<URI> subscribe(HttpServletRequest request, @RequestBody(required = true) SubscriptionDto body)
+	public ResponseEntity<Void> subscribe(HttpServletRequest request, @RequestBody(required = true) SubscriptionDto body)
 			throws AbstractSumaException {
 
 		LOGGER.debug("Subscription request receive with service '{}' for endUser '{}'", body.getServiceId(),
@@ -67,7 +68,7 @@ public class SubscriptionRestController {
 		northSubscriptionLogger.setInternalId(loggerId.getInternalId());
 		northSubscriptionLogger.setRequestTimestamp(PdkDateUtils.getCurrentDateTimestamp());
 
-		URI location = null;
+		HttpHeaders headers = null;
 		String endUserIdValue = "msisdn";
 		String mco = null;
 		try {
@@ -130,18 +131,24 @@ public class SubscriptionRestController {
 			LOGGER.debug("Subscription with EndUserIdValue: '{}'", endUserIdValue);
 			SubscriptionResponse subId = manager.subscribe(body, endUserIdValue, mco);
 
-			try {
-				// build Location header
-				location = new URI(String.format(SUMA_ENDPOINT_SUBSCRIPTION, subId.getCcgwSubscriptionId()));
-			} catch (Exception e) {
-				LOGGER.error("Build internal location header error: '{}'", e.getMessage());
-				throw new SumaBadRequestException(e.getMessage());
-			}
-
 			northSubscriptionLogger.setMsisdn(subId.getMsisdn());
 			northSubscriptionLogger.setSubscriptionId(subId.getSubscriptionId());
 			northSubscriptionLogger.setReturnedSubscriptionId(subId.getCcgwSubscriptionId());
 			northSubscriptionLogger.setHttpResponseCode(HttpStatus.CREATED.toString());
+			
+			try {
+				// build Location header
+				URI location = new URI(String.format(SUMA_ENDPOINT_SUBSCRIPTION, subId.getCcgwSubscriptionId()));
+				
+				// creates response headers
+				headers = new HttpHeaders();
+				headers.setLocation(location);
+				
+			} catch (Exception e) {
+				LOGGER.error("Build internal location header error: '{}'", e.getMessage());
+				throw new SumaBadRequestException(e.getMessage());
+			}
+			
 		} catch (AbstractSumaException e) {
 			northSubscriptionLogger.setHttpResponseCode(String.valueOf(e.getHttpStatusCode()));
 			northSubscriptionLogger.setInternalErrorCode(e.getInternalErrorCode());
@@ -149,12 +156,12 @@ public class SubscriptionRestController {
 			northSubscriptionLogger.setReturnedErrorCode(e.getErrorCode());
 			throw e;
 		} finally {
-
 			northSubscriptionLogger.setResponseTimestamp(PdkDateUtils.getCurrentDateTimestamp());
 
 			northSubscriptionLogger.write();
 		}
-		return new ResponseEntity<>(location, HttpStatus.CREATED);
+		
+		return new ResponseEntity<>(headers, HttpStatus.CREATED);
 	}
 
 	@DeleteMapping("/subscriptions/{subscriptionId}")
