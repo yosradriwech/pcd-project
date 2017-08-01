@@ -19,6 +19,7 @@ import com.orange.paddock.suma.business.exception.SumaSubscriptionIsStillActiveE
 import com.orange.paddock.suma.business.exception.ccgw.SumaCcgwIntegrationErrorException;
 import com.orange.paddock.suma.business.exception.ccgw.SumaCcgwInternalErrorException;
 import com.orange.paddock.suma.business.exception.ccgw.SumaCcgwUnresponsiveException;
+import com.orange.paddock.suma.business.exception.notification.SumaNotificationException;
 import com.orange.paddock.suma.business.log.InternalNotificationSubLogger;
 import com.orange.paddock.suma.business.log.InternalNotificationSubLogger.NotifSubFields;
 import com.orange.paddock.suma.business.log.InternalNotificationUnsubLogger;
@@ -42,8 +43,8 @@ public class NotificationManager {
 	private PdkLogIdBean loggerId;
 
 	@Async("subscriptionNotificationExecutor")
-	public void notificationSubscription(String subscriptionId, String transactionId, Date activationDate,
-			String endUserId) {
+	public void notificationSubscription(String subscriptionId, String transactionId, Date activationDate, String endUserId) {
+
 		TECHNICAL_LOGGER.debug("Starting asynchronuous subscription notification task");
 
 		Map<NotifSubFields, String> logs = new HashMap<NotifSubFields, String>();
@@ -61,21 +62,24 @@ public class NotificationManager {
 
 				String status = subscription.getStatus();
 
-				if (status.equals(SubscriptionStatusUtils.STATUS_ARCHIVED)
-						|| status.equals(SubscriptionStatusUtils.STATUS_WAITING_ARCHIVING)
+				if (status.equals(SubscriptionStatusUtils.STATUS_ARCHIVED) || status.equals(SubscriptionStatusUtils.STATUS_WAITING_ARCHIVING)
 						|| status.equals(SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_WAITING_ARCHIVING)
 						|| status.equals(SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_ARCHIVED)) {
-
+					TECHNICAL_LOGGER.debug("Status is about archiving");
 					throw new SumaAlreadyRevokedUnSubException(subscriptionId);
 
 				} else if (status.equals(SubscriptionStatusUtils.STATUS_ACTIVE)) {
 					// Subscription notification error: trying to active a
 					// subscription that is already active
+					TECHNICAL_LOGGER.debug("Status is already active");
 					throw new SumaAlreadyActiveSubscriptionException(subscriptionId);
 				} else {
+					TECHNICAL_LOGGER.debug("Status should be set to active");
 					status = SubscriptionStatusUtils.STATUS_ACTIVE;
 					subscription.setStatus(status);
 				}
+
+				repository.save(subscription);
 
 			} else {
 				// LOG ERROR SUMA PDK_SUMA_0004
@@ -89,30 +93,29 @@ public class NotificationManager {
 					subscription.setActivationDate(activationDate);
 					subscription.setTransactionId(transactionId);
 					subscription.setEndUserId(endUserId);
-					subscription.setStatus(SubscriptionStatusUtils.STATUS_PENDING);
+					subscription.setStatus(SubscriptionStatusUtils.STATUS_UNSUBSCRIPTION_ERROR);
 
 					repository.save(subscription);
+					throw new SumaNotificationException();
 				}
-				
-				try {
-					if (subscriptionService.unsubscribe(subscriptionId, "PROVIDER_ID", endUserId)) {
-						subscription.setStatus(SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_WAITING_ARCHIVING);
-					} else {
-						subscription.setStatus(SubscriptionStatusUtils.STATUS_UNSUBSCRIPTION_ERROR);
-					}
-				} catch (SumaCcgwUnresponsiveException|SumaCcgwIntegrationErrorException|SumaCcgwInternalErrorException e) {
-					TECHNICAL_LOGGER.error("CCGW error: {}", e.getMessage());
-					
-					subscription.setStatus(SubscriptionStatusUtils.STATUS_UNSUBSCRIPTION_ERROR);
-				}
-			}
 
-			repository.save(subscription);
+				/**
+				 * CCGW unsubscribe request is deprecated beacuse the provider_id is missing and no way was identified (for this moment) to get this
+				 * parameter value
+				 * 
+				 * try { if (subscriptionService.unsubscribe(subscriptionId, "PROVIDER_ID", endUserId)) {
+				 * subscription.setStatus(SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_WAITING_ARCHIVING); } else {
+				 * subscription.setStatus(SubscriptionStatusUtils.STATUS_UNSUBSCRIPTION_ERROR); } } catch
+				 * (SumaCcgwUnresponsiveException|SumaCcgwIntegrationErrorException|SumaCcgwInternalErrorException e) {
+				 * TECHNICAL_LOGGER.error("CCGW error: {}", e.getMessage());
+				 * 
+				 * subscription.setStatus(SubscriptionStatusUtils.STATUS_UNSUBSCRIPTION_ERROR); }
+				 */
+			}
 
 		} catch (AbstractSumaException ex) {
 
-			TECHNICAL_LOGGER.debug("Error occured during Notification Subscription with message: '{}'",
-					ex.getErrorDescription());
+			TECHNICAL_LOGGER.debug("Error occured during Notification Subscription with message: '{}'", ex.getErrorDescription());
 			logs.put(NotifSubFields.INTERNAL_ERROR_CODE, ex.getInternalErrorCode());
 			logs.put(NotifSubFields.INTERNAL_ERROR_DESCRIPTION, ex.getErrorDescription());
 			logs.put(NotifSubFields.END_PROCESS_TIMESTAMP, PdkDateUtils.getCurrentDateTimestamp());
@@ -120,8 +123,7 @@ public class NotificationManager {
 
 		} catch (Exception e) {
 
-			TECHNICAL_LOGGER.debug("An unexpected error occured during notification Subscription with message: '{}'",
-					e.getMessage());
+			TECHNICAL_LOGGER.debug("An unexpected error occured during notification Subscription with message: '{}'", e.getMessage());
 			logs.put(NotifSubFields.INTERNAL_ERROR_DESCRIPTION, e.getMessage());
 			logs.put(NotifSubFields.END_PROCESS_TIMESTAMP, PdkDateUtils.getCurrentDateTimestamp());
 			InternalNotificationSubLogger.write(logs);
@@ -130,8 +132,8 @@ public class NotificationManager {
 	}
 
 	@Async("unsubscriptionNotificationExecutor")
-	public void notificationUnsubscription(String subscriptionId, String requestId, String endUserId)
-			throws AbstractSumaException {
+	public void notificationUnsubscription(String subscriptionId, String requestId, String endUserId) throws AbstractSumaException {
+
 		TECHNICAL_LOGGER.debug("Starting asynchronuous Unsubscription notification task");
 
 		Map<NotifUnsubFields, String> logs = new HashMap<NotifUnsubFields, String>();
@@ -142,56 +144,51 @@ public class NotificationManager {
 
 			if (null == subscriptionToDeactivate) {
 				// LOG PDK_SUMA_0004 in log File
-
+				TECHNICAL_LOGGER.debug("No session found for unsubscription notif request ..");
 				subscriptionToDeactivate = new Subscription();
-
 				subscriptionToDeactivate.setSubscriptionId(subscriptionId);
 				subscriptionToDeactivate.setCreationDate(new Date());
 				subscriptionToDeactivate.setDeActivationDate(new Date());
 				subscriptionToDeactivate.setTransactionId(requestId);
 				subscriptionToDeactivate.setEndUserId(endUserId);
 				subscriptionToDeactivate.setStatus(SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_ARCHIVED);
+
+				repository.save(subscriptionToDeactivate);
+				throw new SumaNotificationException();
+
 			} else {
 				// subscriptionDeactivate = true;
 
 				if (subscriptionToDeactivate.getStatus().equals(SubscriptionStatusUtils.STATUS_ACTIVE)
-						|| subscriptionToDeactivate.getStatus()
-								.equals(SubscriptionStatusUtils.STATUS_WAITING_ACTIVATION)) {
+						|| subscriptionToDeactivate.getStatus().equals(SubscriptionStatusUtils.STATUS_WAITING_ACTIVATION)) {
 
 					subscriptionToDeactivate.setDeActivationDate(new Date());
-					subscriptionToDeactivate.setStatus(SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_ARCHIVED);
+					subscriptionToDeactivate.setStatus(SubscriptionStatusUtils.STATUS_UNKNOWN_UNSUBSCRIPTION_ARCHIVED);
 					repository.save(subscriptionToDeactivate);
 
 					throw new SumaSubscriptionIsStillActiveException(subscriptionId);
-					
+
 				} else if (subscriptionToDeactivate.getStatus().equals(SubscriptionStatusUtils.STATUS_ARCHIVED)
-						|| subscriptionToDeactivate.getStatus()
-								.equals(SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_ARCHIVED)
-						|| subscriptionToDeactivate.getStatus()
-								.equals(SubscriptionStatusUtils.STATUS_UNKNOWN_UNSUBSCRIPTION_ARCHIVED)) {
-					
+						|| subscriptionToDeactivate.getStatus().equals(SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_ARCHIVED)
+						|| subscriptionToDeactivate.getStatus().equals(SubscriptionStatusUtils.STATUS_UNKNOWN_UNSUBSCRIPTION_ARCHIVED)) {
+
 					throw new SumaAlreadyRevokedUnSubException(subscriptionId);
-					
-				} else if (subscriptionToDeactivate.getStatus()
-						.equals(SubscriptionStatusUtils.STATUS_WAITING_ARCHIVING)) {
+
+				} else if (subscriptionToDeactivate.getStatus().equals(SubscriptionStatusUtils.STATUS_WAITING_ARCHIVING)) {
 					subscriptionToDeactivate.setStatus(SubscriptionStatusUtils.STATUS_ARCHIVED);
-				} else if (subscriptionToDeactivate.getStatus()
-						.equals(SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_WAITING_ARCHIVING)) {
+				} else if (subscriptionToDeactivate.getStatus().equals(SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_WAITING_ARCHIVING)) {
 					subscriptionToDeactivate.setStatus(SubscriptionStatusUtils.STATUS_UNKNOWN_UNSUBSCRIPTION_ARCHIVED);
-				} else if (subscriptionToDeactivate.getStatus()
-						.equals(SubscriptionStatusUtils.STATUS_UNSUBSCRIPTION_ERROR)) {
+				} else if (subscriptionToDeactivate.getStatus().equals(SubscriptionStatusUtils.STATUS_UNSUBSCRIPTION_ERROR)) {
 					subscriptionToDeactivate.setStatus(SubscriptionStatusUtils.STATUS_ARCHIVED);
 				}
 
 				subscriptionToDeactivate.setDeActivationDate(new Date());
-
+				repository.save(subscriptionToDeactivate);
 			}
-			repository.save(subscriptionToDeactivate);
 
 		} catch (AbstractSumaException ex) {
 
-			TECHNICAL_LOGGER.debug("Error occured during Notification Unsubscription with message: '{}'",
-					ex.getErrorDescription());
+			TECHNICAL_LOGGER.debug("Error occured during Notification Unsubscription with message: '{}'", ex.getErrorDescription());
 			logs.put(NotifUnsubFields.INTERNAL_ERROR_CODE, ex.getInternalErrorCode());
 			logs.put(NotifUnsubFields.INTERNAL_ERROR_DESCRIPTION, ex.getErrorDescription());
 			logs.put(NotifUnsubFields.END_PROCESS_TIMESTAMP, PdkDateUtils.getCurrentDateTimestamp());
@@ -199,8 +196,7 @@ public class NotificationManager {
 
 		} catch (Exception e) {
 
-			TECHNICAL_LOGGER.debug("An unexpected error occured during notification Unsubscription with message: '{}'",
-					e.getMessage());
+			TECHNICAL_LOGGER.debug("An unexpected error occured during notification Unsubscription with message: '{}'", e.getMessage());
 			logs.put(NotifUnsubFields.INTERNAL_ERROR_DESCRIPTION, e.getMessage());
 			logs.put(NotifUnsubFields.END_PROCESS_TIMESTAMP, PdkDateUtils.getCurrentDateTimestamp());
 			InternalNotificationUnsubLogger.write(logs);

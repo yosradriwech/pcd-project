@@ -11,10 +11,10 @@
 	
 	<appender name="technical-log-appender"
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${logs.directory}/PA-PDK-SUMA-technical.log
+		<file>${logs.directory}/technical/PA-PDK-SUMA-technical.log
 		</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>${logs.directory}/archive/PA-PDK-SUMA-technical.log.%d{yyyyMMdd}.gz
+			<fileNamePattern>${logs.directory}/technical/archive/PA-PDK-SUMA-technical.log.%d{yyyyMMdd}.gz
 			</fileNamePattern>
 			<maxHistory>30</maxHistory>
 		</rollingPolicy>
@@ -25,12 +25,27 @@
 		</encoder>
 	</appender>
 
-	<appender name="ccgw-subscription-appender"
-		class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${logs.directory}/PA-PDK-SUMA-SUB-CCGW-South-access.log
+
+	<appender name="wt-log-appender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        	<file>${logs.directory}/applicative/PA-PDK-SUMA-South-WT-API-access.log
 		</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>${logs.directory}/archive/PA-PDK-SUMA-SUB-CCGW-South-access.log.%d{yyyyMMdd}.gz
+        		<fileNamePattern>${logs.directory}/applicative/PA-PDK-SUMA-South-WT-API-access.log.%d{yyyyMMdd}.gz
+			</fileNamePattern>
+	        	<maxHistory>30</maxHistory>
+        	</rollingPolicy>
+	        <encoder>
+        		<pattern>%m%n
+			</pattern>
+        	</encoder>
+        </appender>
+
+	<appender name="ccgw-subscription-appender"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${logs.directory}/applicative/PA-PDK-SUMA-SUB-CCGW-South-access.log
+		</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${logs.directory}/applicative/archive/PA-PDK-SUMA-SUB-CCGW-South-access.log.%d{yyyyMMdd}.gz
 			</fileNamePattern>
 			<maxHistory>30</maxHistory>
 		</rollingPolicy>
@@ -42,10 +57,10 @@
 
 	<appender name="ccgw-unsubscription-appender"
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${logs.directory}/PA-PDK-SUMA-UNSUB-CCGW-South-access.log
+		<file>${logs.directory}/applicative/PA-PDK-SUMA-UNSUB-CCGW-South-access.log
 		</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>${logs.directory}/archive/PA-PDK-SUMA-UNSUB-CCGW-South-access.log.%d{yyyyMMdd}.gz
+			<fileNamePattern>${logs.directory}/applicative/archive/PA-PDK-SUMA-UNSUB-CCGW-South-access.log.%d{yyyyMMdd}.gz
 			</fileNamePattern>
 			<maxHistory>30</maxHistory>
 		</rollingPolicy>
@@ -57,100 +72,97 @@
 	
 	<appender name="north-subscription-appender"
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${logs.directory}/PA-PDK-SUMA-SUB-North-access.log
+		<file>${logs.directory}/applicative/PA-PDK-SUMA-SUB-North-access.log
 		</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>${logs.directory}/archive/PA-PDK-SUMA-SUB-North-access.log.%d{yyyyMMdd}.gz
+			<fileNamePattern>${logs.directory}/applicative/archive/PA-PDK-SUMA-SUB-North-access.log.%d{yyyyMMdd}.gz
 			</fileNamePattern>
 			<maxHistory>30</maxHistory>
 		</rollingPolicy>
 		<encoder>
-			<pattern>%d{yyyy/MM/dd HH:mm:ss,Europe/Paris} [%thread] %-5level
-				%logger{36} - %m %throwable{full}%n
+			<pattern>%m%n
 			</pattern>
 		</encoder>
 	</appender>
 	
 	<appender name="north-unsubscription-appender"
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${logs.directory}/PA-PDK-SUMA-UNSUB-North-access.log
+		<file>${logs.directory}/applicative/PA-PDK-SUMA-UNSUB-North-access.log
 		</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>${logs.directory}/archive/PA-PDK-SUMA-UNSUB-North-access.log.%d{yyyyMMdd}.gz
+			<fileNamePattern>${logs.directory}/applicative/archive/PA-PDK-SUMA-UNSUB-North-access.log.%d{yyyyMMdd}.gz
 			</fileNamePattern>
 			<maxHistory>30</maxHistory>
 		</rollingPolicy>
 		<encoder>
-			<pattern>%d{yyyy/MM/dd HH:mm:ss,Europe/Paris} [%thread] %-5level
-				%logger{36} - %m %throwable{full}%n
+			<pattern>%m%n
 			</pattern>
 		</encoder>
 	</appender>
 	
 	<appender name="north-get-status-appender"
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${logs.directory}/PA-PDK-SUMA-STATUS-North-access-access.log
+		<file>${logs.directory}/applicative/PA-PDK-SUMA-STATUS-North-access-access.log
 		</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>${logs.directory}/archive/PA-PDK-SUMA-STATUS-North-access.log.%d{yyyyMMdd}.gz
+			<fileNamePattern>${logs.directory}/applicative/archive/PA-PDK-SUMA-STATUS-North-access.log.%d{yyyyMMdd}.gz
 			</fileNamePattern>
 			<maxHistory>30</maxHistory>
 		</rollingPolicy>
 		<encoder>
-			<pattern>%d{yyyy/MM/dd HH:mm:ss,Europe/Paris} [%thread] %-5level
-				%logger{36} - %m %throwable{full}%n
+			<pattern>%m%n
 			</pattern>
 		</encoder>
 	</appender>
 	
 	<appender name="north-notification-appender"
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${logs.directory}/PA-PDK-SUMA-NOTIFY-North-access.log
+		<file>${logs.directory}/applicative/PA-PDK-SUMA-NOTIFY-North-access.log
 		</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>${logs.directory}/archive/PA-PDK-SUMA-NOTIFY-North-access.log.%d{yyyyMMdd}.gz
+			<fileNamePattern>${logs.directory}/applicative/archive/PA-PDK-SUMA-NOTIFY-North-access.log.%d{yyyyMMdd}.gz
 			</fileNamePattern>
 			<maxHistory>30</maxHistory>
 		</rollingPolicy>
 		<encoder>
-			<pattern>%d{yyyy/MM/dd HH:mm:ss,Europe/Paris} [%thread] %-5level
-				%logger{36} - %m %throwable{full}%n
+			<pattern>%m%n
 			</pattern>
 		</encoder>
 	</appender>
 	
 	<appender name="internal-notification-sub-appender"
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${logs.directory}/PA-PDK-SUMA-SUB-Internal.log
+		<file>${logs.directory}/applicative/PA-PDK-SUMA-SUB-Internal.log
 		</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>${logs.directory}/archive/PA-PDK-SUMA-SUB-Internal.log.%d{yyyyMMdd}.gz
+			<fileNamePattern>${logs.directory}/applicative/archive/PA-PDK-SUMA-SUB-Internal.log.%d{yyyyMMdd}.gz
 			</fileNamePattern>
 			<maxHistory>30</maxHistory>
 		</rollingPolicy>
 		<encoder>
-			<pattern>%d{yyyy/MM/dd HH:mm:ss,Europe/Paris} [%thread] %-5level
-				%logger{36} - %m %throwable{full}%n
+			<pattern>%m%n
 			</pattern>
 		</encoder>
 	</appender>
 	
 	<appender name="internal-notification-unsub-appender"
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${logs.directory}/PA-PDK-SUMA-UNSUB-Internal.log
+		<file>${logs.directory}/applicative/PA-PDK-SUMA-UNSUB-Internal.log
 		</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>${logs.directory}/archive/PA-PDK-SUMA-UNSUB-Internal.log.%d{yyyyMMdd}.gz
+			<fileNamePattern>${logs.directory}/applicative/archive/PA-PDK-SUMA-UNSUB-Internal.log.%d{yyyyMMdd}.gz
 			</fileNamePattern>
 			<maxHistory>30</maxHistory>
 		</rollingPolicy>
 		<encoder>
-			<pattern>%d{yyyy/MM/dd HH:mm:ss,Europe/Paris} [%thread] %-5level
-				%logger{36} - %m %throwable{full}%n
+			<pattern>%m%n
 			</pattern>
 		</encoder>
 	</appender>
 	
+	<logger name="wt-log" level="DEBUG" additivity="false">
+        	<appender-ref ref="wt-log-appender" />
+        </logger>
 	
 	<logger name="ccgw-subscription-logger" level="DEBUG" additivity="false">
 		<appender-ref ref="ccgw-subscription-appender" />
@@ -176,11 +188,11 @@
 		<appender-ref ref="north-notification-appender" />
 	</logger>
 	
-	<logger name="internal-notification-sub-logger">
+	<logger name="internal-notification-sub-logger" level="DEBUG" >
 		<appender-ref ref="internal-notification-sub-appender"></appender-ref>
 	</logger>
 	
-	<logger name="internal-notification-unsub-logger">
+	<logger name="internal-notification-unsub-logger" level="DEBUG" >
 		<appender-ref ref="internal-notification-unsub-appender"></appender-ref>
 	</logger>
 
