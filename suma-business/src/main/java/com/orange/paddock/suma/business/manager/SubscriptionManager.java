@@ -86,10 +86,10 @@ public class SubscriptionManager {
 			Map<String, String> wtInputParameters = new HashMap<>();
 
 			if (Objects.equals(PdkAcrUtils.ACR_ORANGE_API_TOKEN, subscriptionDto.getEndUserId())) {
-				wtInputParameters.put(WTParameter.ORANGE_API_TOKEN, subscriptionDto.getEndUserId());
+				wtInputParameters.put(WTParameter.ORANGE_API_TOKEN, endUserIdValue);
 			} else if (Objects.equals(PdkAcrUtils.ACR_ISE2, subscriptionDto.getEndUserId())) {
 				wtInputParameters.put(WTParameter.MCO, mco);
-				wtInputParameters.put(WTParameter.ISE2, subscriptionDto.getEndUserId());
+				wtInputParameters.put(WTParameter.ISE2, endUserIdValue);
 			}
 
 			userMsisdnToStore = this.dealiasing(wtInputParameters);
