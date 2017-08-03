@@ -32,13 +32,12 @@ public class SubscriptionService {
 
 	@Autowired
 	private SubscriptionDtoMapper subscriptionMapper;
-	
+
 	@Resource
 	private Map<String, IExceptionFactory> exceptionFactoryMapping;
 
-	
-	public boolean unsubscribe(String subscriptionId, String providerId, String subscriber)
-			throws SumaCcgwUnresponsiveException, SumaCcgwIntegrationErrorException, SumaCcgwInternalErrorException {
+	public boolean unsubscribe(String subscriptionId, String providerId, String subscriber) throws SumaCcgwUnresponsiveException,
+			SumaCcgwIntegrationErrorException, SumaCcgwInternalErrorException {
 
 		boolean ccgwResponseStatus = false;
 
@@ -58,7 +57,7 @@ public class SubscriptionService {
 		} catch (CcgwClientException e) {
 			LOGGER.error("An error occured while calling CCGW {}", e.toString());
 
-			mapCcgwErrorAndThrowSumaException(e.getCcgwFaultStatusCode());
+			mapCcgwErrorAndThrowSumaException(e);
 
 		} catch (Exception e) {
 			LOGGER.error("An unexpected error occured while calling CCGW", e);
@@ -68,9 +67,9 @@ public class SubscriptionService {
 
 		return ccgwResponseStatus;
 	}
-	
+
 	public String subscribe(SubscriptionDto subscriptionDto, String msisdn, String transactionId) {
-		
+
 		String subscriptionId = null;
 		SumaSubscriptionRequest sumaSubscriptionRequest = new SumaSubscriptionRequest();
 		sumaSubscriptionRequest = subscriptionMapper.map(subscriptionDto, SumaSubscriptionRequest.class);
@@ -79,7 +78,7 @@ public class SubscriptionService {
 
 		try {
 			LOGGER.debug("Trying to call CCGW..");
-			
+
 			subscriptionId = ccgwClient.subscribe(sumaSubscriptionRequest);
 		} catch (CcgwNotRespondingException e) {
 			LOGGER.error("CCGW is unresponsive");
@@ -89,17 +88,18 @@ public class SubscriptionService {
 		} catch (CcgwClientException e) {
 			LOGGER.error("An error occured while calling CCGW {}", e.toString());
 
-			mapCcgwErrorAndThrowSumaException(e.getCcgwFaultStatusCode());
-			
+			mapCcgwErrorAndThrowSumaException(e);
+
 		} catch (Exception e) {
 			LOGGER.error("An unexpected error occured while calling CCGW {}", e);
 			throw new SumaCcgwIntegrationErrorException();
 		}
-		
+
 		return subscriptionId;
 	}
 
-	private void mapCcgwErrorAndThrowSumaException(String ccgwFaultStatusCode) {
+	private void mapCcgwErrorAndThrowSumaException(CcgwClientException e) {
+		String ccgwFaultStatusCode = e.getCcgwFaultStatusCode();
 		LOGGER.debug("map CCGW error code {}", ccgwFaultStatusCode);
 
 		IExceptionFactory exceptionFactory = null;
@@ -114,7 +114,7 @@ public class SubscriptionService {
 			throw new SumaCcgwIntegrationErrorException();
 		}
 
-		exceptionFactory.throwException();
+		exceptionFactory.throwException(e);
 	}
 
 }
