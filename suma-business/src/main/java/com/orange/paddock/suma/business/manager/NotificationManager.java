@@ -16,9 +16,6 @@ import com.orange.paddock.suma.business.exception.AbstractSumaException;
 import com.orange.paddock.suma.business.exception.SumaAlreadyActiveSubscriptionException;
 import com.orange.paddock.suma.business.exception.SumaAlreadyRevokedUnSubException;
 import com.orange.paddock.suma.business.exception.SumaSubscriptionIsStillActiveException;
-import com.orange.paddock.suma.business.exception.ccgw.SumaCcgwIntegrationErrorException;
-import com.orange.paddock.suma.business.exception.ccgw.SumaCcgwInternalErrorException;
-import com.orange.paddock.suma.business.exception.ccgw.SumaCcgwUnresponsiveException;
 import com.orange.paddock.suma.business.exception.notification.SumaNotificationException;
 import com.orange.paddock.suma.business.log.InternalNotificationSubLogger;
 import com.orange.paddock.suma.business.log.InternalNotificationSubLogger.NotifSubFields;
@@ -51,15 +48,13 @@ public class NotificationManager {
 
 		logs.put(NotifSubFields.INTERNAL_ID, loggerId.getInternalId());
 		logs.put(NotifSubFields.START_PROCESS_TIMESTAMP, PdkDateUtils.getCurrentDateTimestamp());
-
+		logs.put(NotifSubFields.SUBSCRIPTION_ID, subscriptionId);
+		
 		try {
 			// catch mongo error
 			Subscription subscription = repository.findOneBySubscriptionId(subscriptionId);
 
 			if (subscription != null) {
-
-				logs.put(NotifSubFields.SUBSCRIPTION_ID, subscriptionId);
-
 				String status = subscription.getStatus();
 
 				if (status.equals(SubscriptionStatusUtils.STATUS_ARCHIVED) || status.equals(SubscriptionStatusUtils.STATUS_WAITING_ARCHIVING)
@@ -77,17 +72,14 @@ public class NotificationManager {
 					TECHNICAL_LOGGER.debug("Status should be set to active");
 					status = SubscriptionStatusUtils.STATUS_ACTIVE;
 					subscription.setStatus(status);
+					repository.save(subscription);
 				}
-
-				repository.save(subscription);
 
 			} else {
 				// LOG ERROR SUMA PDK_SUMA_0004
 				subscription = repository.findOneByTransactionId(transactionId);
 				if (null == subscription) {
-
 					subscription = new Subscription();
-
 					subscription.setSubscriptionId(subscriptionId);
 					subscription.setCreationDate(new Date());
 					subscription.setActivationDate(activationDate);
@@ -118,16 +110,15 @@ public class NotificationManager {
 			TECHNICAL_LOGGER.debug("Error occured during Notification Subscription with message: '{}'", ex.getErrorDescription());
 			logs.put(NotifSubFields.INTERNAL_ERROR_CODE, ex.getInternalErrorCode());
 			logs.put(NotifSubFields.INTERNAL_ERROR_DESCRIPTION, ex.getErrorDescription());
-			logs.put(NotifSubFields.END_PROCESS_TIMESTAMP, PdkDateUtils.getCurrentDateTimestamp());
-			InternalNotificationSubLogger.write(logs);
 
 		} catch (Exception e) {
 
 			TECHNICAL_LOGGER.debug("An unexpected error occured during notification Subscription with message: '{}'", e.getMessage());
 			logs.put(NotifSubFields.INTERNAL_ERROR_DESCRIPTION, e.getMessage());
+
+		} finally {
 			logs.put(NotifSubFields.END_PROCESS_TIMESTAMP, PdkDateUtils.getCurrentDateTimestamp());
 			InternalNotificationSubLogger.write(logs);
-
 		}
 	}
 
@@ -137,9 +128,11 @@ public class NotificationManager {
 		TECHNICAL_LOGGER.debug("Starting asynchronuous Unsubscription notification task");
 
 		Map<NotifUnsubFields, String> logs = new HashMap<NotifUnsubFields, String>();
-
+		logs.put(NotifUnsubFields.INTERNAL_ID, loggerId.getInternalId());
+		logs.put(NotifUnsubFields.START_PROCESS_TIMESTAMP, PdkDateUtils.getCurrentDateTimestamp());
+		logs.put(NotifUnsubFields.SUBSCRIPTION_ID, subscriptionId);
+		
 		try {
-
 			Subscription subscriptionToDeactivate = repository.findOneBySubscriptionId(subscriptionId);
 
 			if (null == subscriptionToDeactivate) {
@@ -191,16 +184,14 @@ public class NotificationManager {
 			TECHNICAL_LOGGER.debug("Error occured during Notification Unsubscription with message: '{}'", ex.getErrorDescription());
 			logs.put(NotifUnsubFields.INTERNAL_ERROR_CODE, ex.getInternalErrorCode());
 			logs.put(NotifUnsubFields.INTERNAL_ERROR_DESCRIPTION, ex.getErrorDescription());
-			logs.put(NotifUnsubFields.END_PROCESS_TIMESTAMP, PdkDateUtils.getCurrentDateTimestamp());
-			InternalNotificationUnsubLogger.write(logs);
 
 		} catch (Exception e) {
-
 			TECHNICAL_LOGGER.debug("An unexpected error occured during notification Unsubscription with message: '{}'", e.getMessage());
 			logs.put(NotifUnsubFields.INTERNAL_ERROR_DESCRIPTION, e.getMessage());
+
+		} finally {
 			logs.put(NotifUnsubFields.END_PROCESS_TIMESTAMP, PdkDateUtils.getCurrentDateTimestamp());
 			InternalNotificationUnsubLogger.write(logs);
-
 		}
 
 	}
