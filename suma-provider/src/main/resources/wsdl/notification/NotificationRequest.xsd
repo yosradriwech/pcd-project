@@ -6,20 +6,20 @@
 
 	<xsd:complexType name="SubscriptionNotificationRequestType">
         <xsd:sequence>
-            <xsd:element name="requestId" type="xsd:string"/>
-            <xsd:element name="subscriptionId" type="xsd:string"/>
+            <xsd:element name="request-id" type="xsd:string"/>
+            <xsd:element name="subscription-id" type="xsd:string"/>
             <xsd:element name="subscriber" type="xsd:string"/>
-            <xsd:element name="activationDate" type="xsd:date"/>
+            <xsd:element name="activation-date" type="xsd:date"/>
 			<xsd:element name="assent-for-activation" type="xsd:boolean"/>
         </xsd:sequence>
     </xsd:complexType>
 	
 	<xsd:complexType name="UnsubscriptionNotificationRequestType">
         <xsd:sequence>
-            <xsd:element name="requestId" type="xsd:string"/>
-            <xsd:element name="subscriptionId" type="xsd:string"/>
+            <xsd:element name="request-id" type="xsd:string"/>
+            <xsd:element name="subscription-id" type="xsd:string"/>
             <xsd:element name="subscriber" type="xsd:string"/>
-            <xsd:element name="activationDate" type="xsd:date"/>
+            <xsd:element name="activation-date" type="xsd:date"/>
 			<xsd:element name="assent-for-activation" type="xsd:boolean"/>
         </xsd:sequence>
     </xsd:complexType>

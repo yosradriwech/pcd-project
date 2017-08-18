@@ -8,7 +8,7 @@ public class CcgwIntegrationErrorExceptionFactory implements IExceptionFactory {
 
 	@Override
 	public void throwException(CcgwClientException e) throws AbstractSumaException {
-		throw new SumaCcgwIntegrationErrorException(e);		
+		throw new SumaCcgwIntegrationErrorException();		
 	}
 
 }

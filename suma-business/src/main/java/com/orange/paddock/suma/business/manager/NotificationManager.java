@@ -42,19 +42,21 @@ public class NotificationManager {
 	@Async("subscriptionNotificationExecutor")
 	public void notificationSubscription(String subscriptionId, String transactionId, Date activationDate, String endUserId) {
 
-		TECHNICAL_LOGGER.debug("Starting asynchronuous subscription notification task");
+		TECHNICAL_LOGGER.debug("Starting asynchronuous subscription notification task for subId: {}, endUserId: {}, transactionId: {}", subscriptionId,
+				endUserId, transactionId);
 
 		Map<NotifSubFields, String> logs = new HashMap<NotifSubFields, String>();
 
 		logs.put(NotifSubFields.INTERNAL_ID, loggerId.getInternalId());
 		logs.put(NotifSubFields.START_PROCESS_TIMESTAMP, PdkDateUtils.getCurrentDateTimestamp());
 		logs.put(NotifSubFields.SUBSCRIPTION_ID, subscriptionId);
-		
+
 		try {
 			// catch mongo error
 			Subscription subscription = repository.findOneBySubscriptionId(subscriptionId);
 
 			if (subscription != null) {
+				TECHNICAL_LOGGER.debug("Session found for subscription id : {}", subscriptionId);
 				String status = subscription.getStatus();
 
 				if (status.equals(SubscriptionStatusUtils.STATUS_ARCHIVED) || status.equals(SubscriptionStatusUtils.STATUS_WAITING_ARCHIVING)
@@ -76,33 +78,21 @@ public class NotificationManager {
 				}
 
 			} else {
-				// LOG ERROR SUMA PDK_SUMA_0004
+				// Subscription id not found
 				subscription = repository.findOneByTransactionId(transactionId);
-				if (null == subscription) {
-					subscription = new Subscription();
-					subscription.setSubscriptionId(subscriptionId);
-					subscription.setCreationDate(new Date());
-					subscription.setActivationDate(activationDate);
-					subscription.setTransactionId(transactionId);
-					subscription.setEndUserId(endUserId);
-					subscription.setStatus(SubscriptionStatusUtils.STATUS_UNSUBSCRIPTION_ERROR);
+				if (null != subscription) {
+					TECHNICAL_LOGGER.debug("Session NOT found for subId : {}, but found for transactionId: {} ", subscriptionId, transactionId);
+					TECHNICAL_LOGGER.debug("Trying to unsubscribe user....");
 
-					repository.save(subscription);
-					throw new SumaNotificationException();
+					boolean unsubscriptionSuccess = subscriptionService.unsubscribe(subscriptionId, subscription.getServiceId(), endUserId);
+					if (unsubscriptionSuccess) {
+						TECHNICAL_LOGGER.debug("UNSUBSCRIPTION was OK.");
+						subscription.setStatus(SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_WAITING_ARCHIVING);
+					} else {
+						TECHNICAL_LOGGER.debug("UNSUBSCRIPTION was NOT OK.");
+						subscription.setStatus(SubscriptionStatusUtils.STATUS_UNSUBSCRIPTION_ERROR);
+					}
 				}
-
-				/**
-				 * CCGW unsubscribe request is deprecated beacuse the provider_id is missing and no way was identified (for this moment) to get this
-				 * parameter value
-				 * 
-				 * try { if (subscriptionService.unsubscribe(subscriptionId, "PROVIDER_ID", endUserId)) {
-				 * subscription.setStatus(SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_WAITING_ARCHIVING); } else {
-				 * subscription.setStatus(SubscriptionStatusUtils.STATUS_UNSUBSCRIPTION_ERROR); } } catch
-				 * (SumaCcgwUnresponsiveException|SumaCcgwIntegrationErrorException|SumaCcgwInternalErrorException e) {
-				 * TECHNICAL_LOGGER.error("CCGW error: {}", e.getMessage());
-				 * 
-				 * subscription.setStatus(SubscriptionStatusUtils.STATUS_UNSUBSCRIPTION_ERROR); }
-				 */
 			}
 
 		} catch (AbstractSumaException ex) {
@@ -131,7 +121,7 @@ public class NotificationManager {
 		logs.put(NotifUnsubFields.INTERNAL_ID, loggerId.getInternalId());
 		logs.put(NotifUnsubFields.START_PROCESS_TIMESTAMP, PdkDateUtils.getCurrentDateTimestamp());
 		logs.put(NotifUnsubFields.SUBSCRIPTION_ID, subscriptionId);
-		
+
 		try {
 			Subscription subscriptionToDeactivate = repository.findOneBySubscriptionId(subscriptionId);
 
