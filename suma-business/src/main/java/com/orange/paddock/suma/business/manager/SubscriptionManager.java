@@ -17,7 +17,10 @@ import com.orange.paddock.commons.msisdn.PdkMsisdnUtils;
 import com.orange.paddock.commons.oneapi.PdkAcrUtils;
 import com.orange.paddock.suma.business.exception.AbstractSumaException;
 import com.orange.paddock.suma.business.exception.SumaAlreadyRevokedSubException;
+import com.orange.paddock.suma.business.exception.SumaDuplicateSubscriptionRequestException;
 import com.orange.paddock.suma.business.exception.SumaInternalErrorException;
+import com.orange.paddock.suma.business.exception.SumaSubscriptionCancelIsPendingException;
+import com.orange.paddock.suma.business.exception.SumaSubscriptionCancellationPendingException;
 import com.orange.paddock.suma.business.exception.SumaUnknownSubscriptionIdException;
 import com.orange.paddock.suma.business.exception.ccgw.SumaCcgwIntegrationErrorException;
 import com.orange.paddock.suma.business.exception.ccgw.SumaCcgwInternalErrorException;
@@ -64,12 +67,10 @@ public class SubscriptionManager {
 	 * @return subscriptionId
 	 * @throws AbstractSumaException
 	 */
-	public SubscriptionResponse subscribe(SubscriptionDto subscriptionDto, String endUserIdValue, String mco)
-			throws AbstractSumaException {
-		TECHNICAL_LOGGER.debug("Starting subscription business logic with subscriptionDto: {} and endUserIdValue: {}",
-				subscriptionDto, endUserIdValue);
+	public SubscriptionResponse subscribe(SubscriptionDto subscriptionDto, String endUserIdValue, String mco) throws AbstractSumaException {
+		TECHNICAL_LOGGER.debug("Starting subscription business logic with subscriptionDto: {} and endUserIdValue: {}", subscriptionDto, endUserIdValue);
 
-		SubscriptionResponse subId = new SubscriptionResponse();
+		SubscriptionResponse subscriptionResponse = new SubscriptionResponse();
 
 		/**
 		 * MSISDN to store in mongo: retrieved from WT or subscriptionDto body
@@ -100,6 +101,50 @@ public class SubscriptionManager {
 		}
 		TECHNICAL_LOGGER.debug("MSISDN after dealiasing or formatting : {}", userMsisdnToStore);
 
+		/**************** Idempotency **************/
+		Subscription previousSubscriptionSession = new Subscription();
+		previousSubscriptionSession = subscriptionRepository.findOneByEndUserIdAndServiceIdAndOnBehalfOfAndCategoryCodeAndDescription(userMsisdnToStore,
+				subscriptionDto.getServiceId(), subscriptionDto.getOnBehalfOf(), subscriptionDto.getCategoryCode(), subscriptionDto.getDescription());
+
+		if (!Objects.isNull(previousSubscriptionSession)) {
+			TECHNICAL_LOGGER.debug("Found previous session for subscription request with subscriptionId= {},  status= {} and transactionId= {}",
+					previousSubscriptionSession.getSubscriptionId(), previousSubscriptionSession.getStatus(), previousSubscriptionSession.getTransactionId());
+
+			String status = previousSubscriptionSession.getStatus();
+			if (Objects.equals(status, SubscriptionStatusUtils.STATUS_PENDING)) {
+				// throw error PDK_SUMA_0008
+				TECHNICAL_LOGGER.error("Subscription session found with status PENDING");
+				throw new SumaDuplicateSubscriptionRequestException();
+
+			} else if ((Objects.equals(status, SubscriptionStatusUtils.STATUS_WAITING_ACTIVATION))
+					|| (Objects.equals(status, SubscriptionStatusUtils.STATUS_ACTIVE))) {
+				// idempotency
+				TECHNICAL_LOGGER.debug("Subscription session found with status {}", status);
+				subscriptionResponse.setCcgwSubscriptionId(previousSubscriptionSession.getSubscriptionId());
+				subscriptionResponse.setMsisdn(PdkMsisdnUtils.getMsisdnWithoutPrefix(userMsisdnToStore));
+				subscriptionResponse.setSubscriptionId(previousSubscriptionSession.getTransactionId());
+				return subscriptionResponse;
+			} else if ((Objects.equals(status, SubscriptionStatusUtils.STATUS_WAITING_ARCHIVING))
+					|| (Objects.equals(status, SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_WAITING_ARCHIVING))) {
+				// throw error PDK_SUMA_0009
+				TECHNICAL_LOGGER.error("Subscription session found with status {}", status);
+				throw new SumaSubscriptionCancelIsPendingException();
+
+			} else if ((Objects.equals(status, SubscriptionStatusUtils.STATUS_ARCHIVED))
+					|| (Objects.equals(status, SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_ARCHIVED))
+					|| (Objects.equals(status, SubscriptionStatusUtils.STATUS_UNKNOWN_UNSUBSCRIPTION_ARCHIVED))
+					|| (Objects.equals(status, SubscriptionStatusUtils.STATUS_SUBSCRIPTION_ERROR))) {
+				// delete session
+				subscriptionRepository.delete(previousSubscriptionSession);
+			
+			} else if ((Objects.equals(status, SubscriptionStatusUtils.STATUS_UNSUBSCRIPTION_ERROR))) {
+				TECHNICAL_LOGGER.error("Subscription session found with status {}", status);
+				throw new SumaSubscriptionCancellationPendingException();
+			}
+		}
+
+		TECHNICAL_LOGGER.debug("The process continues after one/no session found ");
+
 		/**************** Store subscription session **************/
 		Subscription subscriptionSessionToStore = new Subscription();
 		subscriptionSessionToStore = subscriptionMapper.map(subscriptionDto, Subscription.class);
@@ -120,8 +165,7 @@ public class SubscriptionManager {
 		/**************** Call CCGW to get subscriptionId **************/
 		String subscriptionId = null;
 		try {
-			subscriptionId = subscriptionService.subscribe(subscriptionDto, userMsisdnToStore,
-					subscriptionSessionToStore.getTransactionId());
+			subscriptionId = subscriptionService.subscribe(subscriptionDto, userMsisdnToStore, subscriptionSessionToStore.getTransactionId());
 
 			if (Objects.isNull(subscriptionId)) {
 				TECHNICAL_LOGGER.debug("Received subscriptionId is NULL, update session");
@@ -143,11 +187,11 @@ public class SubscriptionManager {
 			subscriptionRepository.save(storedSubscription);
 		}
 
-		subId.setMsisdn(PdkMsisdnUtils.getMsisdnWithoutPrefix(userMsisdnToStore));
-		subId.setSubscriptionId(subscriptionSessionToStore.getSubscriptionId());
-		subId.setCcgwSubscriptionId(subscriptionId);
+		subscriptionResponse.setMsisdn(PdkMsisdnUtils.getMsisdnWithoutPrefix(userMsisdnToStore));
+		subscriptionResponse.setSubscriptionId(subscriptionSessionToStore.getSubscriptionId());
+		subscriptionResponse.setCcgwSubscriptionId(subscriptionId);
 
-		return subId;
+		return subscriptionResponse;
 	}
 
 	/**
@@ -169,20 +213,16 @@ public class SubscriptionManager {
 		if (Objects.equals(subscriptionSessionFound.getStatus(), SubscriptionStatusUtils.STATUS_UNSUBSCRIPTION_ERROR)) {
 			TECHNICAL_LOGGER.error("Subscription session found with status UNSUBSCRIPTION_ERROR");
 			throw new SumaInternalErrorException();
-		} else if (Objects.equals(subscriptionSessionFound.getStatus(),
-				SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_ARCHIVED)
-				|| Objects.equals(subscriptionSessionFound.getStatus(),
-						SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_WAITING_ARCHIVING)) {
+		} else if (Objects.equals(subscriptionSessionFound.getStatus(), SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_ARCHIVED)
+				|| Objects.equals(subscriptionSessionFound.getStatus(), SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_WAITING_ARCHIVING)) {
 			TECHNICAL_LOGGER.error("Subscription session found with status {}", subscriptionSessionFound.getStatus());
 			throw new SumaAlreadyRevokedSubException(subscriptionId);
 		} else if (Objects.equals(subscriptionSessionFound.getStatus(), SubscriptionStatusUtils.STATUS_ARCHIVED)
-				|| Objects.equals(subscriptionSessionFound.getStatus(),
-						SubscriptionStatusUtils.STATUS_WAITING_ARCHIVING)) {
+				|| Objects.equals(subscriptionSessionFound.getStatus(), SubscriptionStatusUtils.STATUS_WAITING_ARCHIVING)) {
 			TECHNICAL_LOGGER.info("Nothin to do, subscription status: {}", subscriptionSessionFound.getStatus());
 		} else {
 			try {
-				if (subscriptionService.unsubscribe(subscriptionId, subscriptionSessionFound.getServiceId(),
-						subscriptionSessionFound.getEndUserId())) {
+				if (subscriptionService.unsubscribe(subscriptionId, subscriptionSessionFound.getServiceId(), subscriptionSessionFound.getEndUserId())) {
 					TECHNICAL_LOGGER.debug("Unsubscribe call from CCGW OK !");
 					subscriptionSessionFound.setStatus(SubscriptionStatusUtils.STATUS_WAITING_ARCHIVING);
 				} else {
@@ -190,8 +230,7 @@ public class SubscriptionManager {
 					subscriptionSessionFound.setStatus(SubscriptionStatusUtils.STATUS_UNSUBSCRIPTION_ERROR);
 				}
 
-			} catch (SumaCcgwUnresponsiveException | SumaCcgwIntegrationErrorException
-					| SumaCcgwInternalErrorException e) {
+			} catch (SumaCcgwUnresponsiveException | SumaCcgwIntegrationErrorException | SumaCcgwInternalErrorException e) {
 				TECHNICAL_LOGGER.error("CCGW error: {}", e.getMessage());
 
 				subscriptionSessionFound.setStatus(SubscriptionStatusUtils.STATUS_UNSUBSCRIPTION_ERROR);
@@ -240,9 +279,8 @@ public class SubscriptionManager {
 		return subscriptionResponseDto;
 	}
 
-	private String dealiasing(Map<String, String> wtInputParameters)
-			throws SumaIoswInternalErrorException, SumaIoswUnresponsiveException, SumaInternalErrorException,
-			SumaWtApiIntegrationException, SumaWtApiInternalErrorException, SumaWtApiAuthenticationFailureException {
+	private String dealiasing(Map<String, String> wtInputParameters) throws SumaIoswInternalErrorException, SumaIoswUnresponsiveException,
+			SumaInternalErrorException, SumaWtApiIntegrationException, SumaWtApiInternalErrorException, SumaWtApiAuthenticationFailureException {
 
 		String msisdn = null;
 

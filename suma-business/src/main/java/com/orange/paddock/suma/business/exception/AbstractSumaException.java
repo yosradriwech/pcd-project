@@ -14,6 +14,9 @@ public abstract class AbstractSumaException extends RuntimeException{
 	public static final String INTERNAL_SUMA_0005_CODE = "PDK_SUMA_0005";
 	public static final String INTERNAL_SUMA_0006_CODE = "PDK_SUMA_0006";
 	public static final String INTERNAL_SUMA_0007_CODE = "PDK_SUMA_0007";
+	public static final String INTERNAL_SUMA_0008_CODE = "PDK_SUMA_0008";
+	public static final String INTERNAL_SUMA_0009_CODE = "PDK_SUMA_0009";
+	public static final String INTERNAL_SUMA_0010_CODE = "PDK_SUMA_0010";
 	public static final String INTERNAL_SUMA_0100_CODE = "PDK_SUMA_0100";
 	public static final String INTERNAL_SUMA_1000_CODE = "PDK_SUMA_1000";
 	public static final String INTERNAL_SUMA_1001_CODE = "PDK_SUMA_1001";
@@ -29,6 +32,8 @@ public abstract class AbstractSumaException extends RuntimeException{
 	public static final String SUMA_ERROR_CODE_00002 = "00002";
 	public static final String SUMA_ERROR_CODE_00003 = "00003";
 	public static final String SUMA_ERROR_CODE_00004 = "00004";
+	public static final String SUMA_ERROR_CODE_00005 = "00005";
+	public static final String SUMA_ERROR_CODE_00006 = "00006";
 
 	protected static final int HTTP_CODE_BAD_REQUEST = 400;
 	
