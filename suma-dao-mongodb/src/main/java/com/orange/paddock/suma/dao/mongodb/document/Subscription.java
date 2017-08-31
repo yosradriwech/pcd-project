@@ -6,16 +6,18 @@ import java.util.Objects;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 @Document
+@CompoundIndex(name = "subId_userId", def = "{'subscriptionId' : 1, 'endUserId' : 1}", unique = true)
 public class Subscription {
 
 	@Id
 	private String id;
-	
-	@Indexed(unique=true)
+
+	@Field("subscriptionId")
 	private String subscriptionId;
 
 	@CreatedDate
@@ -26,7 +28,10 @@ public class Subscription {
 	private String transactionId;
 	private String serviceId;
 	private String onBehalfOf;
+
+	@Field("endUserId")
 	private String endUserId;
+
 	private String description;
 	private String categoryCode;
 	private BigDecimal amount;
@@ -39,8 +44,8 @@ public class Subscription {
 	}
 
 	public Subscription(String id, String subscriptionId, Date creationDate, Date activationDate, Date deActivationDate, String transactionId,
-			String serviceId, String onBehalfOf, String endUserId, String description, String categoryCode, BigDecimal amount,
-			BigDecimal taxedAmount, String currency, boolean isAdult, String status) {
+			String serviceId, String onBehalfOf, String endUserId, String description, String categoryCode, BigDecimal amount, BigDecimal taxedAmount,
+			String currency, boolean isAdult, String status) {
 		super();
 		this.id = id;
 		this.subscriptionId = subscriptionId;
@@ -218,7 +223,7 @@ public class Subscription {
 			return false;
 		if (getClass() != subscriptionObjToCompareTo.getClass())
 			return false;
-		
+
 		Subscription subscriptionToCompareTo = (Subscription) subscriptionObjToCompareTo;
 		if (activationDate == null) {
 			if (subscriptionToCompareTo.activationDate != null)
@@ -297,21 +302,17 @@ public class Subscription {
 				return false;
 		} else if (!transactionId.equals(subscriptionToCompareTo.transactionId))
 			return false;
-		
+
 		return Objects.equals(id, subscriptionToCompareTo.getId()) && Objects.equals(subscriptionId, subscriptionToCompareTo.getSubscriptionId())
 				&& Objects.equals(creationDate, subscriptionToCompareTo.getCreationDate())
 				&& Objects.equals(activationDate, subscriptionToCompareTo.getActivationDate())
 				&& Objects.equals(deActivationDate, subscriptionToCompareTo.getDeActivationDate())
 				&& Objects.equals(transactionId, subscriptionToCompareTo.getTransactionId())
-				&& Objects.equals(serviceId, subscriptionToCompareTo.getServiceId())
-				&& Objects.equals(onBehalfOf, subscriptionToCompareTo.getOnBehalfOf())
-				&& Objects.equals(endUserId, subscriptionToCompareTo.getEndUserId())
-				&& Objects.equals(description, subscriptionToCompareTo.getDescription())
-				&& Objects.equals(categoryCode, subscriptionToCompareTo.getCategoryCode())
-				&& Objects.equals(amount, subscriptionToCompareTo.getAmount())
-				&& Objects.equals(taxedAmount, subscriptionToCompareTo.getTaxedAmount())
-				&& Objects.equals(currency, subscriptionToCompareTo.getCurrency()) && isAdult == subscriptionToCompareTo.isAdult
-				&& Objects.equals(status, subscriptionToCompareTo.getStatus());
+				&& Objects.equals(serviceId, subscriptionToCompareTo.getServiceId()) && Objects.equals(onBehalfOf, subscriptionToCompareTo.getOnBehalfOf())
+				&& Objects.equals(endUserId, subscriptionToCompareTo.getEndUserId()) && Objects.equals(description, subscriptionToCompareTo.getDescription())
+				&& Objects.equals(categoryCode, subscriptionToCompareTo.getCategoryCode()) && Objects.equals(amount, subscriptionToCompareTo.getAmount())
+				&& Objects.equals(taxedAmount, subscriptionToCompareTo.getTaxedAmount()) && Objects.equals(currency, subscriptionToCompareTo.getCurrency())
+				&& isAdult == subscriptionToCompareTo.isAdult && Objects.equals(status, subscriptionToCompareTo.getStatus());
 	}
 
 	@Override
@@ -319,10 +320,10 @@ public class Subscription {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Subscription [id=").append(id).append(", subscriptionId=").append(subscriptionId).append(", creationDate=").append(creationDate)
 				.append(", activationDate=").append(activationDate).append(", deActivationDate=").append(deActivationDate).append(", transactionId=")
-				.append(transactionId).append(", serviceId=" + serviceId).append(", onBehalfOf=").append(onBehalfOf).append(", endUserId=")
-				.append(endUserId).append(", description=").append(description + ", categoryCode=").append(categoryCode).append(", amount=")
-				.append(amount).append(", taxedAmount=").append(taxedAmount).append(", currency=").append(currency).append(", isAdult=")
-				.append(isAdult).append(", status=").append(status).append("]");
+				.append(transactionId).append(", serviceId=" + serviceId).append(", onBehalfOf=").append(onBehalfOf).append(", endUserId=").append(endUserId)
+				.append(", description=").append(description + ", categoryCode=").append(categoryCode).append(", amount=").append(amount)
+				.append(", taxedAmount=").append(taxedAmount).append(", currency=").append(currency).append(", isAdult=").append(isAdult).append(", status=")
+				.append(status).append("]");
 		return sb.toString();
 	}
 
