@@ -101,7 +101,7 @@ public class SubscriptionManagerSubscribeUnitTest extends AbstractSubscriptionMa
 			TECHNICAL_LOGGER.error("Subscribe unit TEST error " + e);
 			throw e;
 		}
-		TECHNICAL_LOGGER.debug("Test result : subscriptionId {}", subscription.getSubscriptionId());
+		TECHNICAL_LOGGER.debug("Test result : subscriptionId {}", subscription.getTransactionId());
 		Assert.assertEquals(subscription.getCcgwSubscriptionId(), SUBSCRIPTION_ID);
 	}
 
@@ -124,7 +124,7 @@ public class SubscriptionManagerSubscribeUnitTest extends AbstractSubscriptionMa
 			TECHNICAL_LOGGER.error("Subscribe unit TEST error " + e);
 			throw e;
 		}
-		Assert.assertNull(subscription.getSubscriptionId());
+		Assert.assertNull(subscription.getTransactionId());
 	}
 
 	@Test
@@ -191,7 +191,7 @@ public class SubscriptionManagerSubscribeUnitTest extends AbstractSubscriptionMa
 			TECHNICAL_LOGGER.error("Subscribe unit TEST error " + e);
 			throw e;
 		}
-		Assert.assertNull(subscription.getSubscriptionId());
+		Assert.assertNull(subscription.getTransactionId());
 	}
 
 	@Test(expected = SumaWtApiIntegrationException.class)
@@ -214,7 +214,7 @@ public class SubscriptionManagerSubscribeUnitTest extends AbstractSubscriptionMa
 			TECHNICAL_LOGGER.error("Subscribe unit TEST error " + e);
 			throw e;
 		}
-		Assert.assertNull(subscription.getSubscriptionId());
+		Assert.assertNull(subscription.getTransactionId());
 	}
 
 	@Test(expected = SumaInternalErrorException.class)
@@ -235,7 +235,7 @@ public class SubscriptionManagerSubscribeUnitTest extends AbstractSubscriptionMa
 			TECHNICAL_LOGGER.error("Subscribe unit TEST error " + e1);
 			throw e1;
 		}
-		Assert.assertNull(subscription.getSubscriptionId());
+		Assert.assertNull(subscription.getTransactionId());
 	}
 
 	@Test
@@ -285,7 +285,7 @@ public class SubscriptionManagerSubscribeUnitTest extends AbstractSubscriptionMa
 			TECHNICAL_LOGGER.error("Subscribe unit TEST error " + e1);
 			throw e1;
 		}
-		Assert.assertNull(subscription.getSubscriptionId());
+		Assert.assertNull(subscription.getTransactionId());
 
 	}
 
@@ -312,7 +312,7 @@ public class SubscriptionManagerSubscribeUnitTest extends AbstractSubscriptionMa
 			TECHNICAL_LOGGER.error("Subscribe unit TEST error " + e1);
 			throw e1;
 		}
-		Assert.assertNull(subscription.getSubscriptionId());
+		Assert.assertNull(subscription.getTransactionId());
 	}
 
 	@Test(expected = SumaCcgwIntegrationErrorException.class)
@@ -338,7 +338,7 @@ public class SubscriptionManagerSubscribeUnitTest extends AbstractSubscriptionMa
 			TECHNICAL_LOGGER.error("Subscribe unit TEST error " + e1);
 			throw e1;
 		}
-		Assert.assertNull(subscription.getSubscriptionId());
+		Assert.assertNull(subscription.getTransactionId());
 	}
 
 }

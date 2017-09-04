@@ -7,6 +7,7 @@ import java.util.Objects;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
@@ -25,7 +26,10 @@ public class Subscription {
 
 	private Date activationDate;
 	private Date deActivationDate;
+	
+	@Indexed(unique=true)
 	private String transactionId;
+	
 	private String serviceId;
 	private String onBehalfOf;
 

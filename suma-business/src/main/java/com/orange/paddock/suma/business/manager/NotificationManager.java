@@ -56,8 +56,8 @@ public class NotificationManager {
 	@Async("subscriptionNotificationExecutor")
 	public void notificationSubscription(String subscriptionId, String transactionId, Date activationDate, String endUserId) {
 
-		TECHNICAL_LOGGER.debug("Starting asynchronuous subscription notification task for subId: {}, endUserId: {}, transactionId: {}", subscriptionId,
-				endUserId, transactionId);
+		TECHNICAL_LOGGER.info("Starting asynchronuous subscription notification task for subId: {}, endUserId: {}, transactionId: {}, activationDate {}", subscriptionId,
+				endUserId, transactionId, activationDate);
 
 		Map<NotifSubFields, String> logs = new HashMap<NotifSubFields, String>();
 

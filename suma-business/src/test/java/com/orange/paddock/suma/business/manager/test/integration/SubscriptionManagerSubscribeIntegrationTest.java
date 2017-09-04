@@ -69,8 +69,8 @@ public class SubscriptionManagerSubscribeIntegrationTest extends AbstractSubscri
 								+ "  <ident name=\"mss\" value=\" \" />" + " </identifiers>" + "</WTResponse>"));
 
 		SubscriptionResponse subscription = subscriptionManager.subscribe(initializeValidSubscriptionDto(), endUserIdValue, mco);
-		TECHNICAL_LOGGER.debug("Test result : subscriptionId {}", subscription.getSubscriptionId());
-		Assert.assertNotNull(subscription.getSubscriptionId());
+		TECHNICAL_LOGGER.debug("Test result : subscriptionId {}", subscription.getTransactionId());
+		Assert.assertNotNull(subscription.getTransactionId());
 	}
 
 	// Error 3001

@@ -2,15 +2,15 @@ package com.orange.paddock.suma.business.model;
 
 public class SubscriptionResponse {
 	
-	private String subscriptionId;
+	private String transactionId;
 	private String ccgwSubscriptionId;
 	private String msisdn;
 	
-	public String getSubscriptionId() {
-		return subscriptionId;
+	public String getTransactionId() {
+		return transactionId;
 	}
-	public void setSubscriptionId(String subscriptionId) {
-		this.subscriptionId = subscriptionId;
+	public void setTransactionId(String subscriptionId) {
+		this.transactionId = subscriptionId;
 	}
 	public String getCcgwSubscriptionId() {
 		return ccgwSubscriptionId;

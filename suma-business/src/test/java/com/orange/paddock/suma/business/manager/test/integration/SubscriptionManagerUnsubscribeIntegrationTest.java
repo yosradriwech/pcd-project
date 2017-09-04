@@ -64,7 +64,7 @@ public class SubscriptionManagerUnsubscribeIntegrationTest extends AbstractSubsc
 		}
 		
 		// Get status
-		SubscriptionDto subscriptionSessionFound = subscriptionManager.getSubscriptionStatus(subscription.getSubscriptionId());
+		SubscriptionDto subscriptionSessionFound = subscriptionManager.getSubscriptionStatus(subscription.getTransactionId());
 
 		// Following fields are set in MongoDb by SUMA
 		subscriptionReceived.setStatus(SubscriptionStatusUtils.STATUS_WAITING_ACTIVATION);
@@ -93,10 +93,10 @@ public class SubscriptionManagerUnsubscribeIntegrationTest extends AbstractSubsc
 		SubscriptionDto subscriptionReceived = initializeValidSubscriptionDto();
 
 		SubscriptionResponse subscription = subscriptionManager.subscribe(subscriptionReceived, endUserIdValue, mco);
-		Assert.assertNotNull(subscription.getSubscriptionId());
+		Assert.assertNotNull(subscription.getTransactionId());
 
 		// Successful unsubscribe request to set status WAITING_ARCHIVING
-		TECHNICAL_LOGGER.debug("Sending unsubscription request expected success");
+		TECHNICAL_LOGGER.debug("Sending unsubscription request expected success: "+subscription.getTransactionId()+subscription.getCcgwSubscriptionId());
 		mockServerClient.reset();
 		mockServerClient.when(request().withPath("/subscribe")).respond(
 				response().withStatusCode(200).withBody(
@@ -105,12 +105,12 @@ public class SubscriptionManagerUnsubscribeIntegrationTest extends AbstractSubsc
 								+ "</ns:success></ns:status>"
 								+ "<ns:vas-signature></ns:vas-signature></ns:subscription-unsubscribe-response></soapenv:Body></soapenv:Envelope>"));
 		
-		String unsubscribeStatus = subscriptionManager.unsubscribe(subscription.getSubscriptionId());
+		String unsubscribeStatus = subscriptionManager.unsubscribe(subscription.getTransactionId());
 		TECHNICAL_LOGGER.debug("Session status after unsubscription {}");
 		Assert.assertEquals(unsubscribeStatus, SubscriptionStatusUtils.STATUS_WAITING_ARCHIVING);
 		
 		// Get status
-		subscriptionManager.getSubscriptionStatus(subscription.getSubscriptionId());
+		subscriptionManager.getSubscriptionStatus(subscription.getTransactionId());
 
 	}
 

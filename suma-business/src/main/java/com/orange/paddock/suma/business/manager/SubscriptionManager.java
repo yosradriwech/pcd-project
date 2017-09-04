@@ -122,7 +122,7 @@ public class SubscriptionManager {
 				TECHNICAL_LOGGER.debug("Subscription session found with status {}", status);
 				subscriptionResponse.setCcgwSubscriptionId(previousSubscriptionSession.getSubscriptionId());
 				subscriptionResponse.setMsisdn(PdkMsisdnUtils.getMsisdnWithoutPrefix(userMsisdnToStore));
-				subscriptionResponse.setSubscriptionId(previousSubscriptionSession.getTransactionId());
+				subscriptionResponse.setTransactionId(previousSubscriptionSession.getTransactionId());
 				return subscriptionResponse;
 			} else if ((Objects.equals(status, SubscriptionStatusUtils.STATUS_WAITING_ARCHIVING))
 					|| (Objects.equals(status, SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_WAITING_ARCHIVING))) {
@@ -188,7 +188,7 @@ public class SubscriptionManager {
 		}
 
 		subscriptionResponse.setMsisdn(PdkMsisdnUtils.getMsisdnWithoutPrefix(userMsisdnToStore));
-		subscriptionResponse.setSubscriptionId(subscriptionSessionToStore.getSubscriptionId());
+		subscriptionResponse.setTransactionId(subscriptionSessionToStore.getTransactionId());
 		subscriptionResponse.setCcgwSubscriptionId(subscriptionId);
 
 		return subscriptionResponse;
@@ -196,18 +196,18 @@ public class SubscriptionManager {
 
 	/**
 	 * 
-	 * @param subscriptionId
+	 * @param transactionId
 	 * @return subscriptionStatus after unsubscribe CCGW response
 	 * @throws AbstractSumaException
 	 */
-	public String unsubscribe(String subscriptionId) throws AbstractSumaException {
-		TECHNICAL_LOGGER.debug("Starting unsubscription business logic with subscriptionId '{}'", subscriptionId);
+	public String unsubscribe(String transactionId) throws AbstractSumaException {
+		TECHNICAL_LOGGER.debug("Starting unsubscription business logic with subscriptionId '{}'", transactionId);
 
-		Subscription subscriptionSessionFound = subscriptionRepository.findOneBySubscriptionId(subscriptionId);
+		Subscription subscriptionSessionFound = subscriptionRepository.findOneByTransactionId(transactionId);
 
 		if (Objects.isNull(subscriptionSessionFound)) {
-			TECHNICAL_LOGGER.error("No subscription session found for '{}'", subscriptionId);
-			throw new SumaUnknownSubscriptionIdException(subscriptionId);
+			TECHNICAL_LOGGER.error("No subscription session found for '{}'", transactionId);
+			throw new SumaUnknownSubscriptionIdException(transactionId);
 		}
 
 		if (Objects.equals(subscriptionSessionFound.getStatus(), SubscriptionStatusUtils.STATUS_UNSUBSCRIPTION_ERROR)) {
@@ -216,13 +216,13 @@ public class SubscriptionManager {
 		} else if (Objects.equals(subscriptionSessionFound.getStatus(), SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_ARCHIVED)
 				|| Objects.equals(subscriptionSessionFound.getStatus(), SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_WAITING_ARCHIVING)) {
 			TECHNICAL_LOGGER.error("Subscription session found with status {}", subscriptionSessionFound.getStatus());
-			throw new SumaAlreadyRevokedSubException(subscriptionId);
+			throw new SumaAlreadyRevokedSubException(transactionId);
 		} else if (Objects.equals(subscriptionSessionFound.getStatus(), SubscriptionStatusUtils.STATUS_ARCHIVED)
 				|| Objects.equals(subscriptionSessionFound.getStatus(), SubscriptionStatusUtils.STATUS_WAITING_ARCHIVING)) {
 			TECHNICAL_LOGGER.info("Nothin to do, subscription status: {}", subscriptionSessionFound.getStatus());
 		} else {
 			try {
-				if (subscriptionService.unsubscribe(subscriptionId, subscriptionSessionFound.getServiceId(), subscriptionSessionFound.getEndUserId())) {
+				if (subscriptionService.unsubscribe(subscriptionSessionFound.getSubscriptionId(), subscriptionSessionFound.getServiceId(), subscriptionSessionFound.getEndUserId())) {
 					TECHNICAL_LOGGER.debug("Unsubscribe call from CCGW OK !");
 					subscriptionSessionFound.setStatus(SubscriptionStatusUtils.STATUS_WAITING_ARCHIVING);
 				} else {
@@ -246,17 +246,17 @@ public class SubscriptionManager {
 
 	/**
 	 * 
-	 * @param subscriptionId
+	 * @param transactionId
 	 * @return subscriptionDto of requested subscriptionId
 	 */
-	public SubscriptionDto getSubscriptionStatus(String subscriptionId) throws AbstractSumaException {
+	public SubscriptionDto getSubscriptionStatus(String transactionId) throws AbstractSumaException {
 
-		TECHNICAL_LOGGER.debug("Starting getStatus business logic with subscriptionId '{}'", subscriptionId);
+		TECHNICAL_LOGGER.debug("Starting getStatus business logic with TxId '{}'", transactionId);
 
-		Subscription subscriptionSessionFound = subscriptionRepository.findOneBySubscriptionId(subscriptionId);
+		Subscription subscriptionSessionFound = subscriptionRepository.findOneByTransactionId(transactionId);
 		if (Objects.isNull(subscriptionSessionFound)) {
-			TECHNICAL_LOGGER.error("No session found for identifier {}", subscriptionId);
-			throw new SumaUnknownSubscriptionIdException(subscriptionId);
+			TECHNICAL_LOGGER.error("No session found for identifier {}", transactionId);
+			throw new SumaUnknownSubscriptionIdException(transactionId);
 		}
 
 		switch (subscriptionSessionFound.getStatus()) {
@@ -265,8 +265,8 @@ public class SubscriptionManager {
 		case SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_ARCHIVED:
 		case SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_WAITING_ARCHIVING:
 		case SubscriptionStatusUtils.STATUS_UNKNOWN_UNSUBSCRIPTION_ARCHIVED:
-			TECHNICAL_LOGGER.error("Subscription already revoked for identifier {}", subscriptionId);
-			throw new SumaAlreadyRevokedSubException(subscriptionId);
+			TECHNICAL_LOGGER.error("Subscription already revoked for identifier {}", transactionId);
+			throw new SumaAlreadyRevokedSubException(transactionId);
 		default:
 			TECHNICAL_LOGGER.debug("Subscription status is {}", subscriptionSessionFound.getStatus());
 		}

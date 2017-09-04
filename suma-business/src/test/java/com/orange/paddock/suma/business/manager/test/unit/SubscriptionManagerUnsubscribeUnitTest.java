@@ -1,6 +1,7 @@
 package com.orange.paddock.suma.business.manager.test.unit;
 
 import java.util.Date;
+import java.util.UUID;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -66,7 +67,9 @@ public class SubscriptionManagerUnsubscribeUnitTest extends AbstractSubscription
 		subscriptionSession.setCreationDate(creationDate);
 		subscriptionSession.setStatus(status);
 		subscriptionSession.setSubscriptionId(SUBSCRIPTION_ID);
-		Mockito.when(subscriptionRepository.findOneBySubscriptionId(Mockito.anyString())).thenReturn(subscriptionSession);
+		// String transactionId = UUID.randomUUID().toString();
+		subscriptionSession.setTransactionId(SUBSCRIPTION_ID);
+		Mockito.when(subscriptionRepository.findOneByTransactionId(Mockito.anyString())).thenReturn(subscriptionSession);
 
 		Mockito.when(subscriptionRepository.save(Mockito.any(Subscription.class))).thenReturn(subscriptionSession);
 	}
@@ -242,7 +245,8 @@ public class SubscriptionManagerUnsubscribeUnitTest extends AbstractSubscription
 		SubscriptionDto subscriptionDto = initializeValidSubscriptionDto();
 		subscriptionDto.setCreationDate(creationDate);
 		subscriptionDto.setStatus(SubscriptionStatusUtils.STATUS_PENDING);
-
+		subscriptionDto.setTransactionId(SUBSCRIPTION_ID);
+		
 		try {
 			SubscriptionDto subscriptionDtoSession = subscriptionManager.getSubscriptionStatus(SUBSCRIPTION_ID);
 			Assert.assertEquals(subscriptionDtoSession, subscriptionDto);

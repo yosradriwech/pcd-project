@@ -3,6 +3,7 @@ package com.orange.paddock.suma.dao.mongodb.test;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import junit.framework.Assert;
 
@@ -26,7 +27,6 @@ public class MongoDbQueriesTest {
 
 	private static final String END_USER_ID = "+99900000027501";
 	private static final String SERVICE_ID = "suma-service";
-	private static final String TRANSACTION_ID = "suma-transaction-id";
 	private static final String SUBSCRIPTION_ID = "4973";
 	private static final BigDecimal AMOUNT = new BigDecimal(1.0);
 	private static final BigDecimal AMOUNT_1 = new BigDecimal(1.5);
@@ -42,44 +42,46 @@ public class MongoDbQueriesTest {
 
 	@Test
 	public void saveSubscriptionSuccessfulTest() {
+		String transactionId = UUID.randomUUID().toString();
 		Subscription sub = new Subscription();
 		sub.setEndUserId(END_USER_ID);
 		sub.setAmount(AMOUNT);
 		sub.setTaxedAmount(TAXED_AMOUNT);
 		sub.setServiceId(SERVICE_ID);
-		sub.setTransactionId(TRANSACTION_ID);
+		sub.setTransactionId(transactionId);
 		sub.setSubscriptionId(SUBSCRIPTION_ID);
 		Subscription savedSession = subscriptionRepo.save(sub);
 		Assert.assertEquals(SUBSCRIPTION_ID, savedSession.getSubscriptionId());
 		Assert.assertEquals(AMOUNT, savedSession.getAmount());
-		
-		Subscription toUpdateSession = subscriptionRepo.findOneBySubscriptionId(SUBSCRIPTION_ID);
+
+		Subscription toUpdateSession = subscriptionRepo.findOneByTransactionId(transactionId);
 		toUpdateSession.setAmount(AMOUNT_1);
 		TECHNICAL_LOGGER.debug("Trying to update session");
 		Subscription savedSessionUpdated = subscriptionRepo.save(toUpdateSession);
 		Assert.assertEquals(AMOUNT_1, savedSessionUpdated.getAmount());
 	}
-	
 
 	@Test
 	public void listSubscriptionsTest() {
+		String transactionId = UUID.randomUUID().toString();
 		Subscription subscription1 = new Subscription();
 		Subscription subscription2 = new Subscription();
-		
+
 		subscription1.setEndUserId(END_USER_ID);
 		subscription1.setAmount(AMOUNT);
 		subscription1.setTaxedAmount(TAXED_AMOUNT);
 		subscription1.setServiceId(SERVICE_ID);
-		subscription1.setTransactionId(TRANSACTION_ID);
+		subscription1.setTransactionId(transactionId);
 		subscription1.setCurrency("currency1");
 		String id1 = subscriptionRepo.save(subscription1).getId();
 		Assert.assertNotNull(id1);
 		
+		transactionId = UUID.randomUUID().toString();
 		subscription2.setEndUserId(END_USER_ID);
 		subscription2.setAmount(AMOUNT_1);
 		subscription2.setTaxedAmount(TAXED_AMOUNT);
 		subscription2.setServiceId(SERVICE_ID);
-		subscription2.setTransactionId(TRANSACTION_ID);
+		subscription2.setTransactionId(transactionId);
 		subscription2.setCurrency("currency2");
 		subscription2.setSubscriptionId(SUBSCRIPTION_ID);
 		String id2 = subscriptionRepo.save(subscription2).getId();
@@ -96,10 +98,10 @@ public class MongoDbQueriesTest {
 		List<Subscription> savedSubscriptionList = subscriptionRepo.findAll();
 
 		TECHNICAL_LOGGER.info("Size of list of subscriptions for mongodb tests: {}", savedSubscriptionList.size());
-		TECHNICAL_LOGGER.info("Currency of Sub 1 : {}, currency of Sub 2 : {}", subscriptionRepo.findOne(id1).getCurrency(), subscriptionRepo
-				.findOne(id2).getCurrency());
+		TECHNICAL_LOGGER.info("Currency of Sub 1 : {}, currency of Sub 2 : {}", subscriptionRepo.findOne(id1).getCurrency(), subscriptionRepo.findOne(id2)
+				.getCurrency());
 		Assert.assertEquals(savedSubscriptionList, initialSubscriptionList);
-		
+
 	}
 
 }
