@@ -141,13 +141,17 @@ public class SubscriptionRestController {
 
 				ObjectMapper mapper = new ObjectMapper();
 				String uriJsonParameterToString = mapper.writeValueAsString(uriJsonParameter);
+				
 				String uriParameter = Base64.getEncoder().encodeToString(uriJsonParameterToString.getBytes(StandardCharsets.UTF_8));
 				URI location = new URI(String.format(SUMA_ENDPOINT_SUBSCRIPTION, uriParameter));
 
 				// creates response headers
 				headers = new HttpHeaders();
 				headers.setLocation(location);
-
+				
+				northSubscriptionLogger.setHttpResponseCode(HttpStatus.CREATED.toString());
+				northSubscriptionLogger.setReturnedEncodedSubscriptionId(uriParameter);
+			
 			} catch (Exception e) {
 				LOGGER.error("Build internal location header error: '{}'", e.getMessage());
 				throw new SumaBadRequestException(e.getMessage());
@@ -190,6 +194,7 @@ public class SubscriptionRestController {
 		northUnsubscriptionLogger.setRequestTimestamp(PdkDateUtils.getCurrentDateTimestamp());
 		northUnsubscriptionLogger.setSubscriptionId(transactionId);
 		northUnsubscriptionLogger.setHttpResponseCode(String.valueOf(HttpStatus.NO_CONTENT));
+		northUnsubscriptionLogger.setSentSubscriptionId(encodedSubscriptionId);
 
 		try {
 			String status = manager.unsubscribe(transactionId);

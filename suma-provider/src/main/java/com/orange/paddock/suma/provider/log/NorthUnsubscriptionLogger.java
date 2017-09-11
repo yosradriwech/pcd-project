@@ -20,6 +20,8 @@ public class NorthUnsubscriptionLogger {
 	private String returnedErrorDescription;
 	private String internalErrorCode = "PDK_SUMA_OK";
 	private String internalErrorDescription;
+	private String sentSubscriptionId;
+
 
 	public void write() {
 		StringBuilder message = new StringBuilder();
@@ -45,6 +47,8 @@ public class NorthUnsubscriptionLogger {
 		message.append(PdkLogUtils.formatValue(internalErrorCode));
 		message.append(PdkLogUtils.LOG_FIELD_SEPARATOR);
 		message.append(PdkLogUtils.formatValue(internalErrorDescription));
+		message.append(PdkLogUtils.LOG_FIELD_SEPARATOR);
+		message.append(PdkLogUtils.formatValue(sentSubscriptionId));
 
 		LOGGER.info(message.toString());
 	}
@@ -92,5 +96,11 @@ public class NorthUnsubscriptionLogger {
 	public void setInternalErrorDescription(String internalErrorDescription) {
 		this.internalErrorDescription = internalErrorDescription;
 	}
+	public String getSentSubscriptionId() {
+		return sentSubscriptionId;
+	}
 
+	public void setSentSubscriptionId(String sentSubscriptionId) {
+		this.sentSubscriptionId = sentSubscriptionId;
+	}
 }
