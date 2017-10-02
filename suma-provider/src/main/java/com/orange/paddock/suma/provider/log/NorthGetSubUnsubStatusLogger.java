@@ -31,6 +31,7 @@ public class NorthGetSubUnsubStatusLogger {
 	private String returnedErrorDescription;
 	private String internalErrorCode = "PDK_SUMA_OK";
 	private String internalErrorDescription;
+	private String returnedEncodedSubscriptionId;
 
 	public void write() {
 
@@ -79,7 +80,8 @@ public class NorthGetSubUnsubStatusLogger {
 		message.append(PdkLogUtils.formatValue(internalErrorCode));
 		message.append(PdkLogUtils.LOG_FIELD_SEPARATOR);
 		message.append(PdkLogUtils.formatValue(internalErrorDescription));
-
+		message.append(PdkLogUtils.LOG_FIELD_SEPARATOR);
+		message.append(PdkLogUtils.formatValue(returnedEncodedSubscriptionId));
 		LOGGER.info(message.toString());
 	}
 
@@ -169,6 +171,9 @@ public class NorthGetSubUnsubStatusLogger {
 
 	public void setInternalErrorDescription(String internalErrorDescription) {
 		this.internalErrorDescription = internalErrorDescription;
+	}
+	public void setReturnedEncodedSubscriptionId(String returnedEncodedSubscriptionId) {
+		this.returnedEncodedSubscriptionId = returnedEncodedSubscriptionId;
 	}
 
 }

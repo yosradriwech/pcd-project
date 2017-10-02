@@ -109,7 +109,8 @@ public class SubscriptionManager {
 		if (!Objects.isNull(previousSubscriptionSession)) {
 			TECHNICAL_LOGGER.debug("Found previous session for subscription request with subscriptionId= {},  status= {} and transactionId= {}",
 					previousSubscriptionSession.getSubscriptionId(), previousSubscriptionSession.getStatus(), previousSubscriptionSession.getTransactionId());
-
+			subscriptionResponse.setIdempotency("true");
+			
 			String status = previousSubscriptionSession.getStatus();
 			if (Objects.equals(status, SubscriptionStatusUtils.STATUS_PENDING)) {
 				// throw error PDK_SUMA_0008

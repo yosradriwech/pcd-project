@@ -126,18 +126,19 @@ public class SubscriptionRestController {
 			northSubscriptionLogger.setIsAdult(String.valueOf(body.getIsAdult()));
 
 			LOGGER.debug("Subscription with EndUserIdValue: '{}'", endUserIdValue);
-			SubscriptionResponse subId = manager.subscribe(body, endUserIdValue, mco);
+			SubscriptionResponse subResponseFromManager = manager.subscribe(body, endUserIdValue, mco);
 
-			northSubscriptionLogger.setMsisdn(subId.getMsisdn());
-			northSubscriptionLogger.setSubscriptionId(subId.getTransactionId());
-			northSubscriptionLogger.setReturnedSubscriptionId(subId.getCcgwSubscriptionId());
+			northSubscriptionLogger.setMsisdn(subResponseFromManager.getMsisdn());
+			northSubscriptionLogger.setSubscriptionId(subResponseFromManager.getTransactionId());
+			northSubscriptionLogger.setReturnedSubscriptionId(subResponseFromManager.getCcgwSubscriptionId());
+			northSubscriptionLogger.setIdempotency(subResponseFromManager.getIdempotency());
 			northSubscriptionLogger.setHttpResponseCode(HttpStatus.CREATED.toString());
 
 			try {
 				// build Location header
 				RestSubscriptionResponse uriJsonParameter = new RestSubscriptionResponse();
-				uriJsonParameter.setSubscriptionId(subId.getCcgwSubscriptionId());
-				uriJsonParameter.setTransactionId(subId.getTransactionId());
+				uriJsonParameter.setSubscriptionId(subResponseFromManager.getCcgwSubscriptionId());
+				uriJsonParameter.setTransactionId(subResponseFromManager.getTransactionId());
 
 				ObjectMapper mapper = new ObjectMapper();
 				String uriJsonParameterToString = mapper.writeValueAsString(uriJsonParameter);
@@ -225,6 +226,7 @@ public class SubscriptionRestController {
 
 		northGetSubUnsubStatusLogger.setInternalId(loggerId.getInternalId());
 		northGetSubUnsubStatusLogger.setRequestTimestamp(PdkDateUtils.getCurrentDateTimestamp());
+		northGetSubUnsubStatusLogger.setReturnedEncodedSubscriptionId(encodedSubscriptionId);
 		
 		/** Decode subscription Id **/
 		ObjectMapper mapper = new ObjectMapper();

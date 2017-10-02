@@ -35,7 +35,6 @@ public class NorthUnsubscriptionLogger {
 		message.append(PdkLogUtils.LOG_FIELD_SEPARATOR);
 		message.append(PdkLogUtils.formatValue(idempotency));
 		message.append(PdkLogUtils.LOG_FIELD_SEPARATOR);
-
 		message.append(PdkLogUtils.formatValue(httpResponseCode));
 		message.append(PdkLogUtils.LOG_FIELD_SEPARATOR);
 		message.append(PdkLogUtils.formatValue(returnedErrorCode));
@@ -48,7 +47,7 @@ public class NorthUnsubscriptionLogger {
 		message.append(PdkLogUtils.LOG_FIELD_SEPARATOR);
 		message.append(PdkLogUtils.formatValue(internalErrorDescription));
 		message.append(PdkLogUtils.LOG_FIELD_SEPARATOR);
-		message.append(PdkLogUtils.formatValue(sentSubscriptionId));
+		message.append(PdkLogUtils.formatValue(sentSubscriptionId));	
 
 		LOGGER.info(message.toString());
 	}

@@ -32,8 +32,9 @@ public class NorthSubscriptionLogger {
 	private String returnedErrorMessage;
 	private String returnedErrorDescription;
 	private String internalErrorCode = "PDK_SUMA_OK";
-	private String internalErrorDescription;
+	private String internalErrorDescription;	
 	private String returnedEncodedSubscriptionId;
+	private String idempotency;
 
 	public void write() {
 		StringBuilder message = new StringBuilder();
@@ -90,6 +91,9 @@ public class NorthSubscriptionLogger {
 		message.append(PdkLogUtils.formatValue(internalErrorDescription));
 		message.append(PdkLogUtils.LOG_FIELD_SEPARATOR);
 		message.append(PdkLogUtils.formatValue(returnedEncodedSubscriptionId));
+		
+		message.append(PdkLogUtils.LOG_FIELD_SEPARATOR);
+		message.append(PdkLogUtils.formatValue(idempotency));
 
 		LOGGER.info(message.toString());
 	}
@@ -195,5 +199,9 @@ public class NorthSubscriptionLogger {
 
 	public void setReturnedEncodedSubscriptionId(String returnedEncodedSubscriptionId) {
 		this.returnedEncodedSubscriptionId = returnedEncodedSubscriptionId;
+	}
+	
+	public void setIdempotency(String idempotency) {
+		this.idempotency = idempotency;
 	}
 }
