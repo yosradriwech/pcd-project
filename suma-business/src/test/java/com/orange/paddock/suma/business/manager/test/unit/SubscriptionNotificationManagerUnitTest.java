@@ -4,8 +4,14 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Date;
 
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
+
+import org.joda.time.DateTime;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -25,6 +31,8 @@ import com.orange.paddock.suma.dao.mongodb.repository.SubscriptionRepository;
 @SpringBootTest(classes = SubscriptionUnitTestConfiguration.class)
 public class SubscriptionNotificationManagerUnitTest extends AbstractSubscriptionNotificationManagerTest {
 	
+	private static final Logger LOGGER = LoggerFactory.getLogger(SubscriptionNotificationManagerUnitTest.class);
+			
 	@Autowired
 	private SubscriptionDtoMapper subscriptionMapper;
 	
@@ -40,6 +48,8 @@ public class SubscriptionNotificationManagerUnitTest extends AbstractSubscriptio
 	@Test
 	public void notificationSubscriptionStatusWaitingActivationTest() throws Exception {
 		Date date = new Date();
+		XMLGregorianCalendar  receivedDate = DatatypeFactory.newInstance().newXMLGregorianCalendar(new DateTime().toGregorianCalendar());
+		date = receivedDate.toGregorianCalendar().getTime();
 		
 		SubscriptionDto subscriptionDto = initializeValidSubscriptionDto();
 		Subscription subscriptionSession = subscriptionMapper.map(subscriptionDto, Subscription.class);
@@ -54,9 +64,10 @@ public class SubscriptionNotificationManagerUnitTest extends AbstractSubscriptio
 		subscription.setActivationDate(date);
 		subscription.setEndUserId(END_USER_ID);
 		subscription.setStatus(SubscriptionStatusUtils.STATUS_ACTIVE);
+		LOGGER.debug("DATEEE "+subscription.getActivationDate());
 		Mockito.when(repository.save(Mockito.any(Subscription.class))).thenReturn(subscription);
-		
-//		String result = manager.notificationSubscription(SUBSCRIPTION_ID, TRANSACTION_ID, date, END_USER_ID);
+	
+		manager.notificationSubscription(SUBSCRIPTION_ID, TRANSACTION_ID, date, END_USER_ID);
 		
 		assertEquals(SubscriptionStatusUtils.STATUS_ACTIVE, subscription.getStatus());
 	}

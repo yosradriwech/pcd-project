@@ -11,6 +11,8 @@ public interface SubscriptionRepository extends MongoRepository<Subscription, St
 	Subscription findOneBySubscriptionId(String subscriptionId);
 
 	List<Subscription> findByEndUserIdAndStatus(String endUserId, String status);
+	
+	List<Subscription> findByStatusIn(List<String> status);
 
 	Subscription findOneBySubscriptionIdAndEndUserId(String subscriptionId, String endUserId);
 

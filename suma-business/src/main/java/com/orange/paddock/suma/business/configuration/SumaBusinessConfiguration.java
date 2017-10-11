@@ -8,6 +8,7 @@ import org.springframework.context.annotation.ScopedProxyMode;
 
 import com.orange.paddock.commons.log.PdkLogIdBean;
 import com.orange.paddock.suma.business.mapper.SubscriptionDtoMapper;
+import com.orange.paddock.suma.business.task.SubscriptionAutoActivationJob;
 import com.orange.paddock.suma.consumer.ccgw.client.CcgwClient;
 import com.orange.paddock.wtapi.client.WTApiClient;
 
@@ -29,11 +30,16 @@ public class SumaBusinessConfiguration {
 	public WTApiClient wtClient() {
 		return new WTApiClient();
 	}
-	
+
 	@Bean
 	@Scope(value = "request", proxyMode = ScopedProxyMode.TARGET_CLASS)
 	public PdkLogIdBean loggerId() {
 		return new PdkLogIdBean();
 	}
-	
+
+	@Bean
+	public SubscriptionAutoActivationJob subscriptionAutoActivationJob() {
+		return new SubscriptionAutoActivationJob();
+	}
+
 }

@@ -133,6 +133,7 @@ public class NotificationManager {
 			status = SubscriptionStatusUtils.STATUS_ACTIVE;
 			subscriptionFoundForReceivedNotif.setStatus(status);
 			subscriptionFoundForReceivedNotif.setActivationDate(activationDate);
+			subscriptionFoundForReceivedNotif.setAutoActivated(false);
 			repository.save(subscriptionFoundForReceivedNotif);
 		}
 	}
@@ -220,6 +221,7 @@ public class NotificationManager {
 			TECHNICAL_LOGGER.debug("Trying to unsubscribe user from {} services", serviceIdList.size());
 			String status = unsubscribeUserFromServiceList(serviceIdList, subscriptionId, transactionId, endUserId);
 			newSubscriptionAfterNotif.setStatus(status);
+			newSubscriptionAfterNotif.setAutoActivated(false);
 			repository.save(newSubscriptionAfterNotif);
 
 		} else {
@@ -265,6 +267,7 @@ public class NotificationManager {
 
 					subscriptionToDeactivate.setDeActivationDate(new Date());
 					subscriptionToDeactivate.setStatus(SubscriptionStatusUtils.STATUS_UNKNOWN_UNSUBSCRIPTION_ARCHIVED);
+					subscriptionToDeactivate.setAutoActivated(false);
 					repository.save(subscriptionToDeactivate);
 
 					throw new SumaSubscriptionIsStillActiveException(subscriptionId);
@@ -284,6 +287,7 @@ public class NotificationManager {
 				}
 
 				subscriptionToDeactivate.setDeActivationDate(new Date());
+				subscriptionToDeactivate.setAutoActivated(false);
 				repository.save(subscriptionToDeactivate);
 			}
 

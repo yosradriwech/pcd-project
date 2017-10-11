@@ -21,8 +21,11 @@ import com.orange.paddock.suma.business.exception.wt.SumaWtApiIntegrationExcepti
 import com.orange.paddock.suma.business.exception.wt.SumaWtApiInternalErrorException;
 import com.orange.paddock.suma.business.manager.SubscriptionManager;
 import com.orange.paddock.suma.business.manager.test.AbstractSubscriptionManagerTest;
+import com.orange.paddock.suma.business.mapper.SubscriptionDtoMapper;
 import com.orange.paddock.suma.business.model.SubscriptionResponse;
-import com.orange.paddock.wtapi.client.WTApiClient;
+import com.orange.paddock.suma.business.task.SubscriptionAutoActivationJob;
+import com.orange.paddock.suma.dao.mongodb.document.Subscription;
+import com.orange.paddock.suma.dao.mongodb.repository.SubscriptionRepository;
 
 @SpringBootTest(classes = SubscriptionManagerTestApplication.class)
 public class SubscriptionManagerSubscribeIntegrationTest extends AbstractSubscriptionManagerTest {
@@ -50,6 +53,24 @@ public class SubscriptionManagerSubscribeIntegrationTest extends AbstractSubscri
 	@Value("${orange.wtpapi.default.serv}")
 	private String wtDefaultService;
 
+	@Autowired
+	private SubscriptionAutoActivationJob subscriptionAutoActivationJob;
+	
+	@Autowired
+	private SubscriptionRepository repository;
+	
+	@Autowired
+	private SubscriptionDtoMapper subscriptionMapper;
+	
+	@Test
+	public void autoActivationTest (){
+		TECHNICAL_LOGGER.debug("Start autoActivationTest");
+		Subscription subToSave =  subscriptionMapper.map(initializeValidSubscriptionDto(), Subscription.class);
+		repository.save(subToSave);
+		
+		subscriptionAutoActivationJob.activateSubscriptionJob();		
+	}
+	
 	@Test
 	public void subscribeSuccessfulTest() throws AbstractSumaException {
 

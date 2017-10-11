@@ -6,6 +6,7 @@ import java.util.Objects;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -25,11 +26,17 @@ public class Subscription {
 	private Date creationDate;
 
 	private Date activationDate;
+
 	private Date deActivationDate;
-	
-	@Indexed(unique=true)
+
+	@LastModifiedDate
+	private Date lastUpdateDate;
+
+	private boolean autoActivated = false;
+
+	@Indexed(unique = true)
 	private String transactionId;
-	
+
 	private String serviceId;
 	private String onBehalfOf;
 
@@ -44,12 +51,11 @@ public class Subscription {
 	private boolean isAdult;
 	private String status;
 
-	public Subscription() {
-	}
+	public Subscription() {}
 
 	public Subscription(String id, String subscriptionId, Date creationDate, Date activationDate, Date deActivationDate, String transactionId,
 			String serviceId, String onBehalfOf, String endUserId, String description, String categoryCode, BigDecimal amount, BigDecimal taxedAmount,
-			String currency, boolean isAdult, String status) {
+			String currency, boolean isAdult, String status, Date lastUpdateDate, boolean autoActivated) {
 		super();
 		this.id = id;
 		this.subscriptionId = subscriptionId;
@@ -67,6 +73,8 @@ public class Subscription {
 		this.currency = currency;
 		this.isAdult = isAdult;
 		this.status = status;
+		this.autoActivated = autoActivated;
+		this.lastUpdateDate = lastUpdateDate;
 	}
 
 	public String getId() {
@@ -197,6 +205,22 @@ public class Subscription {
 		this.isAdult = isAdult;
 	}
 
+	public Date getLastUpdatedDate() {
+		return lastUpdateDate;
+	}
+
+	public void setLastUpdatedDate(Date lastUpdatedDate) {
+		this.lastUpdateDate = lastUpdatedDate;
+	}
+
+	public boolean isAutoActivated() {
+		return autoActivated;
+	}
+
+	public void setAutoActivated(boolean autoActivated) {
+		this.autoActivated = autoActivated;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -217,6 +241,8 @@ public class Subscription {
 		result = prime * result + ((subscriptionId == null) ? 0 : subscriptionId.hashCode());
 		result = prime * result + ((taxedAmount == null) ? 0 : taxedAmount.hashCode());
 		result = prime * result + ((transactionId == null) ? 0 : transactionId.hashCode());
+		result = prime * result + ((lastUpdateDate == null) ? 0 : lastUpdateDate.hashCode());
+		result = prime * result + (autoActivated ? 1231 : 1237);
 		return result;
 	}
 
@@ -306,6 +332,13 @@ public class Subscription {
 				return false;
 		} else if (!transactionId.equals(subscriptionToCompareTo.transactionId))
 			return false;
+		if (autoActivated != subscriptionToCompareTo.autoActivated)
+			return false;
+		if (lastUpdateDate == null) {
+			if (subscriptionToCompareTo.lastUpdateDate != null)
+				return false;
+		} else if (!lastUpdateDate.equals(subscriptionToCompareTo.lastUpdateDate))
+			return false;
 
 		return Objects.equals(id, subscriptionToCompareTo.getId()) && Objects.equals(subscriptionId, subscriptionToCompareTo.getSubscriptionId())
 				&& Objects.equals(creationDate, subscriptionToCompareTo.getCreationDate())
@@ -323,11 +356,11 @@ public class Subscription {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Subscription [id=").append(id).append(", subscriptionId=").append(subscriptionId).append(", creationDate=").append(creationDate)
-				.append(", activationDate=").append(activationDate).append(", deActivationDate=").append(deActivationDate).append(", transactionId=")
-				.append(transactionId).append(", serviceId=" + serviceId).append(", onBehalfOf=").append(onBehalfOf).append(", endUserId=").append(endUserId)
-				.append(", description=").append(description + ", categoryCode=").append(categoryCode).append(", amount=").append(amount)
-				.append(", taxedAmount=").append(taxedAmount).append(", currency=").append(currency).append(", isAdult=").append(isAdult).append(", status=")
-				.append(status).append("]");
+				.append(", activationDate=").append(activationDate).append(", deActivationDate=").append(deActivationDate).append(", lastUpdateDate=")
+				.append(lastUpdateDate).append(", transactionId=").append(transactionId).append(", serviceId=" + serviceId).append(", onBehalfOf=")
+				.append(onBehalfOf).append(", endUserId=").append(endUserId).append(", description=").append(description + ", categoryCode=")
+				.append(categoryCode).append(", amount=").append(amount).append(", taxedAmount=").append(taxedAmount).append(", currency=").append(currency)
+				.append(", isAdult=").append(isAdult).append(", status=").append(status).append(", autoActivated=").append(autoActivated).append("]");
 		return sb.toString();
 	}
 

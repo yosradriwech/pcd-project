@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.data.mongodb.config.EnableMongoAuditing;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import com.orange.paddock.commons.log.PdkLogIdBean;
 import com.orange.paddock.suma.business.factory.CcgwIntegrationErrorExceptionFactory;
@@ -21,6 +22,7 @@ import com.orange.paddock.suma.business.factory.IExceptionFactory;
 import com.orange.paddock.suma.business.manager.SubscriptionManager;
 import com.orange.paddock.suma.business.mapper.SubscriptionDtoMapper;
 import com.orange.paddock.suma.business.service.SubscriptionService;
+import com.orange.paddock.suma.business.task.SubscriptionAutoActivationJob;
 import com.orange.paddock.suma.consumer.ccgw.client.CcgwClient;
 import com.orange.paddock.suma.consumer.ccgw.susbcription.model.ObjectFactory;
 import com.orange.paddock.wtapi.client.WTApiClient;
@@ -36,6 +38,7 @@ import com.orange.paddock.wtapi.client.WTApiClient;
 @ImportResource("classpath:applicationContext-test.xml")
 @EnableMongoAuditing
 @EnableMongoRepositories("com.orange.paddock.suma.dao.mongodb.repository")
+@EnableScheduling
 public class SubscriptionManagerTestApplication {
 	
 	@Bean
@@ -43,6 +46,9 @@ public class SubscriptionManagerTestApplication {
 		return new SubscriptionDtoMapper();
 	};
 
+	@Bean
+	public SubscriptionAutoActivationJob subscriptionAutoActivationJob(){return new SubscriptionAutoActivationJob();}; 
+	
 	@Bean
 	public SubscriptionManager subscriptionManager() {
 		return new SubscriptionManager();

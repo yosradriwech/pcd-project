@@ -10,11 +10,13 @@ import org.junit.runner.RunWith;
 import org.mockserver.integration.ClientAndServer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import com.orange.paddock.commons.log.PdkLogIdBean;
 import com.orange.paddock.suma.business.model.SubscriptionDto;
+import com.orange.paddock.suma.business.task.SubscriptionAutoActivationJob;
 import com.orange.paddock.suma.dao.mongodb.repository.SubscriptionRepository;
 
 /**
@@ -48,7 +50,7 @@ public abstract class AbstractSubscriptionManagerTest {
 	protected static final String WT_MSISDN = "33675952191";
 	
 	@Autowired
-	private SubscriptionRepository subscriptionRepository;
+	protected SubscriptionRepository subscriptionRepository;
 	
 //	@MockBean
 //	protected PdkLogIdBean loggerId;
