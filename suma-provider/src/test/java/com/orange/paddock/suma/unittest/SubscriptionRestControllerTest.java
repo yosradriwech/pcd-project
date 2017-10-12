@@ -146,7 +146,7 @@ public class SubscriptionRestControllerTest extends AbstractControllerTest {
 		subscriptionDto.setCreationDate(new Date());
 		// subscriptionDto.isAdult();
 		subscriptionDto.setStatus("ACTIVE");
-
+		subscriptionDto.setActivationDate(new Date());
 		
 		String encodedSubscriptionId = encodeResponse(subId,txId);
 		

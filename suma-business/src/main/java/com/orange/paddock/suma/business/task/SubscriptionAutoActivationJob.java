@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,21 +45,23 @@ public class SubscriptionAutoActivationJob {
 				TECHNICAL_LOGGER.debug("List is not empty ");
 				for (Subscription subscriptionFound : allRegistredSubscriptions) {
 
-					//TECHNICAL_LOGGER.debug("sub found with service {} & UserId {}, update status ..", subscriptionFound.getServiceId(),
-							//subscriptionFound.getEndUserId());
+					// TECHNICAL_LOGGER.debug("sub found with service {} & UserId {}, update status ..", subscriptionFound.getServiceId(),
+					// subscriptionFound.getEndUserId());
 
 					long differenceInSeconds = (currentDate.getTime() - subscriptionFound.getLastUpdatedDate().getTime()) / 1000;
-					//TECHNICAL_LOGGER.debug("Must be autoActivate subscription");
+					// TECHNICAL_LOGGER.debug("Must be autoActivate subscription");
 
 					if (differenceInSeconds > timeToWaitInSeconds) {
-						//TECHNICAL_LOGGER.debug("Difference in seconds {}",differenceInSeconds);
+						// TECHNICAL_LOGGER.debug("Difference in seconds {}",differenceInSeconds);
 						subscriptionFound.setAutoActivated(true);
 
 						if (subscriptionFound.getStatus().equals(SubscriptionStatusUtils.STATUS_WAITING_ARCHIVING)) {
 							subscriptionFound.setStatus(SubscriptionStatusUtils.STATUS_ARCHIVED);
+							subscriptionFound.setDeActivationDate(new Date());
 						}
 						if (subscriptionFound.getStatus().equals(SubscriptionStatusUtils.STATUS_WAITING_ACTIVATION)) {
 							subscriptionFound.setStatus(SubscriptionStatusUtils.STATUS_ACTIVE);
+							subscriptionFound.setActivationDate(new Date());
 						}
 						subscriptionRepository.save(subscriptionFound);
 					}

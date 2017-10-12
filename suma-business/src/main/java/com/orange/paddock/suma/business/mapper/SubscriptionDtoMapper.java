@@ -17,7 +17,9 @@ public class SubscriptionDtoMapper extends ConfigurableMapper {
 
 		factory.classMap(SubscriptionDto.class, Subscription.class).exclude("creationDate").byDefault().register();
 		
-		factory.classMap(Subscription.class, SubscriptionDto.class).byDefault().register();
+		factory.classMap(Subscription.class, SubscriptionDto.class)
+		.field("deActivationDate", "deactivationDate")
+		.byDefault().register();
 		
 		factory.classMap(SubscriptionDto.class, SumaUnsubscriptionRequest.class).byDefault().register();
 		

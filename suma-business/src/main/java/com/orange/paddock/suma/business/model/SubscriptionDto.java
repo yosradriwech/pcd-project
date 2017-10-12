@@ -4,13 +4,20 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class SubscriptionDto {
 
+	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS")
 	private Date creationDate;
+	
+	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS")
 	private Date activationDate;
+	
+	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS")
 	private Date deactivationDate;
+	
 	private String transactionId;
 	private String serviceId;
 	private String onBehalfOf;

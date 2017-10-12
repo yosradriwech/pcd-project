@@ -248,10 +248,8 @@ public class SubscriptionRestController {
 
 		SubscriptionDto subscription = null;
 		try {
-			subscription = manager.getSubscriptionStatus(transactionId);
-
-			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-
+			subscription = manager.getSubscriptionStatus(transactionId);	
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 			northGetSubUnsubStatusLogger.setCreationDate(formatter.format(subscription.getCreationDate()));
 			northGetSubUnsubStatusLogger.setTransactionId(subscription.getTransactionId());
 			northGetSubUnsubStatusLogger.setServiceId(subscription.getServiceId());
