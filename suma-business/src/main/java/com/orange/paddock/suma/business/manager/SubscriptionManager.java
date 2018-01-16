@@ -20,7 +20,6 @@ import com.orange.paddock.suma.business.exception.SumaAlreadyRevokedSubException
 import com.orange.paddock.suma.business.exception.SumaDuplicateSubscriptionRequestException;
 import com.orange.paddock.suma.business.exception.SumaInternalErrorException;
 import com.orange.paddock.suma.business.exception.SumaSubscriptionCancelIsPendingException;
-import com.orange.paddock.suma.business.exception.SumaSubscriptionCancellationPendingException;
 import com.orange.paddock.suma.business.exception.SumaUnknownSubscriptionIdException;
 import com.orange.paddock.suma.business.exception.ccgw.SumaCcgwIntegrationErrorException;
 import com.orange.paddock.suma.business.exception.ccgw.SumaCcgwInternalErrorException;
@@ -110,7 +109,7 @@ public class SubscriptionManager {
 			TECHNICAL_LOGGER.debug("Found previous session for subscription request with subscriptionId= {},  status= {} and transactionId= {}",
 					previousSubscriptionSession.getSubscriptionId(), previousSubscriptionSession.getStatus(), previousSubscriptionSession.getTransactionId());
 			subscriptionResponse.setIdempotency("true");
-			
+
 			String status = previousSubscriptionSession.getStatus();
 			if (Objects.equals(status, SubscriptionStatusUtils.STATUS_PENDING)) {
 				// throw error PDK_SUMA_0008
@@ -134,13 +133,17 @@ public class SubscriptionManager {
 			} else if ((Objects.equals(status, SubscriptionStatusUtils.STATUS_ARCHIVED))
 					|| (Objects.equals(status, SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_ARCHIVED))
 					|| (Objects.equals(status, SubscriptionStatusUtils.STATUS_UNKNOWN_UNSUBSCRIPTION_ARCHIVED))
+					|| (Objects.equals(status, SubscriptionStatusUtils.STATUS_UNSUBSCRIPTION_ERROR))
 					|| (Objects.equals(status, SubscriptionStatusUtils.STATUS_SUBSCRIPTION_ERROR))) {
 				// delete session
 				subscriptionRepository.delete(previousSubscriptionSession);
-			
-			} else if ((Objects.equals(status, SubscriptionStatusUtils.STATUS_UNSUBSCRIPTION_ERROR))) {
-				TECHNICAL_LOGGER.error("Subscription session found with status {}", status);
-				throw new SumaSubscriptionCancellationPendingException();
+
+				// } else if ((Objects.equals(status,
+				// SubscriptionStatusUtils.STATUS_UNSUBSCRIPTION_ERROR))
+				// || (Objects.equals(status,
+				// SubscriptionStatusUtils.STATUS_SUBSCRIPTION_ERROR))) {
+				// TECHNICAL_LOGGER.error("Subscription session found with status {}",
+				// status);
 			}
 		}
 
@@ -213,7 +216,9 @@ public class SubscriptionManager {
 
 		if (Objects.equals(subscriptionSessionFound.getStatus(), SubscriptionStatusUtils.STATUS_UNSUBSCRIPTION_ERROR)) {
 			TECHNICAL_LOGGER.error("Subscription session found with status UNSUBSCRIPTION_ERROR");
+			unsubscribeFromCCGW(subscriptionSessionFound);	
 			throw new SumaInternalErrorException();
+
 		} else if (Objects.equals(subscriptionSessionFound.getStatus(), SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_ARCHIVED)
 				|| Objects.equals(subscriptionSessionFound.getStatus(), SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_WAITING_ARCHIVING)) {
 			TECHNICAL_LOGGER.error("Subscription session found with status {}", subscriptionSessionFound.getStatus());
@@ -222,27 +227,32 @@ public class SubscriptionManager {
 				|| Objects.equals(subscriptionSessionFound.getStatus(), SubscriptionStatusUtils.STATUS_WAITING_ARCHIVING)) {
 			TECHNICAL_LOGGER.info("Nothin to do, subscription status: {}", subscriptionSessionFound.getStatus());
 		} else {
-			try {
-				if (subscriptionService.unsubscribe(subscriptionSessionFound.getSubscriptionId(), subscriptionSessionFound.getServiceId(), subscriptionSessionFound.getEndUserId())) {
-					TECHNICAL_LOGGER.debug("Unsubscribe call from CCGW OK !");
-					subscriptionSessionFound.setStatus(SubscriptionStatusUtils.STATUS_WAITING_ARCHIVING);
-				} else {
-					TECHNICAL_LOGGER.info("Unsubscribe call from CCGW was not successful");
-					subscriptionSessionFound.setStatus(SubscriptionStatusUtils.STATUS_UNSUBSCRIPTION_ERROR);
-				}
+			unsubscribeFromCCGW(subscriptionSessionFound);
+		}
+		return subscriptionSessionFound.getStatus();
+	}
 
-			} catch (SumaCcgwUnresponsiveException | SumaCcgwIntegrationErrorException | SumaCcgwInternalErrorException e) {
-				TECHNICAL_LOGGER.error("CCGW error: {}", e.getMessage());
-
+	private void unsubscribeFromCCGW(Subscription subscriptionSessionFound) {
+		try {
+			if (subscriptionService.unsubscribe(subscriptionSessionFound.getSubscriptionId(), subscriptionSessionFound.getServiceId(),
+					subscriptionSessionFound.getEndUserId())) {
+				TECHNICAL_LOGGER.debug("Unsubscribe call from CCGW OK !");
+				subscriptionSessionFound.setStatus(SubscriptionStatusUtils.STATUS_WAITING_ARCHIVING);
+			} else {
+				TECHNICAL_LOGGER.info("Unsubscribe call from CCGW was not successful");
 				subscriptionSessionFound.setStatus(SubscriptionStatusUtils.STATUS_UNSUBSCRIPTION_ERROR);
-
-				throw e;
-			} finally {
-				subscriptionRepository.save(subscriptionSessionFound);
 			}
+
+		} catch (SumaCcgwUnresponsiveException | SumaCcgwIntegrationErrorException | SumaCcgwInternalErrorException e) {
+			TECHNICAL_LOGGER.error("CCGW error: {}", e.getMessage());
+
+			subscriptionSessionFound.setStatus(SubscriptionStatusUtils.STATUS_UNSUBSCRIPTION_ERROR);
+
+			throw e;
+		} finally {
+			subscriptionRepository.save(subscriptionSessionFound);
 		}
 
-		return subscriptionSessionFound.getStatus();
 	}
 
 	/**

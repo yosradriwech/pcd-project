@@ -254,7 +254,7 @@ public class NotificationManager {
 				subscriptionToDeactivate.setDeActivationDate(new Date());
 				subscriptionToDeactivate.setTransactionId(requestId);
 				subscriptionToDeactivate.setEndUserId(endUserId);
-				subscriptionToDeactivate.setStatus(SubscriptionStatusUtils.STATUS_UNKNOWN_SUBSCRIPTION_ARCHIVED);
+				subscriptionToDeactivate.setStatus(SubscriptionStatusUtils.STATUS_ARCHIVED);
 
 				repository.save(subscriptionToDeactivate);
 				throw new SumaNotificationException();
@@ -266,7 +266,7 @@ public class NotificationManager {
 						|| subscriptionToDeactivate.getStatus().equals(SubscriptionStatusUtils.STATUS_WAITING_ACTIVATION)) {
 
 					subscriptionToDeactivate.setDeActivationDate(new Date());
-					subscriptionToDeactivate.setStatus(SubscriptionStatusUtils.STATUS_UNKNOWN_UNSUBSCRIPTION_ARCHIVED);
+					subscriptionToDeactivate.setStatus(SubscriptionStatusUtils.STATUS_ARCHIVED);
 					subscriptionToDeactivate.setAutoActivated(false);
 					repository.save(subscriptionToDeactivate);
 

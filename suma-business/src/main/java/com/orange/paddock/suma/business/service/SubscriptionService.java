@@ -62,7 +62,7 @@ public class SubscriptionService {
 		} catch (Exception e) {
 			LOGGER.error("An unexpected error occured while calling CCGW", e);
 
-			throw new SumaCcgwIntegrationErrorException();
+			throw new SumaCcgwIntegrationErrorException("Integration fault");
 		}
 
 		return ccgwResponseStatus;
@@ -92,7 +92,7 @@ public class SubscriptionService {
 
 		} catch (Exception e) {
 			LOGGER.error("An unexpected error occured while calling CCGW {}", e);
-			throw new SumaCcgwIntegrationErrorException();
+			throw new SumaCcgwIntegrationErrorException("Integration fault");
 		}
 
 		return subscriptionId;
@@ -111,7 +111,7 @@ public class SubscriptionService {
 		}
 
 		if (null == exceptionFactory) {
-			throw new SumaCcgwIntegrationErrorException();
+			throw new SumaCcgwIntegrationErrorException("Integration fault");
 		}
 
 		exceptionFactory.throwException(e);
