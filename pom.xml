@@ -3,39 +3,35 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<parent>
-		<groupId>com.francetelecom.maven</groupId>
-		<artifactId>pom-corporate</artifactId>
-		<version>3.0</version>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>1.5.3.RELEASE</version>
 	</parent>
 
 	<modelVersion>4.0.0</modelVersion>
-	<name>SUMA parent Maven module</name>
-	<groupId>com.orange.paddock</groupId>
-	<artifactId>suma</artifactId>
+	<name>PCD project parent Maven module</name>
+	<groupId>com.pcd.rest</groupId>
+	<artifactId>pcd-project</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<modules>
-		<module>suma-dao-mongodb</module>
-		<module>suma-consumer-ccgw</module>
-		<module>suma-business</module>
-		<module>suma-provider</module>
-		<module>suma-jar</module>
-		<module>suma-tar</module>
+		<module>pcd-dao-mongodb</module>
+		<module>pcd-business</module>
+		<module>pcd-provider</module>
+		<module>pcd-jar</module>
 	</modules>
 
 	<properties>
 		<jdk.version>1.8</jdk.version>
-		<jaxws-api.version>2.0</jaxws-api.version>
-		<cxf.version>3.1.11</cxf.version>
+
 		<mockserver.version>3.10.8</mockserver.version>
 		<orika.version>1.5.1</orika.version>
-		<pdk.commons.version>1.3.4</pdk.commons.version>
-		<wt.version>2.0.3</wt.version>
+
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<application.name>PA-PDK-SUMA</application.name>
-		<application.version>${sumaVersion}</application.version>
-		<application.title>Subscription manager</application.title>
+		<application.name>PCD-REST-API</application.name>
+		<application.version>1.0.0</application.version>
+		<application.title>PCD REST API</application.title>
 		<package.name>${application.name}-${application.version}</package.name>
 	</properties>
 
@@ -48,12 +44,6 @@
 				<version>1.5.4.RELEASE</version>
 				<type>pom</type>
 				<scope>import</scope>
-			</dependency>
-
-			<dependency>
-				<groupId>com.orange.paddock.module</groupId>
-				<artifactId>paddock-commons</artifactId>
-				<version>${pdk.commons.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
