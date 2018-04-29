@@ -3,12 +3,13 @@ package com.pcd.rest.dao.mongodb.document;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.mapping.Document;
 import java.util.Date;
 
 @Document
-@CompoundIndexes({String type, double latitude, double longitude})
+@CompoundIndexes(value = { @CompoundIndex(name = "ind1", def = "{'type' : 1, 'latitude': 1,'longitude' : 1}", unique = true) })
 public class Incident {
     @Id
     private int id;
@@ -27,12 +28,12 @@ public class Incident {
     @LastModifiedDate
     private Date lastUpdateDate;
 
-    public Incident(String type, double latitude, double longitude, Date dateI) {
+    public Incident(String type, double latitude, double longitude, Date dateI,String etat) {
         this.type = type;
         this.latitude = latitude;
         this.longitude = longitude;
         this.dateI = dateI;
-        this.etat = "rien";
+        this.etat = etat;
         this.confirmation = 0;
         this.t = 60;
     }

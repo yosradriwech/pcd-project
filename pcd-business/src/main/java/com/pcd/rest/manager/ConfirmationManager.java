@@ -15,7 +15,7 @@ public class ConfirmationManager {
     @Autowired
     private IncidentRepository IncidentRepository;
 
-    public int confirm(String type, double latitude, double longitude, int conf) throws AbstractPcdException {
+    public Incident confirm(String type, double latitude, double longitude, int conf,String etat) throws AbstractPcdException {
         TECHNICAL_LOGGER.debug("Starting confirmation business");
 
         Incident incidentFound = IncidentRepository.findOneByTypeAndLatitudeAndLongitude(type,latitude,longitude);
@@ -24,8 +24,9 @@ public class ConfirmationManager {
             TECHNICAL_LOGGER.error("No  incident found for '{}'", type,latitude,longitude); }
         else
             incidentFound.setConfirmation(conf);
+            incidentFound.setEtat(etat);
 
-        return incidentFound.getConfirmation();
+        return incidentFound;
     }
 
 }

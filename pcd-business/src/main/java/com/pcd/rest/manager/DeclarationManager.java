@@ -23,10 +23,7 @@ public class DeclarationManager {
 
     public Incident declare(Incident incident, String login) throws AbstractPcdException {
         TECHNICAL_LOGGER.debug("Starting declaration business");
-        Incident declarationResponse = new Incident(incident.getType(), incident.getLatitude(), incident.getLongitude(), incident.getDateI());
-
-        declarationResponse.setEtat("started");
-
+        Incident declarationResponse = new Incident(incident.getType(), incident.getLatitude(), incident.getLongitude(), incident.getDateI(),incident.getEtat());
         User userSessionFound = userRepository.findOneByLogin(login);
 
         if (Objects.isNull(userSessionFound)) {
@@ -36,6 +33,7 @@ public class DeclarationManager {
                 declarationResponse.setConfirmation(-1);
             }
         }
+        IncidentRepository.save(declarationResponse);
         return declarationResponse;
     }
 }

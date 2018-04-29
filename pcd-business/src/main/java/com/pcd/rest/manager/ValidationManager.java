@@ -17,15 +17,16 @@ public class ValidationManager {
 
     public String valider(String type, double latitude, double longitude) throws AbstractPcdException {
         TECHNICAL_LOGGER.debug("Starting validation business");
-        String v;
-        Incident validationIncident = IncidentRepository.findOneByTypeAndLatitudeAndLongitude(type,latitude,longitude);
+
+        String retour="";
+       Incident validationIncident = IncidentRepository.findOneByTypeAndLatitudeAndLongitude(type,latitude,longitude);
 
         if (Objects.isNull(validationIncident)) {
             TECHNICAL_LOGGER.error("No  incident found for '{}'",  type,latitude,longitude); }
         else
-            if ( validationIncident.getConfirmation()>=0) {
-                 v = "validation";}
-            else v = "nonValidation" ;
-    return v;
+            {if ( validationIncident.getConfirmation()>=0) { retour = "validation";}
+             else retour =  "nonValidation" ; }
+
+        return retour;
     }
 }
