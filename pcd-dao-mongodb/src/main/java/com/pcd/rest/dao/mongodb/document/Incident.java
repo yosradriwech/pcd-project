@@ -37,6 +37,15 @@ public class Incident {
         this.confirmation = 0;
         this.t = 60;
     }
+    public Incident copierIncident(Incident objet) {
+        this.type = objet.getType();
+        this.latitude = objet.getLatitude();
+        this.longitude = objet.getLongitude();
+        this.dateI = objet.getDateI();
+        this.etat = objet.getEtat();
+        this.confirmation = objet.getConfirmation();
+        this.t = objet.getT();
+    return this; }
 
     public Incident() {
     }

@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("confirmations")
@@ -37,6 +38,8 @@ public class ConfirmationRestController {
         } catch (Exception e) {
             LOGGER.error("An error occured {}", e);
         }
-        return new ResponseEntity<>(incidentResponse, HttpStatus.ACCEPTED);
+        if (Objects.isNull(incidentResponse)) {return new ResponseEntity<>(incidentResponse, HttpStatus.NOT_FOUND);}
+        else { return new ResponseEntity<>(incidentResponse, HttpStatus.OK);}
     }
 }
+//jawou behi

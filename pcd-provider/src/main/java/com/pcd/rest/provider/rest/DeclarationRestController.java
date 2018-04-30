@@ -39,3 +39,4 @@ public class DeclarationRestController {
 
     }
 //ici yosr verif el conf de la reponse si c zero thabet toul si c -1 c pas validé et donc elle passe au confirmations
+//jawou behi
