@@ -32,7 +32,7 @@ public class ValidationRestController {
             if ((body.getEtat()=="finished")&&(manager.valider(body.getType(), body.getLatitude(), body.getLongitude())=="validation")){reponseIncident = null; }
             } catch (AbstractPcdException e) {
             LOGGER.error("An error occured {}", e);
-            throw e;
+            throw e;  
         } catch (Exception e) {
             LOGGER.error("An error occured {}", e);
         }
