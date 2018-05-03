@@ -23,7 +23,7 @@ public class DeclarationRestController {
     private IncidentRepository IncidentRepository;
 
     @PostMapping("/incidents/{login}")
-    public ResponseEntity<Incident> declare(HttpServletRequest request, @PathVariable String login, @RequestBody(required = true) Incident body) throws AbstractPcdException {
+    public ResponseEntity<Incident> declare(HttpServletRequest request, @PathVariable String login, @RequestBody(required = true) Incident body){
         LOGGER.debug("declaration request received with type{} and date{} and latitude{} and longitude{} and confirmation{}", body.getType(), body.getDateI(), body.getLatitude(), body.getLongitude(), body.getConfirmation());
        Incident createIncident = null;
         try {

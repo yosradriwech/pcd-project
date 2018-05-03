@@ -21,7 +21,7 @@ public class AuthentificationRestController {
     private AuthentificationManager manager;
 
     @GetMapping("/users/{login}")
-    public ResponseEntity<Void> authentifier(HttpServletRequest request, @PathVariable String login, @RequestBody(required = true) User body) throws AbstractPcdException {
+    public ResponseEntity<Void> authentifier(HttpServletRequest request, @PathVariable String login, @RequestBody(required = true) User body){
         String status="";
         try { status = manager.authentifier(login,body.getPassword());
 

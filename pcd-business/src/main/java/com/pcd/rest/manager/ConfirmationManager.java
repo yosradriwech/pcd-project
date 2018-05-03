@@ -15,7 +15,7 @@ public class ConfirmationManager {
     @Autowired
     private IncidentRepository IncidentRepository;
 
-    public Incident confirm(String type, double latitude, double longitude, int conf,String etat) throws AbstractPcdException {
+    public Incident confirm(String type, double latitude, double longitude, int conf,String etat){
         TECHNICAL_LOGGER.debug("Starting confirmation business");
 
         Incident incidentFound = IncidentRepository.findOneByTypeAndLatitudeAndLongitude(type,latitude,longitude);

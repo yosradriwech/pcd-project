@@ -24,7 +24,7 @@ public class ValidationRestController {
     private ValidationManager manager;
 
     @DeleteMapping("finished/incidents")
-    public ResponseEntity<Void> delete(HttpServletRequest request, @RequestBody(required = true) Incident body) throws AbstractPcdException {
+    public ResponseEntity<Void> delete(HttpServletRequest request, @RequestBody(required = true) Incident body){
 
         LOGGER.debug("End validation request received with type{} and date{} and latitude{} and longitude{} and confirmation{}", body.getType(), body.getDateI(), body.getLatitude(), body.getLongitude(), body.getConfirmation());
         Incident reponseIncident = new Incident();
@@ -43,7 +43,7 @@ public class ValidationRestController {
         }
     }
     @GetMapping("started/incidents")
-    public ResponseEntity<Incident> Start(HttpServletRequest request, @RequestBody(required = true) Incident body) throws AbstractPcdException {
+    public ResponseEntity<Incident> Start(HttpServletRequest request, @RequestBody(required = true) Incident body){
     Incident reponseIncident = new Incident();
 
         try {

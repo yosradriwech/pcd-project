@@ -15,7 +15,7 @@ public class AuthentificationManager {
         @Autowired
         private UserRepository userRepository;
 
-        public String authentifier(String login,String password) throws AbstractPcdException {
+        public String authentifier(String login,String password){
         TECHNICAL_LOGGER.debug("Starting authentification business");
         String retour="" ;
 

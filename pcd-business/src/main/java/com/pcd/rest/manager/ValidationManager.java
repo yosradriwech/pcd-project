@@ -15,7 +15,7 @@ public class ValidationManager {
     @Autowired
     private IncidentRepository IncidentRepository;
 
-    public String valider(String type, double latitude, double longitude) throws AbstractPcdException {
+    public String valider(String type, double latitude, double longitude){
         TECHNICAL_LOGGER.debug("Starting validation business");
 
         String retour="";
@@ -25,8 +25,10 @@ public class ValidationManager {
             TECHNICAL_LOGGER.error("No  incident found for '{}'",  type,latitude,longitude); }
         else
             {if ( validationIncident.getConfirmation()>=0) { retour = "validation";}
-             else retour =  "nonValidation" ; }
-
+             else if (validationIncident.getEtat() == "F") {IncidentRepository.delete(validationIncident);}
+             retour =  "nonValidation" ;}
         return retour;
     }
 }
+//F==finished
+//S==started

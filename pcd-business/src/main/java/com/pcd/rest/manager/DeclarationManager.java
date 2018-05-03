@@ -21,7 +21,7 @@ public class DeclarationManager {
     @Autowired
     private UserRepository userRepository;
 
-    public Incident declare(Incident incident, String login) throws AbstractPcdException {
+    public Incident declare(Incident incident, String login){
         TECHNICAL_LOGGER.debug("Starting declaration business");
         Incident declarationResponse = new Incident(incident.getType(), incident.getLatitude(), incident.getLongitude(), incident.getDateI(),incident.getEtat());
         User userSessionFound = userRepository.findOneByLogin(login);

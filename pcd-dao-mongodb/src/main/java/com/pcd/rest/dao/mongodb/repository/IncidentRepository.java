@@ -5,4 +5,5 @@ import com.pcd.rest.dao.mongodb.document.Incident;
 public interface IncidentRepository {
     Incident findOneByTypeAndLatitudeAndLongitude(String type,double latitude,double longitude);
     Incident save(Incident incident);
+    void delete(Incident incident);
    }

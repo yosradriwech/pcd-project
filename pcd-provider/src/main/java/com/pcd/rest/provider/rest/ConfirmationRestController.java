@@ -21,7 +21,7 @@ public class ConfirmationRestController {
     @Autowired
     private ConfirmationManager manager;
     @PutMapping("/incidents")
-    public ResponseEntity<Incident> confirm(HttpServletRequest request, @RequestBody(required = true) Incident body) throws AbstractPcdException {
+    public ResponseEntity<Incident> confirm(HttpServletRequest request, @RequestBody(required = true) Incident body){
         Incident incidentResponse = new Incident();
         LOGGER.debug("confirmation request received with type{} and date{} and latitude{} and longitude{} and confirmation{}", body.getType(), body.getDateI(), body.getLatitude(), body.getLongitude(), body.getConfirmation());
         try {
