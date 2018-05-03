@@ -27,10 +27,7 @@ public class DeclarationRestController {
         LOGGER.debug("declaration request received with type{} and date{} and latitude{} and longitude{} and confirmation{}", body.getType(), body.getDateI(), body.getLatitude(), body.getLongitude(), body.getConfirmation());
        Incident createIncident = null;
         try {
-            createIncident = manager.declare(body,login);
-        } catch (AbstractPcdException e) {
-            LOGGER.error("An error occured {}", e);
-            throw e;
+                createIncident = manager.declare(body,login);
         } catch (Exception e) {
             LOGGER.error("An error occured {}", e);
         }

@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("validations")
@@ -23,31 +24,30 @@ public class ValidationRestController {
     private ValidationManager manager;
 
     @DeleteMapping("finished/incidents")
-    public ResponseEntity<Incident> delete(HttpServletRequest request, @RequestBody(required = true) Incident body) throws AbstractPcdException {
+    public ResponseEntity<Void> delete(HttpServletRequest request, @RequestBody(required = true) Incident body) throws AbstractPcdException {
 
         LOGGER.debug("End validation request received with type{} and date{} and latitude{} and longitude{} and confirmation{}", body.getType(), body.getDateI(), body.getLatitude(), body.getLongitude(), body.getConfirmation());
         Incident reponseIncident = new Incident();
         try {
 
-            if ((body.getEtat()=="finished")&&(manager.valider(body.getType(), body.getLatitude(), body.getLongitude())=="validation")){reponseIncident = null; }
-            } catch (AbstractPcdException e) {
-            LOGGER.error("An error occured {}", e);
-            throw e;  
+            if ((body.getEtat() == "finished") && (manager.valider(body.getType(), body.getLatitude(), body.getLongitude()) == "validation")) {
+                reponseIncident = null;
+            }
         } catch (Exception e) {
             LOGGER.error("An error occured {}", e);
         }
-
-        return new ResponseEntity<>(reponseIncident, HttpStatus.OK);
+        if (Objects.isNull(reponseIncident)) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
     }
     @GetMapping("started/incidents")
     public ResponseEntity<Incident> Start(HttpServletRequest request, @RequestBody(required = true) Incident body) throws AbstractPcdException {
     Incident reponseIncident = new Incident();
 
         try {
-        if ((reponseIncident.getEtat()=="started")&&(manager.valider(body.getType(), body.getLatitude(), body.getLongitude())!="validation")){reponseIncident=null;}
-    } catch (AbstractPcdException e) {
-        LOGGER.error("An error occured {}", e);
-        throw e;
+        if ((reponseIncident.getEtat()=="started")&&(manager.valider(body.getType(), body.getLatitude(), body.getLongitude())=="validation")){reponseIncident=null;}
     } catch (Exception e) {
         LOGGER.error("An error occured {}", e);
     }

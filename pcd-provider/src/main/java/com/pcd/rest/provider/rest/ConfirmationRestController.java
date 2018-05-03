@@ -1,7 +1,6 @@
 package com.pcd.rest.provider.rest;
 
 import com.pcd.rest.dao.mongodb.document.Incident;
-import com.pcd.rest.dao.mongodb.repository.IncidentRepository;
 import com.pcd.rest.manager.ConfirmationManager;
 import com.pcd.rest.manager.exception.AbstractPcdException;
 import org.slf4j.Logger;
@@ -21,20 +20,14 @@ public class ConfirmationRestController {
 
     @Autowired
     private ConfirmationManager manager;
-    private IncidentRepository IncidentRepository;
-
     @PutMapping("/incidents")
     public ResponseEntity<Incident> confirm(HttpServletRequest request, @RequestBody(required = true) Incident body) throws AbstractPcdException {
-
+        Incident incidentResponse = new Incident();
         LOGGER.debug("confirmation request received with type{} and date{} and latitude{} and longitude{} and confirmation{}", body.getType(), body.getDateI(), body.getLatitude(), body.getLongitude(), body.getConfirmation());
-        Incident incidentResponse = IncidentRepository.findOneByTypeAndLatitudeAndLongitude(body.getType(), body.getLatitude(), body.getLongitude());
         try {
 
-            incidentResponse = manager.confirm(body.getType(), body.getLatitude(), body.getLongitude(),body.getConfirmation(),body.getEtat());
+            incidentResponse = manager.confirm(body.getType(), body.getLatitude(), body.getLongitude(), body.getConfirmation(), body.getEtat());
 
-        } catch (AbstractPcdException e) {
-            LOGGER.error("An error occured {}", e);
-            throw e;
         } catch (Exception e) {
             LOGGER.error("An error occured {}", e);
         }

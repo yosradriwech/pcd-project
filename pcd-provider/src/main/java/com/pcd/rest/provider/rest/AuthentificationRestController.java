@@ -3,7 +3,6 @@ package com.pcd.rest.provider.rest;
 import com.pcd.rest.dao.mongodb.document.User;
 import com.pcd.rest.manager.AuthentificationManager;
 import com.pcd.rest.manager.exception.AbstractPcdException;
-import org.apache.catalina.Manager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,8 +25,8 @@ public class AuthentificationRestController {
         String status="";
         try { status = manager.authentifier(login,body.getPassword());
 
-        } catch (AbstractPcdException e) {
-            throw e;
+        }catch (Exception e) {
+            LOGGER.error("An error occured {}", e);
         }
         if (status=="Not.Found"){return new ResponseEntity<>(HttpStatus.NOT_FOUND);}
         else if (status=="Wrong.Password"){return new ResponseEntity<>(HttpStatus.BAD_REQUEST);}
