@@ -1,0 +1,2 @@
+ 							Started	
+		== ${application.title} ${application.version} ==

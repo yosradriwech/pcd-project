@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration>
+	<property name="logs.directory" value="./logs" />
+
+	<logger name="com.orange" level="DEBUG" />
+	<logger name="org.springframework" level="INFO" />
+	<logger name="org.apache.cxf" level="INFO" />
+	<logger name="org.apache.http" level="INFO" />
+	
+	<appender name="console-appender" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
+			</pattern>
+		</encoder>
+	</appender>
+<!--
+	<appender name="technical-log-appender"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${logs.directory}/PA-PDK-SUMA-technical-test.log
+		</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${logs.directory}/archive/PA-PDK-SUMA-technical-test.log.%d{yyyyMMdd}.gz
+			</fileNamePattern>
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%d{yyyy/MM/dd HH:mm:ss,Europe/Paris} [%thread] %-5level
+				%logger{36} - %m %throwable{full}%n
+			</pattern>
+		</encoder>
+	</appender>
+-->
+	<root level="DEBUG">
+		<appender-ref ref="console-appender" />
+		<!-- <appender-ref ref="technical-log-appender" /> -->
+	</root>
+
+</configuration>
