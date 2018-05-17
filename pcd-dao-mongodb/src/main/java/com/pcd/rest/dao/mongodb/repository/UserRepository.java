@@ -6,7 +6,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 import com.pcd.rest.dao.mongodb.document.User;
 
-
 public interface UserRepository extends MongoRepository<User, String> {
 
 	User findOneBySubscriptionId(String subscriptionId);

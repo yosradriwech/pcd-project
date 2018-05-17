@@ -34,5 +34,18 @@ public class ConfirmationRestController {
         if (Objects.isNull(incidentResponse)) {return new ResponseEntity<>(incidentResponse, HttpStatus.NOT_FOUND);}
         else { return new ResponseEntity<>(incidentResponse, HttpStatus.OK);}
     }
+    @GetMapping("/incidents/confirmation")
+    public ResponseEntity<Incident> confirmation(HttpServletRequest request,@RequestBody(required = true) Incident body){
+        Incident incidentResponse = new Incident();
+        LOGGER.debug("confirmation request received with type{} and date{} and latitude{} and longitude{} and confirmation{}", body.getType(), body.getDateI(), body.getLatitude(), body.getLongitude(), body.getConfirmation());
+        try {
+
+            incidentResponse = manager.confirmation(body);
+
+        } catch (Exception e) {
+            LOGGER.error("An error occured {}", e);
+        }
+        return new ResponseEntity<>(incidentResponse, HttpStatus.OK);
+    }
 }
 //jawou behi

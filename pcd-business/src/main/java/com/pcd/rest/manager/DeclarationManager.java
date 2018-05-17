@@ -2,7 +2,6 @@ package com.pcd.rest.manager;
 
 import com.pcd.rest.dao.mongodb.document.Incident;
 import com.pcd.rest.dao.mongodb.document.User;
-import com.pcd.rest.manager.exception.AbstractPcdException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,8 +22,8 @@ public class DeclarationManager {
 
     public Incident declare(Incident incident, String login){
         TECHNICAL_LOGGER.debug("Starting declaration business");
-        Incident declarationResponse = new Incident(incident.getType(), incident.getLatitude(), incident.getLongitude(), incident.getDateI(),incident.getEtat());
         User userSessionFound = userRepository.findOneByLogin(login);
+        Incident declarationResponse = new Incident(incident.getType(), incident.getLatitude(), incident.getLongitude(), incident.getDateI(),incident.getEtat(),userSessionFound);
 
         if (Objects.isNull(userSessionFound)) {
             TECHNICAL_LOGGER.error("No declaration can be held for '{}'", login);

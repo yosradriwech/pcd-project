@@ -14,13 +14,13 @@ public class Incident {
     @Id
     private int id;
     private Date dateI;
-
     private String etat;
     private int confirmation;
     private int t;
     private String type;
     private double latitude;
     private double longitude;
+    private User user;
     @CreatedDate
     private Date creationDate;
     private Date activationDate;
@@ -28,14 +28,20 @@ public class Incident {
     @LastModifiedDate
     private Date lastUpdateDate;
 
-    public Incident(String type, double latitude, double longitude, Date dateI,String etat) {
+    public User getUser() {
+        return user;
+    }
+
+    public Incident(String type, double latitude, double longitude, Date dateI, String etat, User user) {
         this.type = type;
         this.latitude = latitude;
         this.longitude = longitude;
         this.dateI = dateI;
         this.etat = etat;
+
         this.confirmation = 0;
         this.t = 60;
+        this.user = user;
     }
     public Incident copierIncident(Incident objet) {
         this.type = objet.getType();

@@ -6,9 +6,10 @@ import com.pcd.rest.manager.exception.AbstractPcdException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Objects;
-
+@Service
 public class ValidationManager {
     private static final Logger TECHNICAL_LOGGER = LoggerFactory.getLogger(ValidationManager.class);
 
@@ -24,9 +25,10 @@ public class ValidationManager {
         if (Objects.isNull(validationIncident)) {
             TECHNICAL_LOGGER.error("No  incident found for '{}'",  type,latitude,longitude); }
         else
-            {if ( validationIncident.getConfirmation()>=0) { retour = "validation";}
-             else if (validationIncident.getEtat() == "F") {IncidentRepository.delete(validationIncident);}
-             retour =  "nonValidation" ;}
+            {if ( validationIncident.getConfirmation()>=0) { retour = "validation";
+                if (validationIncident.getEtat() == "S") {validationIncident.getUser().setTrustRank(1);}
+                if (validationIncident.getEtat() == "F") {IncidentRepository.delete(validationIncident);}}
+             else retour =  "nonValidation" ;}
         return retour;
     }
 }

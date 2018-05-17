@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import com.pcd.rest.dao.mongodb.document.User;
 import com.pcd.rest.dao.mongodb.repository.UserRepository;
-import com.pcd.rest.manager.exception.AbstractPcdException;
 
 
 @Service

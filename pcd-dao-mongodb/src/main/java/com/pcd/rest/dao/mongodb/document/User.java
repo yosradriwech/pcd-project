@@ -10,7 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document
 public class User{
- 
+
 	@Id
 	private String id;
 	private String name;
@@ -129,7 +129,7 @@ public class User{
 	}
 
 	public void setTrustRank(int trustRank) {
-		this.trustRank = trustRank;
+		this.trustRank = this.trustRank + trustRank;
 	}
 
 	public Date getLastUpdateDate() {

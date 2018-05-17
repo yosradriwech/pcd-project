@@ -1,9 +1,7 @@
 package com.pcd.rest.provider.rest;
 
 import com.pcd.rest.dao.mongodb.document.Incident;
-import com.pcd.rest.dao.mongodb.repository.IncidentRepository;
 import com.pcd.rest.manager.DeclarationManager;
-import com.pcd.rest.manager.exception.AbstractPcdException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +18,6 @@ public class DeclarationRestController {
 
     @Autowired
     private DeclarationManager manager;
-    private IncidentRepository IncidentRepository;
 
     @PostMapping("/incidents/{login}")
     public ResponseEntity<Incident> declare(HttpServletRequest request, @PathVariable String login, @RequestBody(required = true) Incident body){
